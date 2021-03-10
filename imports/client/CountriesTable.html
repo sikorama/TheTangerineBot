@@ -1,0 +1,45 @@
+<template name="Countries">
+
+  {{>SelectChannel}}
+
+    <h2>Number of people per country</h2>
+
+      {{#with countries=getCountryCount}}
+
+      <p><strong>{{numPeopleLoc}}</strong>  people registered from <strong>{{countries.length}}</strong> Countries</p>
+      <table class="pure-table">
+        <thead>
+          <tr>
+            <th>Country</th>
+            <th>Percent</th>
+            <th>Count</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each c in countries}}
+            {{#if c._id}}
+              <tr>
+                <td>
+                  {{FormatCountryName c._id}}
+                </td>
+                <td>
+                  {{c.p}} %
+                </td>
+                <td>
+                  {{c.t}}
+                </td>
+              </tr>
+            {{/if}}
+          {{/each}}
+
+        </tbody>
+      </table>
+
+      {{/with}}
+
+      <h2>Chart</h2>
+      <div>
+        <canvas id="countryChart" height="100px"></canvas>
+      </div>
+
+  </template>

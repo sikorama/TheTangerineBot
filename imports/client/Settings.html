@@ -1,0 +1,187 @@
+<template name="Settings">
+  <h1>Settings</h1>
+
+  <h2>Channels Management</h2>
+
+  <!-- TODO: use a collection -->
+  <datalist id="imagelist">
+    <option value="/default.png"></option>
+    <option value="/tang1.png"></option>
+    <option value="/tang2.png"></option>
+    <option value="/tang3.png"></option>
+    <option value="/tang4.png"></option>
+    <option value="/tang5.png"></option>
+    <option value="/pumkin.png"></option>
+    <option value="/chris1.png"></option>
+    <option value="/chris2.png"></option>
+    <option value="/chris3.png"></option>
+    <option value="/cris1.png"></option>
+    <option value="/cris2.png"></option>
+    <option value="/cris3.png"></option>
+    <option value="/reiko1.png"></option>
+    <option value="/reiko2.png"></option>
+    <option value="/reiko3.png"></option>
+    <option value="/patrice1.png"></option>
+    <option value="/patrice2.png"></option>
+    <option value="/patrice3.png"></option>
+    <option value="/musical1.png"></option>
+    <option value="/musical2.png"></option>
+    <option value="/mikulski1.png"></option>
+    <option value="/mikulski2.png"></option>
+    <option value="/mikulski3.png"></option>
+    <option value="/mikulski4.png"></option>
+    <option value="/uhf1.png"></option>
+    <option value="/favicon-32.png"></option>
+  </datalist>
+
+  <table class="pure-table">
+    <thead>
+      <tr>
+        <th>Channel</th>
+        <th>Enabled</th>
+        <th>Translation</th>
+        <th>World Map</th>
+        <th>Greet</th>
+        <th>/me prefix</th>
+        <th>catch !so command</th>
+        <th>shoutout command</th>
+        <th>Quizz</th>
+        <th>Stats</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each c in getChannels}}
+      <tr id="{{c._id}}">
+        <td>
+          {{c.channel}}
+          <span class="autohide delete">&#9746;</span>
+        </td>
+        <td class="centered">
+          {{>CheckMark b=c.enabled n="enabled" c=c}}
+        </td>
+        <td class="centered">
+          {{>CheckMark b=c.tr n="tr"}}
+        </td>
+        <td class="centered">
+          {{>CheckMark b=c.map n="map"}}
+          Guest Account:
+          <input type="text" value="{{c.guestAccount}}" class="chanSettings" name="guestAccount">
+        </td>
+        <td class="centered">
+          {{>CheckMark b=c.greet n="greet"}}
+        </td>
+        <td class="centered">
+          {{>CheckMark b=c.me n="me"}}
+        </td>
+
+        <td class="centered">
+          {{>CheckMark b=c.so n="so"}}
+        </td>
+        <td class="centered chanSettings">
+          <input type="text" value="{{c.socmd}}" class="chanSettings" name="socmd">
+        </td>
+
+        <td class="centered">
+          {{>CheckMark b=c.quizz n="quizz"}}
+        </td>
+        <td class="centered">
+          {{#each s in (stats c.channel)}}
+          {{s.count}}
+          {{/each}}
+        </td>
+
+        <td class="centered">
+          <img src="{{c.map_icon_std}}">
+          <img src="{{c.map_icon_name}}">
+          <img src="{{c.map_icon_msg}}">
+
+          Standard: <input class="chanSettings" value="{{c.map_icon_std}}" list="imagelist" name="map_icon_std">
+          Name: <input class="chanSettings" value="{{c.map_icon_name}}" list="imagelist" name="map_icon_name">
+          Message: <input class="chanSettings" value="{{c.map_icon_msg}}" list="imagelist" name="map_icon_msg">
+        </td>
+
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+
+  <h3>Add Channel (need to restart)</h3>
+  <table>
+    <tbody>
+      <tr>
+        <td> <input id="newChannel"> </td>
+        <td> <button class="addChannel">Add Channel </button> </td>
+      </tr>
+    </tbody>
+  </table>
+
+  {{#if isUserRole "admin greet"}}
+
+  <h2>Accounts</h2>
+  <table class="pure-table">
+    <thead>
+      <tr>
+        <th>User</th>
+        <th>Groups</th>
+        <th>Admin</th>
+        <th>Streamer</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each u in users}}
+      <tr id="{{u._id}}">
+        <td>
+          {{u.username}}
+        </td>
+        <td>
+          <input class="profile" value="{{u.profile.groups}}" name="groups">
+        </td>
+        <td>
+          {{>CheckMark n="uadmin" b=(userHasRole u._id "admin")}}
+        </td>
+        <td>
+          {{>CheckMark n="ustreamer" b=(userHasRole u._id "streamer")}}
+        </td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+
+  <h3>Add Account</h3>
+  <table>
+    <tbody>
+      <tr>
+        <td>Name:</td>
+        <td> <input id="accountName"> </td>
+      </tr>
+      <tr>
+        <td>Password:</td>
+        <td> <input id="accountPass"> </td>
+      </tr>
+      <tr>
+        <td>Channel:</td>
+        <td> <input id="accountChan"> </td>
+      </tr>
+      <tr>
+        <td>Guest Password:</td>
+        <td> <input id="accountGuestPass"> </td>
+      </tr>
+      <tr>
+        <td>Streamer Account:</td>
+        <td> <input id="accountStreamer" type="checkbox"> </td>
+      </tr>
+      <button name="addAccount">Create Account</button>
+    </tbody>
+  </table>
+
+  <!--
+    <h2>Main Parameters</h2>
+    Location Interval (in seconds)
+    <input id="location_interval" type="number" value="5">
+  -->
+
+  {{/if}}
+
+  <br>
+  <img src="/bot.png">
+</template>

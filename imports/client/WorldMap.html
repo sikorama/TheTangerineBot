@@ -1,0 +1,47 @@
+<template name="WorldMap">
+  <table class="pure-table" style="width:100%;">
+    <tbody>
+      <tr>
+        <td colspan="3"><input style="width:100%;" type="text" name="text" class="search" placeHolder="Search..." autocomplete="false"></td>
+        <td colspan="1"><input type="checkbox" name="show" class="search">With Nicknames</td>
+        <td colspan="1"><input type="checkbox" name="msg" class="search">With Messages</td>
+        {{#if isStreamer}}
+          <td colspan="1"><input type="checkbox" name="streamer" class="search">Streamer</td>
+          <td colspan="1">{{> SelectActive}}</td>
+        {{/if}}
+        <td colspan="1">
+        {{>SelectChannel}}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <div id="map" style="height: 600px;"></div>
+</template>
+
+<template name="SelectActive">
+
+  <input type="checkbox" name="activeSince" class="search" checked>
+  Active since
+
+<select name="activeSinceHours" class="search">
+  <option value="8" >8 hours</option>
+  <option value="24" >24 hours</option>
+  <option value="170" >1 week</option>
+  <option value="720" >1 month</option>
+  <option value="2160" selected=true>3 months</option>
+  <option value="4320" >6 months</option>
+  <option value="8760">1 year</option>
+</select>
+
+</template>
+<template name="SelectChannel">
+  {{#let g=groups}}
+  {{#if g}}
+    Channel : <select id="selChannel" name="selChannel" placeholder="{{getSessionVar "sel_channel"}}">
+      {{#each v in g}}
+        <option value="{{v.l}}" selected="{{v.s}}">{{v.l}}</option>
+      {{/each}}
+    </select>
+    {{/if}}
+  {{/let}}
+</template>

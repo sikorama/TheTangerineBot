@@ -1,0 +1,52 @@
+
+<template name="About">
+
+    The Tangerine Bot is a friendly little bot i (sikorama) have developped for The Tangerine Club, a fantastic band you
+    can find on twitch, bandcamp, instagram, and many other social networks.
+
+    This bot is currently working for some streamers, such as:
+    {{#each c in enchan}}
+    <a href="http://twich.tv/{{c.channel}}">{{c.channel}} &bull;
+    </a>
+    {{/each}}
+
+    <h4> Collected data</h4>
+    All data are collected for the solely purpose of improving your interaction with the bot/the streamer.
+    In particular, location associated with nicknames are used for greeting people when they enter in the chat, in
+    a personalized way (taking account of the local language and local time ).
+    Geolocation ise not accurate, and is event are a bit randomized (for example the icon on the map will move every time you refresh the map).
+
+    You can remove all informations associated with yout nickname with !forget command in chat.
+
+    <h4>Credits</h4>
+    <ul>
+  <li>
+    Code: sikorama
+  </li>
+  <li>
+    Developped in Javascript using <a href="https://www.meteor.com/">MeteorJS Framework</a>
+  </li>
+  <li>
+    Map is displayed using leaflet API
+  </li>
+  <li>
+    Geolocation conversion made with open street map API
+  </li>
+    </ul>
+
+    <h4>Contact</h4>
+    Contact me here:
+    <a href="mailto:sikoogle+tangerine@gmail.com" class="pure-menu-link"></a>
+
+    <br>
+    Source code available on <a href="https://github.com/sikorama/TheTangerineBot"> github </a>!
+    You'll also find here a minimalistic bot, easy to deply, that performs translation only.
+
+    <br>
+    Also note i'm not affiliated with 'tangerine-bot', a bot aimed to help moderate your discord server. Check it here : <a href="tangerinebot.com"> tangerinebot.com</a>
+    (source code available <a href="https://github.com/tangerine-bot/tangerine">here</a>).
+
+    <br>
+    Logged as {{currentUser.username}} <a href="/" id="logout" class="pure-link">(Disconnect)</a>
+
+  </template>

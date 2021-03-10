@@ -1,0 +1,192 @@
+
+<template name="CommandsTable">
+
+    <h2>Translator</h2>
+  <p>  You can use one of these commands followed by your sentence to translate to one of the following languages. </p>
+
+    <table class="pure-table">
+      <thead>
+        <tr >
+          <th style="width:15%;">Command</th>
+          <th>Description</th>
+          <th style="width:15%;">Command</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>!cn</code></td>
+          <td>Translate to Simplified Chinese</td>
+          <td><code>!en</code></td>
+          <td>Translate to English</td>
+        </tr>
+
+        <tr>
+          <td><code>!fi</code></td>
+          <td>Translate to Finnish</td>
+          <td><code>!fr</code></td>
+          <td>Translate to French</td>
+        </tr>
+        <tr>
+          <td><code>!de</code> or <code>!ge</code></td>
+          <td>Translate to German</td>
+          <td><code>!it</code></td>
+          <td>Translate to Italian</td>
+        </tr>
+        <tr>
+          <td><code>!jp</code></td>
+          <td>Translate to Japanese</td>
+          <td><code>!ko</code></td>
+          <td>Translate to Korean</td>
+        </tr>
+        <tr>
+          <td><code>!pl</code></td>
+          <td>Translate to Polish</td>
+          <td><code>!pt</code> or <code>!br</code></td>
+          <td>Translate to Portuguese</td>
+        </tr>
+        <tr>
+          <td><code>!ro</code></td>
+          <td>Translate to Romanian</td>
+          <td><code>!tu</code></td>
+          <td>Translate to Turkish</td>
+        </tr>
+        <tr>
+          <td><code>!ru</code></td>
+          <td>Translate to Russian</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p>For example: <code> !pt Hello friends! </code>: </p>
+
+    <ul>
+      <li>
+        The automatic translator uses Google translate API for translating. It will <strong>automatically
+          recognizes</strong> the language of the sentence you want to translate.
+      </li>
+      <li> Please <strong>avoid emoticons</strong> in the message, as they will disturb the bot (and it won't probably be
+        able to display them). Also avoid mixing different languages in your sentence.
+      </li>
+      <li>
+        If the bot doesn't answer to you translation request at all, you may tray again, there's a (short) cooldown to
+        avoid too many requests.
+      </li>
+      <li> Note there is also a <code>!lang</code> command displaying some basic informations.
+      </li>
+    </ul>
+
+
+    <h2>Map Commands</h2>
+
+    Data is used solely for the purpose of making the bot interact in a better way with user in chat.
+    For example, it will greet you in the language of your country, it will select sentences depending on your local time, and more fun stuff :)
+    Locations of icons displayed on the map are a bit randomized. But still, it is better not to give your precise location (city is enough) - which is a good practice in general on internet.
+
+    <table class="pure-table">
+      <thead>
+        <tr>
+          <th style="width:15%;">Command</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>!from [location]</code></td>
+          <td>User can provide its location with this command.<br> Ex: <code>!from Tokyo,Japan</code> </td>
+        </tr>
+        <tr>
+          <td><code>!where</code></td>
+          <td>Answer user's location, as stored in database</td>
+        </tr>
+        <tr>
+          <td><code>!forget</code></td>
+          <td>Deletes all information relative to the user</td>
+        </tr>
+        <tr>
+          <td><code>!mask</code></td>
+          <td>Use this command to hide your nickname on the public map</td>
+        </tr>
+        <tr>
+          <td><code>!show</code></td>
+          <td>Use this command to allow the display of your nickname on the public map</td>
+        </tr>
+        <tr>
+          <td><code>!msg</code></td>
+          <td>You can add a short message on the map! Your nickname will be displayed, except if you use <code>!hide</code> command after <code>!msg</code> command</td>
+        </tr>
+        <tr>
+          <td><code>!map</code></td>
+          <td>Explains how to access to the map / this website!</td>
+        </tr>
+        <tr>
+          <td><code>!closest</code> or <code>!neighbours</code></td>
+          <td>Name user's closest neighbours on the map!</td>
+        </tr>
+
+      </tbody>
+    </table>
+
+    {{#if rh_featureEnabled "quizz"}}
+
+    <h2>Quizz/Trivia</h2>
+    <table class="pure-table">
+      <thead>
+        <tr >
+          <th style="width:15%;">Command</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>!quizz</code> or <code>!trivia</code></td>
+          <td>Pick up a new question (if not already done), and write the question in the chat. Then any user saying one of the words in the answer list will win. If a question is already chosen, then simply repeat the question.</td>
+        </tr>
+        <tr>
+          <td><code>!clue</code> or <code>!help</code></td>
+          <td>Gives a clue (1st letter, or number of letters...) </td>
+        </tr>
+        <tr>
+          <td><code>!skip</code></td>
+          <td>Skip the current question for a new one</td>
+        </tr>
+        <tr>
+          <td><code>!score</code></td>
+          <td>Gives user's score</td>
+        </tr>
+        <tr>
+          <td><code>!scores</code></td>
+          <td>Gives the name of the 3 best trivia players</td>
+        </tr>
+        <tr>
+          <td><code>!answer</code></td>
+          <td>(only for mod) Gives the answer and considers the question as answered.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    {{/if}}
+
+    {{#if isUserRole "admin"}}
+    <h2>Secret commands</h2>
+    <table class="pure-table">
+      <thead>
+        <tr >
+          <th style="width:15%;">Command</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><code>!statement</code> or <code>!poem</code></td>
+          <td>Generate a random sentances using various patterns.</td>
+        </tr>
+        <tr>
+          <td>Talking to @TheTangerineBot</td>
+          <td>Will generate a random answer with various patterns</td>
+        </tr>
+      </tbody>
+    </table>
+    {{/if}}
+
+  </template>

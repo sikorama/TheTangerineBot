@@ -1,0 +1,144 @@
+
+<template name="Greetings">
+
+  <datalist id="chanlist">
+    {{#each c in greetChan}}
+      <option value="{{c}}"></option>
+    {{/each}}
+  </datalist>
+
+  <h2> Greetings and shoutouts <a href="/greetings/{{#unless edit_mode}}edit{{/unless}}">&#9998;</a> </h2>
+
+  <table class="pure-table">
+    <thead>
+      <tr>
+        <th colspan="4">Add new line</th>
+      </tr>
+    </thead>
+    <thead>
+      <tr style="width:100%;">
+        <th style="width:20%;">User</th>
+        <th style="width:60%;">Message</th>
+        <th style="width:20%;">Channel (optional)</th>
+        <th></th>
+      </tr>
+    </thead>
+
+    <tr>
+      <td class="AddNewGreetLine">
+        <input name="addUserName" type="text" value="">
+      </td>
+      <td class="AddNewGreetLine">
+        <input name="addUserText" style="width:100%;"  type="text" value="">
+      </td>
+      <td class="AddNewGreetLine">
+        <input name="addUserChan" style="width:100%;" type="text" list="chanlist" value="">
+      </td>
+      <td class="AddNewGreetLine">
+          <button class="ok" name="confirm_user_greet">&plus;</button>
+      </td>
+    </tr>
+  </table>
+
+  <h2>Personalized messages </h2>
+  <table class="pure-table">
+      <thead>
+        <tr style="width:100%;">
+          <th style="width:25%;">User's name</th>
+          <th style="width:75%;">Message</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each c in (greetlines "false")}}
+          <tr style="width:100%;" id="{{c._id}}">
+            <td class="username">
+              <a href="https://openstreetmap.org/search?query={{ul.location}}" target="_blank">&boxbox;</a>
+              <span class="uname">{{c.username}}</span>
+              <button class="resettimer" name={{c.username}}> &#8986; </button>
+            </td>
+            <td style="width:100%;" id="{{c._id}}">
+              {{#each l in c.texts}}
+                {{#if edit_mode}}
+                {{>CheckMark b=l.enabled n=l.index vcross="&nbsp;&nbsp;"}}
+                <input class="greetline" style="width:80%;" type="text" value="{{l.txt}}" name="txt_{{l.index}}">
+
+                <input class="greetline" style="width:10%;" type="text" list="chanlist" value="{{l.channel}}" name="channel_{{l.index}}">
+                <button class="ko" name="remove_{{l.index}}">&cross;</button>
+                <br>
+                {{else}}
+                &bull; {{l.txt}}
+
+                {{#if l.channel}} <strong> [ {{l.channel}} ] </strong> {{/if}}
+
+                <br>
+                {{/if}}
+              {{/each}}
+            </td>
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
+
+
+    <h2> Map based Greetings <a href="/greetings/{{#unless edit_mode}}edit{{/unless}}">&#9998;</a> </h2>
+    <table class="pure-table">
+      <thead>
+        <tr>
+          <th>Languages</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each c in (greetlines "true")}}
+          <tr style="width:100%;" id="{{c._id}}">
+            <td class="username">
+              <span class="capcase uname">{{c.username}}</span>
+            </td>
+            <td style="width:100%;" id="{{c._id}}">
+              {{#each l in c.texts}}
+              {{#if edit_mode}}
+              {{>CheckMark b=l.enabled n=l.index vcross="&nbsp;&nbsp;"}}
+                <input class="greetline" style="width:80%;" type="text" value="{{l.txt}}" name="txt_{{l.index}}">
+                <input class="greetline" style="width:5%;" type="number" min="0" max="24" value="{{l.hmin}}" name="hmin_{{l.index}}">
+                <input class="greetline" style="width:5%;" type="number" min="0" max="24" value="{{l.hmax}}" name="hmax_{{l.index}}">
+
+                <button class="ko" name="remove_{{l.index}}">&cross;</button>
+              {{else}}
+              &bull; {{l.txt}}
+
+              {{#if l.hmin}}
+              <strong>
+                [{{l.hmin}}h - {{l.hmax}}h]
+              </strong>
+              {{/if}}
+
+              {{/if}}
+                <br>
+              {{/each}}
+
+            </td>
+
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
+
+    <h2>Instructions</h2>
+    <ul>
+      <li>@atname for injecting user's Name (with @)</li>
+      <li>@nickname for injecting user's Name (without @)</li>
+      <li>@icon for inserting a random icon</li>
+      <li>@twitch for inserting a link to the twitch channel</li>
+      <li>@name for injecting user's Name</li>
+    </ul>
+
+    In personalized messages, channels can specified to constrain the message to a specific channel OR to to exclud it if the channel is preceded by a "-" symbol:
+    <ul>
+      <li>if channel == "thetangerineclub ttcstation", the message will be displayed only on TTCStation and TheTangerineClub's chat</li>
+      <li>if channel == "-thetangerineclub", the message will be displayed on any channel except on TheTangerineClub's chat</li>
+    </ul>
+
+    In generic messages, 2 optional parameters define the time when the message is allowed to be displayed For example 8-12 means the message will be displayed between 8am and 12am, in user's local time.
+    (Local hour is based on user's longitude, it's an approximation)
+
+  </template>

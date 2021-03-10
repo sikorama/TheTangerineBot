@@ -1,0 +1,149 @@
+<template name="LatestLocations">
+    <h2>User's Locations<a href="/from/{{#unless edit_mode}}edit{{/unless}}" >&#9998;</a></h2>
+
+    {{#let userloc=getUserLocs}}
+  <p>
+    {{userloc.count}}/{{numLocations}} Users,
+    {{>ShowMore v="locations"}}
+  </p>
+
+    <table class="pure-table" style="width:100%;">
+        <thead>
+          <tr>
+            <th colspan="9">Search</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td colspan="2"><input style="width:100%;" type="text" name="text" class="search"></td>
+            <td colspan="1"><input type="checkbox" name="show" class="search">Showing Nicknames</td>
+            <td colspan="1"><input type="checkbox" name="msg" class="search">With Messages</td>
+            <td colspan="1"><input type="checkbox" name="streamer" class="search">Streamer</td>
+            <td colspan="1"> <td colspan="1">{{>SelectActive}}</td></td>
+            <td colspan="1"> <td colspan="1">{{>SelectChannel}}</td></td>
+          </tr>
+        </tbody>
+
+        <thead>
+          <tr>
+            <th class="sort" name="name">User Name</th>
+            <th class="sort" name="channel">Registered</th>
+            <th class="sort" name=location>Location</th>
+            <th class="sort" name=latitude>GPS</th>
+            <th class="sort" name="country">Country</th>
+            <th class="sort" name="allow">Allow</th>
+            <th class="sort" name="msg">Message</th>
+            <th class="sort" name="timestamp">Timestamp</th>
+            <th class="sort" name="proximity">Proximity</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each ul in userloc}}
+            <tr id={{ul.__originalId}}>
+              <td>
+                  {{#if edit_mode}}
+                    {{#if ul.streamer}}
+                      <input title="Streamer" class="edit" type="checkbox" name="streamer" checked >
+                    {{else}}
+                      <input title="Streamer?" class="edit" type="checkbox" name="streamer">
+                    {{/if}}
+
+                  {{/if}}
+
+                {{#if edit_mode}}
+                <input class="edit" type="text" name="name" value={{ul.name}}>
+                <input class="edit" type="text" name="dname" value={{ul.dname}}>
+                <input class="edit" type="text" name="mapname" value={{ul.mapname}}>
+                {{else}}
+                <a href="https://twitch.tv/{{ul.dname}}" target="_blank">{{#if ul.dname}} {{ul.dname}} {{else}} {{ul.mapname}} {{/if}}</a>
+                {{/if}}
+
+                {{#if edit_mode}}
+                  <span class="autohide delete">&#9746;</span>
+                {{else}}
+                {{#if ul.streamer}}
+                  &#9732;
+                {{/if}}
+                {{/if}}
+
+
+              </td>
+              <td>
+                {{#each c in ul.channels}}
+                  {{c}}
+                {{/each}}
+              </td>
+              <td>
+                {{#if edit_mode}}
+                <div class="oneline">
+                  <input class="edit" type="text" name="location" value={{ul.location}}>
+                  &nbsp; <a href="https://openstreetmap.org/search?query={{ul.location}}" target="_blank">&boxbox;</a>
+                </div>
+                {{else}}
+                  <a href="https://openstreetmap.org/search?query={{ul.location}}" target="_blank">{{ul.location}}</a>
+                {{/if}}
+              </td>
+              <td>
+                {{#if edit_mode}}
+                  <input class="edit" type="text" name="latitude" value={{ul.latitude}}>
+                  <input class="edit" type="text" name="longitude" value={{ul.longitude}}>
+                {{else}}
+                  {{FormatGeoloc ul.latitude ul.longitude}}
+                {{/if}}
+              </td>
+              <td>
+                {{#if edit_mode}}
+                  {{FormatCountryName ul.country}}
+                  <input class="edit" type="text" name="country" value={{ul.country}}>
+                {{else}}
+                  {{FormatCountryName ul.country}}
+                {{/if}}
+
+              </td>
+              <td>
+                {{#if ul.allow}}
+                  &check;
+                {{else}}
+                  &cross;
+                {{/if}}
+              </td>
+              <td>
+                {{#if edit_mode}}
+                  <input class="edit" type="text" name="msg" value="{{ul.msg}}">
+                {{else}}
+                  {{ul.msg}}
+                {{/if}}
+              </td>
+              <td>
+                {{FormatDate ul.timestamp}}
+              </td>
+              <td>
+                {{#each c in ul.proximity}}
+                  {{c}}
+                {{/each}}
+              </td>
+
+            </tr>
+          {{/each}}
+
+        </tbody>
+      </table>
+
+      <br>
+      {{userloc.count}} / {{numPeopleLoc}} users found
+      {{#if isUserRole "admin"}}
+      {{#if edit_mode}}
+          <a href="/from/edit">Mode Normal</a>
+      {{else}}
+          <a href="/from/edit">Mode Edition</a>
+      {{/if}}
+      {{/if}}
+
+      <p class="centered">
+        {{>SkipResult v="locations" t=numLocations}}
+      </p>
+
+
+      {{/let}}
+
+  </template>

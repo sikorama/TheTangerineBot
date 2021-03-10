@@ -1,0 +1,111 @@
+<head>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+    integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+    crossorigin="" />
+  <title>The Tangerine Bot Office</title>
+  <link rel="icon" href="/favicon-64.png" />
+</head>
+
+<body>
+</body>
+
+<template name="PageTop">
+  <nav class="pure-menu pure-menu-horizontal main-menu">
+
+    <ul class="pure-menu-list main-menu-list">
+
+      <li class="pure-menu-item {{active "map"}}">
+        <a href="/map" class="pure-menu-link ">Map</a>
+      </li>
+
+      <li class="pure-menu-item {{active "countries"}}">
+        <a href="/countries" class="pure-menu-link ">World</a>
+      </li>
+
+      <li class="pure-menu-item {{active "commands"}}">
+        <a href="/commands" class="pure-menu-link ">Commands</a>
+      </li>
+      {{#if isUserRole "admin"}}
+        <li class="pure-menu-item {{active "from"}}">
+          <a href="/from" class="pure-menu-link ">Friends</a>
+        </li>
+      {{/if}}
+
+      {{#if rh_featureEnabled "quizz"}}
+      <li class="pure-menu-item {{active "quizz"}}">
+        <a href="/quizz/scores" class="pure-menu-link ">Quizz</a>
+      </li>
+      {{/if}}
+
+      {{#if isUserRole "admin greet"}}
+
+        <li class="pure-menu-item {{active "greetings"}}">
+          <a href="/greetings" class="pure-menu-link ">Greetings</a>
+        </li>
+      {{/if}}
+
+      {{#if isUserRole "admin"}}
+        <li class="pure-menu-item {{active "settings"}}">
+          <a href="/settings" class="pure-menu-link ">Settings</a>
+        </li>
+      {{/if}}
+
+      <li class="pure-menu-item {{active "about"}}">
+        <a href="/about" class="pure-menu-link ">About</a>
+      </li>
+
+      <li>
+        {{>SelectChannel}}
+      </li>
+
+
+    </ul>
+
+
+
+
+  </nav>
+</template>
+
+<template name="MainPage">
+  {{#if currentUser}}
+    {{> PageTop }}
+    {{> Template.dynamic template=main}}
+  {{else}}
+    {{> loginButtons}}
+    <br> <br>
+    <img src="/bot.png">
+    <p>Follow me on <a href="http://twich.tv/TheTangerineBot">twich.tv/TheTangerineBot</a>
+    </p>
+  {{/if}}
+</template>
+
+<template name="CheckMark">
+  <button class="{{#if b}} ok {{else}} ko {{/if}} toggleCheck" name="{{n}}">
+    {{#if b}}
+      &check;
+    {{else}}
+      {{#if vcross}} {{{vcross}}} {{else}} &cross; {{/if}}
+    {{/if}}
+  </button>
+</template>
+
+
+<template name="ShowMore">
+  Show <select>
+    {{#each l in limits}}
+      <option class="limit" {{selected l}}>{{l}}</option>
+    {{/each}}
+
+  </select>
+  Items per page
+</template>
+
+<!-- Prend les params t (nb total) et p (nb par page) et v pour le prefixe des variables suffixés par _page et _skip -->
+<template name="SkipResult">
+  <span class="{{#unless first}} prevpage {{/unless}}"> &lt; </span>
+  {{#each i in pages}}
+    <span class="setpage {{classIsSelected i}}">{{i}}</span>
+  {{/each}}
+  <span class="{{#unless last}} nextpage {{/unless}}"> &gt; </span>
+</template>
