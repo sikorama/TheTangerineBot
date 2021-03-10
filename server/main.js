@@ -1,47 +1,10 @@
-// BUGS
-// - Removing greets entry
-// -logger les messages envoyés au bot pour améliorer smalltalk
+/*
+ * The Tangerine Bot
+ * Main Server file / entry point
+ * 
+ */
 
-// Client:
-// + Masquer les erreurs dans le chat (quand on est pas logué)
-
-// - Intercepter les !sr (ou les réponses de bots)
-// - intercepter les raids  ou pour faire des stats.
-//   Probleme des differents bots
-// - combobox de selection de channel dans le titre et pas dans les fenetres
-//
-// Greets:
-// - Adding categories (music, game, chat ...) for each channel
-// - Better interface (search engine...)
-//
-// Translation:
-// - filter icones for translation (LUL...)
-//
-// Map
-// - Heat map
-// + Convertir les localisation en minuscule pour optimiser le cache (a virer une fois appliqué)
-// - Message !msg / map
-// - emotes: add a storage system + image database
-// - Filtre par defaut sur 3 ou 6 mois activé
-// - emotes names in channel instead of users
-//
-// - Settings:
-//   - user setttings (groups)
-//   - channel settings
-//   - popups?
-//
-// Smalltalk
-// - answer to hi
-// - answer to does ...
-
-// Generators
-// - Generate texts with rimes
-//
-// Connexion
-// - redémarrage du service/reconnexion
-// - Reconnexion a la volée, sans redémarrer le bot
-
-import { Meteor } from 'meteor/meteor';
+ import { Meteor } from 'meteor/meteor';
 import { UserLocations, BotChannels, GreetMessages, Settings, QuizzQuestions, QuizzScores, Stats } from '../imports/api/collections.js';
 import { init_users } from './user_management.js';
 import { init_publications } from './publications.js';
@@ -79,11 +42,6 @@ botpassword = 'oauth:' + botpassword;
 // Only one stack for all greetings
 let greetingsStack = [];
 
-// Conversion en minuscule des locations
-//UserLocations.find().fetch().forEach(function(item) {
-//  UserLocations.update(item._id, {$set: {location: item.location.toLowerCase() }});
-//});
-
 function pushGreetMessage(target, txt, username) {
   greetingsStack.push({ target: target, txt: txt });
   // Store interaction date now, to avoid double messages.
@@ -97,19 +55,16 @@ function pushGreetMessage(target, txt, username) {
       o[target] = d;
       greetDate[username] = o;
     }
-    //     Interactions.upsert({chan: target, user: username}, {$set: {date: d}});
-    console.info("Store greet date", greetDate[username]);
+//    console.info("Store greet date", greetDate[username]);
   }
 
 }
 
-// Question en cours (objet avec la question en base,et des compteurs)
+// Current Question (contains full object)
 var curQuestion = undefined;
 var numQuestions = 0;
 
-//var numPeopleLoc = 0;
-
-// FIXME: Manque le referer, le user-agent...
+// FIXME: Add referer, user-agent...
 let gcoptions = {
   provider: 'openstreetmap',
 };
@@ -119,7 +74,6 @@ let geoCoder = gc(gcoptions);
 // Derniere date de salutation "user:timestamp" => database?
 var greetDate = {};
 
-
 const regext  = /@twitch/gi;
 
 AccountsTemplates.configure({
@@ -127,7 +81,6 @@ AccountsTemplates.configure({
   forbidClientAccountCreation: true,
   // pas d'autorisation de changer de pw pour un user
   enablePasswordChange: false,
-
 });
 
 
