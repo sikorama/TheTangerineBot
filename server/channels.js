@@ -3,6 +3,14 @@ import { UserLocations, BotChannels, GreetMessages, Settings, QuizzQuestions, Qu
 
 export function addChannel(chan, fields, guestAccount) {
 
+    if (!chan)  {
+      console.error('addChannel: chan==undefined!');
+      return;
+    }
+
+    // Enforce lower cases
+    chan = chan.toLowerCase();
+
     BotChannels.remove({ channel: chan });
 
     doc = {
