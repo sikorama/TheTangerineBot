@@ -879,11 +879,11 @@ Meteor.startup(() => {
             timestamp: now,
             channels: [target],
             allow: false,
-
           }
           // Interaction stamp
           doc[chan] = now;
 
+          // Check if user has already given its location
           pdoc = UserLocations.findOne({ name: username });
           if (pdoc === undefined) {
             //Nouvel utilisateur
@@ -904,14 +904,19 @@ Meteor.startup(() => {
             return;
           }
           else {
-            // Le document éxistait déja, on met a jour location et channels
-            // et on vire latitude, longitude, ...
-            // le dname pourrait avoir changé...
+            // User's location already exists, in case a use gives location again,
+            // geo coordinates and country will be recomputed.
+            // Also dname could have changed (case)
+            // And user can register on another channel
 
+            // Channels where user has registered. (deprecated?)
             if (pdoc.channels.indexOf(target) < 0)
               pdoc.channels.push(target);
 
-            UserLocations.update(pdoc._id, { $set: { location: doc.location, channels: pdoc.channels, dname: doc.dname }, $unset: { country: 1, latitude: 1, longitude: 1, proximity: 1 } });
+            let updateObj = { location: doc.location, channels: pdoc.channels, dname: doc.dname };
+            // Timestamp for getting active on channel's map
+            updateObj[chan] = now; 
+            UserLocations.update(pdoc._id, { $set: updateObj, $unset: { country: 1, latitude: 1, longitude: 1, proximity: 1 } });
             say(target, answername + " Ok, i've updated my database!");
             return;
           }

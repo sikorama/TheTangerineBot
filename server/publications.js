@@ -23,11 +23,12 @@ Meteor.publish('BotChannels', function (sel) {
 
   if (uid)
   {
+    console.error('subscribe bots channels: ', uid, getUserGroups(uid));
     // If non admin, only publish the channels corresponding to the group associated to the user
     if (!hasRole(uid, ['admin'])) {
       sel.channel = getUserGroups(uid);
     }
-//      console.info('Publication BotChannels, sel=', sel);
+    console.info('Publication BotChannels, sel=', sel);
     return BotChannels.find(sel);
   }
   this.ready();

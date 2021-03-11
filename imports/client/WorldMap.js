@@ -17,8 +17,8 @@ Template.WorldMap.onRendered(function () {
   this.subscribe('BotChannels');
 
   let searchOptions = {
-    activeSince: true,
-    activeSinceHours: 24*30*3,
+//    activeSince: true,
+    activeSinceHours: 24*30*12,
   };
 
 //  let qp = FlowRouter.getQueryParam('since');
@@ -39,6 +39,7 @@ Template.WorldMap.onRendered(function () {
 
   const updateMap = ((chan) => {
     let p = BotChannels.findOne({ channel: chan });
+    console.error(chan,p);
     let ic;
     if (p)
       ic = [p.map_icon_std, p.map_icon_name, p.map_icon_msg];
@@ -57,7 +58,7 @@ Template.WorldMap.onRendered(function () {
       });
     });
 
-
+    console.error(icons);
     let newmarkers = {};
 
     if (layer === undefined) {
