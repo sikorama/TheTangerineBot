@@ -17,18 +17,19 @@ export function init_publications() {
 //
 // ---------------------- CHANNELS -------------------------------
 //
-Meteor.publish('BotChannels', function (sel) {
+Meteor.publish('botChannels', function (sel) {
   if (!sel) sel = {}
   let uid = this.userId;
 
   if (uid)
   {
-    console.error('subscribe bots channels: ', uid, getUserGroups(uid));
-    // If non admin, only publish the channels corresponding to groups associated to the user
+    //console.error('subscribe bots channels: ', uid, getUserGroups(uid));
+    // If non admin, only publish enabled channels corresponding to groups associated to the user
     if (!hasRole(uid, ['admin'])) {
       sel.channel = {$in : getUserGroups(uid)};
+      sel.enabled = true;
     }
-//    console.info('Publication BotChannels, sel=', sel,BotChannels.findOne(sel));
+    //console.info('Publication BotChannels, sel=', sel,BotChannels.findOne(sel));
     return BotChannels.find(sel);
   }
   this.ready();

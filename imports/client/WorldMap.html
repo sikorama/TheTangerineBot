@@ -1,4 +1,6 @@
 <template name="WorldMap">
+  {{#if Template.subscriptionsReady}}
+  {{/if}}
   <table class="pure-table" style="width:100%;">
     <tbody>
       <tr>
@@ -6,16 +8,17 @@
         <td colspan="1"><input type="checkbox" name="show" class="search">With Nicknames</td>
         <td colspan="1"><input type="checkbox" name="msg" class="search">With Messages</td>
         {{#if isStreamer}}
-          <td colspan="1"><input type="checkbox" name="streamer" class="search">Streamer</td>
-          <td colspan="1">{{> SelectActive}}</td>
+        <td colspan="1"><input type="checkbox" name="streamer" class="search">Streamer</td>
+        <td colspan="1">{{> SelectActive}}</td>
         {{/if}}
         <td colspan="1">
-        {{>SelectChannel}}
+          {{>SelectChannel}}
         </td>
       </tr>
     </tbody>
   </table>
   <div id="map" style="height: 600px;"></div>
+
 </template>
 
 <template name="SelectActive">
@@ -34,6 +37,7 @@
 </select>
 
 </template>
+
 <template name="SelectChannel">
   {{#let g=groups}}
   {{#if g}}

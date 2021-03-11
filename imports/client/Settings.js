@@ -69,11 +69,10 @@ Template.Settings.events({
 
         // groups is an array
         if (n==='groups') {
-            v= v.split(' ');
+            v= v.split(',').map((item)=>item.trim());
             console.error(n,v);
         }
         p[n] = v;
-        console.error(id,n,v,u,p);
         Meteor.users.update(id, { $set: { profile: p } });
     },
     'click button[name="addAccount"]' : function(event) {

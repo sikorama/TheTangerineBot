@@ -148,7 +148,7 @@ Template.registerHelper(
 )
 
 Template.PageTop.onRendered(function() {
-  this.subscribe('BotsChannel',{ enabled: true });
+  this.subscribe('botChannels',{ enabled: true });
 });
 
 Template.registerHelper( 'rh_featureEnabled' , function(feature) {

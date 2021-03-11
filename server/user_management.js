@@ -36,7 +36,7 @@ exports.isAdmin = isAdmin;
 // Recuper les groupes associés a un userId
 export function getUserGroups(userId) {
     let user = Meteor.users.findOne(userId);
-    console.info('get User Group', user);
+//    console.info('get User Group', user);
     if (user === undefined) return [];
     let userg = user.profile.groups;
     // Si pas de groupe => pas de resulat? ou 'default' ?
