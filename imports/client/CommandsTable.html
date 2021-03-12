@@ -1,5 +1,6 @@
 
 <template name="CommandsTable">
+  {{#if rh_featureEnabled "tr"}}
 
     <h2>Translator</h2>
   <p>  You can use one of these commands followed by your sentence to translate to one of the following languages. </p>
@@ -75,13 +76,16 @@
       <li> Note there is also a <code>!lang</code> command displaying some basic informations.
       </li>
     </ul>
+    {{/if}}
 
+    {{#if rh_featureEnabled "quizz"}}
 
     <h2>Map Commands</h2>
 
     Data is used solely for the purpose of making the bot interact in a better way with user in chat.
     For example, it will greet you in the language of your country, it will select sentences depending on your local time, and more fun stuff :)
     Locations of icons displayed on the map are a bit randomized. But still, it is better not to give your precise location (city is enough) - which is a good practice in general on internet.
+
 
     <table class="pure-table">
       <thead>
@@ -126,7 +130,9 @@
 
       </tbody>
     </table>
+    {{/if}}
 
+    
     {{#if rh_featureEnabled "quizz"}}
 
     <h2>Quizz/Trivia</h2>

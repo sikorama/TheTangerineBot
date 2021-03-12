@@ -38,40 +38,87 @@
     <thead>
       <tr>
         <th>Channel</th>
-        <th>Enabled</th>
         <th>Translation</th>
         <th>World Map</th>
         <th>Greet</th>
-        <th>/me prefix</th>
         <th>catch !so command</th>
         <th>shoutout command</th>
         <th>Quizz</th>
-        <th>Stats</th>
       </tr>
     </thead>
     <tbody>
       {{#each c in getChannels}}
       <tr id="{{c._id}}">
         <td>
-          {{c.channel}}
-          <span class="autohide delete">&#9746;</span>
-        </td>
-        <td class="centered">
-          {{>CheckMark b=c.enabled n="enabled" c=c}}
+          <div>
+            {{>CheckMark b=c.enabled n="enabled" c=c}}
+            {{c.channel}}
+            <span class="autohide delete">&#9746;</span>
+          </div>
         </td>
         <td class="centered">
           {{>CheckMark b=c.tr n="tr"}}
         </td>
         <td class="centered">
           {{>CheckMark b=c.map n="map"}}
-          Guest Account:
-          <input type="text" value="{{c.guestAccount}}" class="chanSettings" name="guestAccount">
+          <div>
+          </div>
+
+          <table>
+
+            <body>
+              <tr>
+                <td>
+                  Guest Account:
+                </td>
+                <td>
+                  <input type="text" value="{{c.guestAccount}}" class="chanSettings" name="guestAccount">
+                </td>
+              </tr>
+
+              <tr>
+                <td>
+                  Standard icon:
+                </td>
+                <td>
+                  <input class="chanSettings" value="{{c.map_icon_std}}" list="imagelist" name="map_icon_std">
+                </td>
+                <td>
+                  <img src="{{c.map_icon_std}}">
+                </td>
+              </tr>
+
+              <tr>
+                <td>
+                  Name icon:
+                </td>
+                <td>
+                  <input class="chanSettings" value="{{c.map_icon_name}}" list="imagelist" name="map_icon_name">
+                </td>
+                <td>
+                  <img src="{{c.map_icon_name}}">
+                </td>
+              </tr>
+
+              <tr>
+                <td>
+                  Message icon:
+                </td>
+                <td>
+                  <input class="chanSettings" value="{{c.map_icon_msg}}" list="imagelist" name="map_icon_msg">
+                </td>
+                <td>
+                  <img src="{{c.map_icon_msg}}">
+                </td>
+              </tr>
+
+            </body>
+          </table>
         </td>
+
         <td class="centered">
           {{>CheckMark b=c.greet n="greet"}}
-        </td>
-        <td class="centered">
-          {{>CheckMark b=c.me n="me"}}
+          /me prefix {{>CheckMark b=c.me n="me"}}
         </td>
 
         <td class="centered">
@@ -84,28 +131,14 @@
         <td class="centered">
           {{>CheckMark b=c.quizz n="quizz"}}
         </td>
-        <td class="centered">
-          {{#each s in (stats c.channel)}}
-          {{s.count}}
-          {{/each}}
-        </td>
-
-        <td class="centered">
-          <img src="{{c.map_icon_std}}">
-          <img src="{{c.map_icon_name}}">
-          <img src="{{c.map_icon_msg}}">
-
-          Standard: <input class="chanSettings" value="{{c.map_icon_std}}" list="imagelist" name="map_icon_std">
-          Name: <input class="chanSettings" value="{{c.map_icon_name}}" list="imagelist" name="map_icon_name">
-          Message: <input class="chanSettings" value="{{c.map_icon_msg}}" list="imagelist" name="map_icon_msg">
-        </td>
-
       </tr>
       {{/each}}
     </tbody>
   </table>
 
-  <h3>Add Channel (need to restart)</h3>
+  {{#if isUserRole "admin greet"}}
+
+  <h4>Add Channel (need to restart)</h4>
   <table>
     <tbody>
       <tr>
@@ -115,7 +148,27 @@
     </tbody>
   </table>
 
-  {{#if isUserRole "admin greet"}}
+  <h2>Translation stats</h2>
+  <!-- todo: format correctly year/months-->
+  <table class="pure-table">
+    <thead>
+      <th>Channel</th>
+    </thead>
+    <tbody>
+      {{#each c in getChannels}}
+      <tr>
+        <td>
+          {{c.channel}}
+        </td>
+        {{#each s in (stats c.channel)}}
+        <td>
+          {{s.count}}
+        </td>
+        {{/each}}
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
 
   <h2>Accounts</h2>
   <table class="pure-table">
@@ -147,7 +200,7 @@
     </tbody>
   </table>
 
-  <h3>Add Account</h3>
+  <h4>Add Account</h4>
   <table>
     <tbody>
       <tr>

@@ -143,3 +143,12 @@ FlowRouter.route('/countries', {
        });
      }
   });
+
+
+  FlowRouter.route('/disconnect', {
+    name: 'disconnect',
+    action: function(params, queryParams) {
+      AccountsTemplates.logout();
+      FlowRouter.go('/');
+     }
+  });

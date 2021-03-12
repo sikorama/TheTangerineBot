@@ -54,9 +54,23 @@ a {
 	cursor: default;
 }
 
-.pure-table {
-	width:80%;
+.disconnect-button {
+	text-anchor: right;
 }
+
+.pure-table {
+	width:100%;
+}
+
+/*div {
+	display: inline-block;
+}
+*/
+
+img {
+	padding:0px;
+}
+
 
 .pure-table tr:nth-child(2n) {
 	background-color: #EFEFF0;
@@ -80,8 +94,6 @@ textarea {
 
 }
 
-
-
 .pure-menu-heading.pure-menu-active>.pure-menu-link,
 .pure-menu-heading.pure-menu-link:hover,
 .pure-menu-heading.pure-menu-link:focus,
@@ -100,7 +112,7 @@ textarea {
 }
 
 .pure-menu-link{
-	white-space: normal;
+white-space: normal;
   overflow: hidden;
 }
 
@@ -119,7 +131,7 @@ textarea {
 	position: absolute;
 	right: 0;
 	padding: 3px 0 3px 0;
-  width: 230px;
+	width: 230px;
 }
 
 .main-menu-list .pure-menu-link{

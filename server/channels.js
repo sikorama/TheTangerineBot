@@ -16,7 +16,7 @@ export function addChannel(chan, fields, guestAccount) {
     doc = {
       channel: chan,
       guestAccount: guestAccount,
-      map_icon_std: "/tang1.png",
+      map_icon_std: "/tang2.png",
       map_icon_name: "/tang3.png",
       map_icon_msg: "/favicon-32.png",
     };
