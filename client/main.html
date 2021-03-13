@@ -79,11 +79,16 @@
   {{> PageTop }}
   {{> Template.dynamic template=main}}
   {{else}}
-  {{> loginButtons}}
-  <br> <br>
-  <img src="/bot.png">
-  <p>Follow me on <a href="http://twich.tv/TheTangerineBot">twich.tv/TheTangerineBot</a>
-  </p>
+
+  <div class="centered">
+    <h1 class="capcase" >The Tangerine Bot Office</h1>
+    {{> loginButtons}}
+    <div>
+      <img src="/bot.png">  
+    </div>
+
+    <p>Follow me on <a href="http://twich.tv/TheTangerineBot">twich.tv/TheTangerineBot</a></p>
+  </div>
   {{/if}}
 </template>
 
