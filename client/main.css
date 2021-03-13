@@ -27,7 +27,6 @@ a {
  cursor: auto;
 }
 
-
 .setpage {
 	cursor: pointer;
 }
@@ -47,7 +46,6 @@ a {
 	cursor: pointer;
    }
 
-
 .nohpad {
 	padding-left:2px;
 	padding-right:2px;
@@ -62,37 +60,33 @@ a {
 	width:100%;
 }
 
-/*div {
-	display: inline-block;
-}
-*/
-
 img {
 	padding:0px;
 }
-
 
 .pure-table tr:nth-child(2n) {
 	background-color: #EFEFF0;
 }
 
-.main-menu-list {
-  width:100%;
-}
-
 .main-menu {
 	background-color: darkorange;
-	color: white;
 }
 
 textarea {
 	width:100%;
 }
 
-.oneline{
-	display: flex;
 
+.main-title {
+	padding-left: 30px;
+	padding-top:2px;
+	font-weight: bold;
+	font-size: 1.4em;
+	text-transform: uppercase;
+	background:darkorange;
+	background-color:darkorange;
 }
+
 
 .pure-menu-heading.pure-menu-active>.pure-menu-link,
 .pure-menu-heading.pure-menu-link:hover,
@@ -116,9 +110,8 @@ white-space: normal;
   overflow: hidden;
 }
 
-
 .main-menu-list{
-	padding-left: 30px;
+	padding-left: 20px;
 }
 
 .pure-menu-item{
@@ -140,75 +133,14 @@ white-space: normal;
 	font-size: 14px;
 }
 
-/*
-.main-menu-list .pure-menu-link{
-	color: white ;
-	opacity: 0.8;
-	font-weight: 600;
-	font-size: 14px;
-}
-.main-menu-list .pure-menu-link.pure-menu-active,
-.main-menu-list .pure-menu-link:hover,
-.main-menu-list .pure-menu-link:focus {
-	text-decoration: none;
-	color: #ffffff;
-	background: inherit;
-	opacity: 1;
-}
-.main-menu-list .pure-menu-children{
-	background: #324762;
-}
-.pure-menu-has-children,
-.pure-menu-children .pure-menu-item{
-	text-transform: none;
-	text-decoration: none;
-}
-#menu-user img{
-	vertical-align: middle;
-	margin-right: 10px;
-}
-#menu-user > .pure-menu-item > .pure-menu-link{
-	opacity: 1;
-	color: white;
-	font-weight: 400;
-	text-align: center;
-	padding: 7px;
-}
-#menu-user .pure-menu-item {
-	width: 100%;
-}
-#menu-user .pure-menu-children .pure-menu-item {
-	height: 50px;
-	line-height: 50px;
-}
-#menu-user > .pure-menu-item > .pure-menu-link:hover,
-#menu-user > .pure-menu-item > .pure-menu-link:active,
-#menu-user > .pure-menu-item > .pure-menu-link:focus{
-	background: transparent;
-	text-decoration: none;
-}
-#menu-user .pure-menu-children .pure-menu-link{
-	background:red ;
-	color: #ffffff;
-	padding: 0 20px;
-}
-#menu-user .pure-menu-children  .pure-menu-link:hover,
-#menu-user .pure-menu-children  .pure-menu-link:focus {
-	background: #233342;
-	text-decoration: none;
-}
-
-*/
-
-
-/*i{
-	margin-right: 10px;
-}
-*/
-
 .pure-menu-active{
 	background:red;
 }
+
+.oneline{
+	display: flex;
+}
+
 
 .resettimer {
 	color: transparent;
@@ -222,6 +154,7 @@ white-space: normal;
 	color: red;
 }
 
+
 .autohide {
 	color: transparent;
 }
@@ -234,6 +167,7 @@ white-space: normal;
 .uname {
 	background-color:#f0f00080;
 }
+
 .capcase {
 	text-transform: uppercase ;
 }

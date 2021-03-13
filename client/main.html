@@ -10,15 +10,17 @@
 </body>
 
 <template name="PageTop">
-  <nav class="pure-menu pure-menu-horizontal main-menu">
 
-    <ul class="pure-menu-list main-menu-list">
+  <div>
+    <div style="float:right;">
+      <a href="/disconnect">&times;</a>
+    </div>
+    <div class="main-title">The Tangerine bot</div>
+  </div>
 
-      <li class="pure-menu-item">
-        <a href="/disconnect" class="disconnect-button pure-menu-link ">X</a>
-      </li>
-
-      <li class="pure-menu-item {{active "map"}}">
+  <nav class="pure-menu pure-menu-horizontal main-menu">      
+   <ul class="pure-menu-list main-menu-list">
+    <li class="pure-menu-item {{active "map"}}">
         <a href="/map" class="pure-menu-link ">Map</a>
       </li>
 
@@ -30,9 +32,9 @@
         <a href="/commands" class="pure-menu-link ">Commands</a>
       </li>
       {{#if isUserRole "admin"}}
-        <li class="pure-menu-item {{active "from"}}">
-          <a href="/from" class="pure-menu-link ">Friends</a>
-        </li>
+      <li class="pure-menu-item {{active "from"}}">
+        <a href="/from" class="pure-menu-link ">Friends</a>
+      </li>
       {{/if}}
 
       {{#if rh_featureEnabled "quizz"}}
@@ -43,54 +45,47 @@
 
       {{#if isUserRole "admin greet"}}
 
-        <li class="pure-menu-item {{active "greetings"}}">
-          <a href="/greetings" class="pure-menu-link ">Greetings</a>
-        </li>
+      <li class="pure-menu-item {{active "greetings"}}">
+        <a href="/greetings" class="pure-menu-link ">Greetings</a>
+      </li>
       {{/if}}
 
       {{#if isUserRole "admin"}}
-        <li class="pure-menu-item {{active "settings"}}">
-          <a href="/settings" class="pure-menu-link ">Settings</a>
-        </li>
+      <li class="pure-menu-item {{active "settings"}}">
+        <a href="/settings" class="pure-menu-link ">Settings</a>
+      </li>
       {{/if}}
 
       <li class="pure-menu-item {{active "about"}}">
         <a href="/about" class="pure-menu-link ">About</a>
       </li>
 
-
-      <li>
-        {{>SelectChannel}}
-      </li>
-
-
     </ul>
+    </nav>
 
+  {{>SelectChannel}}
 
-
-
-  </nav>
 </template>
 
 <template name="MainPage">
   {{#if currentUser}}
-    {{> PageTop }}
-    {{> Template.dynamic template=main}}
+  {{> PageTop }}
+  {{> Template.dynamic template=main}}
   {{else}}
-    {{> loginButtons}}
-    <br> <br>
-    <img src="/bot.png">
-    <p>Follow me on <a href="http://twich.tv/TheTangerineBot">twich.tv/TheTangerineBot</a>
-    </p>
+  {{> loginButtons}}
+  <br> <br>
+  <img src="/bot.png">
+  <p>Follow me on <a href="http://twich.tv/TheTangerineBot">twich.tv/TheTangerineBot</a>
+  </p>
   {{/if}}
 </template>
 
 <template name="CheckMark">
   <button class="{{#if b}} ok {{else}} ko {{/if}} toggleCheck" name="{{n}}">
     {{#if b}}
-      &check;
+    &check;
     {{else}}
-      {{#if vcross}} {{{vcross}}} {{else}} &cross; {{/if}}
+    {{#if vcross}} {{{vcross}}} {{else}} &cross; {{/if}}
     {{/if}}
   </button>
 </template>
@@ -99,7 +94,7 @@
 <template name="ShowMore">
   Show <select>
     {{#each l in limits}}
-      <option class="limit" {{selected l}}>{{l}}</option>
+    <option class="limit" {{selected l}}>{{l}}</option>
     {{/each}}
 
   </select>
@@ -110,7 +105,7 @@
 <template name="SkipResult">
   <span class="{{#unless first}} prevpage {{/unless}}"> &lt; </span>
   {{#each i in pages}}
-    <span class="setpage {{classIsSelected i}}">{{i}}</span>
+  <span class="setpage {{classIsSelected i}}">{{i}}</span>
   {{/each}}
   <span class="{{#unless last}} nextpage {{/unless}}"> &gt; </span>
 </template>
