@@ -48,21 +48,25 @@
     </thead>
     <tbody>
       {{#each c in getChannels}}
-      <tr id="{{c._id}}">
+      <tr id="{{c._id}}" class="channelEdit">
         <td>
           <div>
             {{>CheckMark b=c.enabled n="enabled" c=c}}
-            {{c.channel}}
-            <span class="autohide delete">&#9746;</span>
+            <div class="{{#if isCurEditChan c._id}} strong {{/if}}">
+              {{c.channel}}
+            </div>
+            {{#if isCurEditChan c._id}}
+            <button class="delete">remove</button>
+            {{/if}}
           </div>
         </td>
         <td class="centered">
           {{>CheckMark b=c.tr n="tr"}}
         </td>
+
         <td class="centered">
           {{>CheckMark b=c.map n="map"}}
-          <div>
-          </div>
+          {{#if isCurEditChan c._id}}
 
           <table>
 
@@ -114,6 +118,8 @@
 
             </body>
           </table>
+          {{/if}}
+
         </td>
 
         <td class="centered">

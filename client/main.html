@@ -12,10 +12,11 @@
 <template name="PageTop">
 
   <div>
-    <div style="float:right;">
-      <a href="/disconnect">&times;</a>
+    <div style="float:right;"> 
+      <a href="/disconnect">{{curSelChan}} &times;</a>
     </div>
     <div class="main-title">The Tangerine bot </div>
+     
   </div>
 
   <nav class="pure-menu pure-menu-horizontal main-menu">
@@ -81,8 +82,8 @@
   {{else}}
 
   <div class="centered">
-    <h1 class="capcase" >The Tangerine Bot Office</h1>
-    {{> loginButtons}}
+    <h1 class="capcase" >The Tangerine Bot's Office</h1>
+    {{>loginButtons}}
     <div>
       <img src="/bot.png">  
     </div>

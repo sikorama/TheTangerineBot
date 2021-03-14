@@ -591,7 +591,16 @@ Meteor.startup(() => {
 
     // Filter commands (options)
     if (commandName[0] === '!') {
-      cmdarray = commandName.split(' ');
+      
+      cmdarray = commandName.split(' ').filter(function(item) {
+        try {
+          return (item.length>0)
+        }
+        catch(e) {
+          console.error(e);
+          return false;
+        }
+      }) ;
       cmd = cmdarray[0].substring(1).toLowerCase();
     }
 
@@ -1082,6 +1091,14 @@ Meteor.startup(() => {
       }
     }
 
+    /*
+   3/14/2021 12:48:20 PM #crisortegalive < [crisortegalive] !so  @calvinthomasmusic
+  so [ '!so', '', '@calvinthomasmusic' ]
+  #crisortegalive > /me you must follow https://twitch.tv/ CurseLit
+  so @follow @twitch @icon
+  3/14/2021 12:48:55 PM #crisortegalive < [calvinthomasmusic] :D :D :D
+    */
+
 
     // ---------- catch !so command
     // Extract the 2nd parameter, removes @ symbols (sonitize?)
@@ -1127,7 +1144,6 @@ Meteor.startup(() => {
     if (botchan.greet === true) {
       // dnow?
       let d = Date.now();
-      console.error(botchan.socmd);
       // Si ca fait moins de 8 heures, pas de greetings
       let candidate = true;
       if (username in greetDate) {

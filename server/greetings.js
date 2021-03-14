@@ -146,10 +146,14 @@ export function getGreetMessages(username,chan) {
 
   let gm = GreetMessages.findOne({ username: username });
   let gmtext = [];
+  console.info('getGreetMessage - username=', username, 'chan=', chan);
+  console.info('getGreetMessage - gm=', gm);
 
   // Filtrage de gm pour virer ce qui est désactivé et ce qui est pour une autre chaine
   if (gm != undefined) {
     gmtext = gm.texts.filter((item) => {
+      console.info('getGreetMessage - item=', item);
+
       if (item.enabled != true) return false;
       // if there is a channel field, use it as a constraint
       if (item.channel != undefined && item.channel.length>0) {
@@ -161,9 +165,11 @@ export function getGreetMessages(username,chan) {
           if (item.channel.indexOf(chan) < 0) return false;
         }
       }
+      console.info('getGreetMessage - OK');
       return true;
     });
   }
+  console.info('getGreetMessage - gmtext=', gmtext);
 
   return gmtext;
 }

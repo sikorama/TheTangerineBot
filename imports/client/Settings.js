@@ -1,6 +1,7 @@
 import { BotChannels, Settings , Stats} from '../api/collections.js';
 import { getParentId } from './tools.js';
 import { checkUserRole } from '../api/roles.js';
+import { Session } from 'meteor/session';
 
 
 import './Settings.html';
@@ -11,13 +12,16 @@ Template.Settings.onCreated(function () {
     this.subscribe("allUsers");
     this.subscribe("statistics");
 
-/*    Meteor.call('parameter', "location_interval", function (res, val) {
-        document.getElementById('location_interval').value = val.val;
-    })
-*/
+    Session.set('curEditChan','');
 });
 
 Template.Settings.helpers({
+    isCurEditChan(chan) {
+        console.error(chan);
+        console.error(Session.get('curEditChan'));
+        
+        return Session.equals('curEditChan',chan);
+    },
     getChannels() {
         return BotChannels.find();
     },
@@ -46,6 +50,7 @@ Template.Settings.events({
         let id = getParentId(event.currentTarget);
         let f = event.currentTarget.name;
         Meteor.call("toggleSettings", id, f);
+        return false;
     },
     'change .chanSettings': function (event) {
         let id = getParentId(event.currentTarget);
@@ -58,6 +63,7 @@ Template.Settings.events({
     "change .settings": function (event) {
         let v = parseInt(event.currentTarget.value);
         Meteor.call('parameter', event.currentTarget.id, v);
+        return false;
     },
     "change .profile": function (event) {
         let id = getParentId(event.target);
@@ -87,5 +93,14 @@ Template.Settings.events({
 
             console.error(doc);
         Meteor.call("insertUser",doc);
+    },
+    'click .channelEdit' : function(event) {
+        let id = getParentId(event.target);
+        if (Session.set('curEditChan',id)) {
+            Session.set('curEditChan','');
+        }
+        else
+            Session.set('curEditChan',id);
+
     }
 });

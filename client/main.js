@@ -1,5 +1,4 @@
 import { Template } from 'meteor/templating';
-import { Tracker } from 'meteor/tracker';
 import { Session } from 'meteor/session';
 import { UserLocations, BotChannels, GreetMessages, Settings } from '../imports/api/collections.js';
 import { checkUserRole } from '../imports/api/roles.js';
@@ -162,7 +161,8 @@ Template.registerHelper( 'rh_featureEnabled' , function(feature) {
 Template.PageTop.helpers({
   active(s) {
     return ((FlowRouter.getRouteName() === s) ? 'pure-menu-active active' : '');
-  }
+  },
+  curSelChan() {return Session.get('sel_channel');}
 })
 
 Template.About.onCreated(function () {
