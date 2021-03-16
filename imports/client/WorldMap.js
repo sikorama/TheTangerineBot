@@ -8,14 +8,15 @@ var L = require('leaflet');
 
 
 // ---------------------------
-Template.WorldMap.events({
-  'input .search': _.debounce(function (event) { manageSearchEvents(event, 'searchUsers'); }, 300),
-})
+
+
 Template.WorldMap.onCreated(function () {
 });
 
 Template.WorldMap.onRendered(function () {
-  this.subscribe('botChannels', {}, function () {
+  let sc = Session.get('sel_channel');
+
+  this.subscribe('botChannels', { channel: sc }, function () {
 
     let searchOptions = {
       activeSince: true,
@@ -24,7 +25,13 @@ Template.WorldMap.onRendered(function () {
 
     if (FlowRouter.getQueryParam('show')) searchOptions.show = true;
     if (FlowRouter.getQueryParam('msg')) searchOptions.msg = true;
+    if (FlowRouter.getQueryParam('active')) {
+      searchOptions.activeSince = true;
+      searchOptions.activeSinceHours = parseInt(FlowRouter.getQueryParam('active')) * 24;
 
+    }
+
+    console.error(searchOptions);
     Session.set("searchUsers", searchOptions);
 
     // Create Map
@@ -147,11 +154,6 @@ Template.WorldMap.onRendered(function () {
         }
       })
 
-      // On pourrait utiliser un objet pour gerer les marqueurs et ne pas tous les virer
-      // gerer ca avec un 'double buffer' ?
-      // N'optimise que partiellement, mais permet de ne pas detruire les elements quand on a
-      // qui s'accumulent. On pourrait mettre les elements dans un 3eme buffer qu'on virrait plus
-      // tard, mais ca se complique...
       let ak = Object.keys(markers);
       if (ak.length > 0) {
         ak.forEach(function (k) {
@@ -164,8 +166,6 @@ Template.WorldMap.onRendered(function () {
         });
       }
       markers = newmarkers;
-
-
     });
 
     // cursor = UserLocations.find({ latitude: { $exists: 1 } },{fields: {dname:1, latitude:1, longitude:1,msg:1} }):
@@ -177,8 +177,8 @@ Template.WorldMap.onRendered(function () {
       try {
 
 
-        // check there is a user
-        if (!Meteor.userId()) return;
+        // check there is a user (for non public maps only)
+        // if (!Meteor.userId()) return;
 
         let searchData = Session.get("searchUsers");
 
@@ -239,3 +239,14 @@ Template.WorldMap.onRendered(function () {
 
 
 });
+
+Template.WorldMap.helpers({
+  chan_name() {
+    return Session.get('sel_channel');
+  }
+});
+
+Template.WorldMap.events({
+  'input .search': _.debounce(function (event) { manageSearchEvents(event, 'searchUsers'); }, 300),
+})
+

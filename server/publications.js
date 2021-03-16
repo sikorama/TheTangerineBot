@@ -32,6 +32,15 @@ Meteor.publish('botChannels', function (sel) {
     //console.info('Publication BotChannels, sel=', sel,BotChannels.findOne(sel));
     return BotChannels.find(sel);
   }
+  else 
+  {
+   // Limited access for guest users 
+   // FIXME!
+   // Only required fields
+   return BotChannels.find(sel//, 
+    //{fields: {}}
+    );
+  }
   this.ready();
 });
 

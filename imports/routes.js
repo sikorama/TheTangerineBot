@@ -19,6 +19,17 @@ FlowRouter.route('/commands', {
      }
   });
 
+  FlowRouter.route('/c/:chan', {
+    name: 'countries',
+    action: function(params, queryParams) {
+      BlazeLayout.render('DirectMap', {
+//         main: 'DirectMap',
+       });
+
+     }
+  });
+
+
 
 FlowRouter.route('/countries', {
     name: 'countries',

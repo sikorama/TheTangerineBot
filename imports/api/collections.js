@@ -16,7 +16,8 @@ export const Stats = new Mongo.Collection('statistics');
     collection: UserLocations,
     fields: ['name', 'msg', 'location','country','streamer'],
     permission: function (options) {
-        return (options.userId);
+        return true;
+//        return (options.userId);
     },
     // Options de recherche par défaut
     defaultSearchOptions: {

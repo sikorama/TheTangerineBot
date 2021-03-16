@@ -4,7 +4,7 @@
  * 
  */
 
- import { Meteor } from 'meteor/meteor';
+import { Meteor } from 'meteor/meteor';
 import { UserLocations, BotChannels, GreetMessages, Settings, QuizzQuestions, QuizzScores, Stats } from '../imports/api/collections.js';
 import { init_users } from './user_management.js';
 import { init_publications } from './publications.js';
@@ -36,6 +36,11 @@ if ((botname == undefined) || (botpassword == undefined)) {
 }
 
 botpassword = 'oauth:' + botpassword;
+
+
+let WEBSITE_URL = "https://tangerine.sikorama.fr"
+let wurl = process.env.WEBSITE_URL;
+if (wurl) WEBSITE_URL=wurl;
 
 // Stack for answering to greetings.
 // Greetings are not immediate in order to add a delay between multiple greetings
@@ -591,7 +596,7 @@ Meteor.startup(() => {
 
     // Filter commands (options)
     if (commandName[0] === '!') {
-      
+
       cmdarray = commandName.split(' ').filter(function(item) {
         try {
           return (item.length>0)
@@ -744,14 +749,15 @@ Meteor.startup(() => {
 
       // ------------------- MAP -------------------------
       if (botchan.map === true) {
-
         //  Depending on the channel, guest account differs.
         // FIXME: passwords should be different
         if (cmd.indexOf('map') == 0) {
-          let ga = botchan.guestAccount;
-          if (ga && ga.length > 0) {
-            say(target, "You can access our EarthDay map here: https://tangerine.sikorama.fr / login: "+ga+" / pw: dolores");
-          }
+          
+          say(target, "You can access our EarthDay map here: '+WEBSITE_URL+'/c/"+chan);
+//          let ga = botchan.guestAccount;
+//          if (ga && ga.length > 0) {
+//            say(target, "You can access our EarthDay map here: https://tangerine.sikorama.fr / login: "+ga+" / pw: dolores");
+//          }
           return;
         }
 

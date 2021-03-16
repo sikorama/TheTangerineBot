@@ -14,6 +14,7 @@ import '../imports/client/GreetingsTable.html';
 import '../imports/client/LocationsTable.html';
 import '../imports/client/about.html';
 import '../imports/client/WorldMap.js';
+import '../imports/client/WorldMap.html';
 
 import { Accounts } from 'meteor/accounts-base';
 
@@ -589,6 +590,7 @@ Template.SelectChannel.helpers({
   getSessionVar(s) {
     return Session.get(s);
   }
+
 })
 
 Template.SelectChannel.events({
@@ -598,3 +600,11 @@ Template.SelectChannel.events({
     Session.set('sel_channel', v);
   }
 });
+
+// Direct access to a map, without needing to be logged
+Template.DirectMap.onCreated(function () {
+let chan = FlowRouter.getParam('chan');
+  Session.set('sel_channel', chan);
+  console.error(chan);
+});
+
