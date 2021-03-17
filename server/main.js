@@ -752,12 +752,7 @@ Meteor.startup(() => {
         //  Depending on the channel, guest account differs.
         // FIXME: passwords should be different
         if (cmd.indexOf('map') == 0) {
-          
           say(target, "You can access our EarthDay map here: "+WEBSITE_URL+"/c/"+chan);
-//          let ga = botchan.guestAccount;
-//          if (ga && ga.length > 0) {
-//            say(target, "You can access our EarthDay map here: https://tangerine.sikorama.fr / login: "+ga+" / pw: dolores");
-//          }
           return;
         }
 

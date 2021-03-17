@@ -1,165 +1,186 @@
-import { Session} from 'meteor/session'
+import { Session } from 'meteor/session'
 
+
+FlowRouter.notFound = {
+  action: function () {
+    FlowRouter.go("/");
+  }
+};
 
 FlowRouter.route('/settings', {
   name: 'settings',
-  action: function(params, queryParams) {
+  action: function (params, queryParams) {
     BlazeLayout.render('MainPage', {
-       main: 'Settings',
-     });
-   }
+      main: 'Settings',
+    });
+  }
 });
 
 FlowRouter.route('/commands', {
-    name: 'commands',
-    action: function(params, queryParams) {
-      BlazeLayout.render('MainPage', {
-         main: 'CommandsTable',
-       });
-     }
-  });
+  name: 'commands',
+  action: function (params, queryParams) {
+    BlazeLayout.render('MainPage', {
+      main: 'CommandsTable',
+    });
+  }
+});
 
-  FlowRouter.route('/c/:chan', {
-    name: 'countries',
-    action: function(params, queryParams) {
-      BlazeLayout.render('DirectMap', {
-//         main: 'DirectMap',
-       });
 
-     }
-  });
-
+FlowRouter.route('/about', {
+  name: 'about',
+  action: function (params, queryParams) {
+    BlazeLayout.render('MainPage', {
+      main: 'About',
+    });
+  }
+});
 
 
 FlowRouter.route('/countries', {
-    name: 'countries',
-    action: function(params, queryParams) {
-      BlazeLayout.render('MainPage', {
-         main: 'Countries',
-       });
-     }
-  });
+  name: 'countries',
+  action: function (params, queryParams) {
+    BlazeLayout.render('MainPage', {
+      main: 'Countries',
+    });
+  }
+});
 
-  FlowRouter.route('/from', {
-    name: 'from',
-    action: function(params, queryParams) {
-      Session.set('edit_mode',false);
-      BlazeLayout.render('MainPage', {
-         main: 'LatestLocations',
-       });
-     }
-  });
+FlowRouter.route('/from', {
+  name: 'from',
+  action: function (params, queryParams) {
+    Session.set('edit_mode', false);
+    BlazeLayout.render('MainPage', {
+      main: 'LatestLocations',
+    });
+  }
+});
 
-  FlowRouter.route('/from/edit', {
-    name: 'from',
-    action: function(params, queryParams) {
-      Session.set('edit_mode',true);
-      BlazeLayout.render('MainPage', {
-         main: 'LatestLocations',
-       });
-     }
-  });
+FlowRouter.route('/from/edit', {
+  name: 'from',
+  action: function (params, queryParams) {
+    Session.set('edit_mode', true);
+    BlazeLayout.render('MainPage', {
+      main: 'LatestLocations',
+    });
+  }
+});
 
-  FlowRouter.route('/greetings', {
-    name: 'greetings',
-    action: function(params, queryParams) {
-      Session.set('edit_mode',false);
-      BlazeLayout.render('MainPage', {
-         main: 'Greetings',
-       });
-     }
-  });
+FlowRouter.route('/greetings', {
+  name: 'greetings',
+  action: function (params, queryParams) {
+    Session.set('edit_mode', false);
+    BlazeLayout.render('MainPage', {
+      main: 'Greetings',
+    });
+  }
+});
 
-  FlowRouter.route('/greetings/edit', {
-    name: 'greetings',
-    action: function(params, queryParams) {
-      Session.set('edit_mode',true);
-      BlazeLayout.render('MainPage', {
-         main: 'Greetings',
-       });
-     }
-  });
+FlowRouter.route('/greetings/edit', {
+  name: 'greetings',
+  action: function (params, queryParams) {
+    Session.set('edit_mode', true);
+    BlazeLayout.render('MainPage', {
+      main: 'Greetings',
+    });
+  }
+});
 
-  FlowRouter.route('/', {
-    action: function(params, queryParams) {
-            FlowRouter.go('/map');
-     }
-  });
+FlowRouter.route('/', {
+  name: 'map',
+  action: function (params, queryParams) {
+    BlazeLayout.render('MainPage', {
+      main: 'WorldMap',
+    });
+  }
+});
 
-
-  FlowRouter.route('/map', {
-    name: 'map',
-    action: function(params, queryParams) {
-      BlazeLayout.render('MainPage', {
-         main: 'WorldMap',
-       });
-     }
-  });
-
-  FlowRouter.route('/mapsearch', {
-    name: 'map',
-    action: function(params, queryParams) {
-      BlazeLayout.render('WorldMap', {
-         main: '',
-         search_mode: true
-       });
-     }
-  });
-
-  FlowRouter.route('/about', {
-    name: 'about',
-    action: function(params, queryParams) {
-      BlazeLayout.render('MainPage', {
-         main: 'About',
-       });
-     }
-  });
+FlowRouter.route('/map', {
+  name: 'map',
+  action: function (params, queryParams) {
+    BlazeLayout.render('MainPage', {
+      main: 'WorldMap',
+    });
+  }
+});
 
 
-  FlowRouter.route('/quizz', {
-    name: 'quizz',
-    action: function(params, queryParams) {
-      Session.set('edit_mode',false);
-      BlazeLayout.render('MainPage', {
-         main: 'QuizzTable',
-       });
-     }
-  });
-
-  FlowRouter.route('/quizz/scores', {
-    name: 'quizz',
-    action: function(params, queryParams) {
-      BlazeLayout.render('MainPage', {
-         main: 'QuizzScores',
-       });
-     }
-  });
-
-  FlowRouter.route('/quizz/settings', {
-    name: 'quizz',
-    action: function(params, queryParams) {
-      BlazeLayout.render('MainPage', {
-         main: 'QuizzSettings',
-       });
-     }
-  });
+FlowRouter.route('/mapsearch', {
+  name: 'map',
+  action: function (params, queryParams) {
+    BlazeLayout.render('WorldMap', {
+      main: '',
+      search_mode: true
+    });
+  }
+});
 
 
-  FlowRouter.route('/quizz/edit', {
-    name: 'quizz',
-    action: function(params, queryParams) {
-      Session.set('edit_mode',true);
-      BlazeLayout.render('MainPage', {
-         main: 'QuizzTable',
-       });
-     }
-  });
+FlowRouter.route('/quizz', {
+  name: 'quizz',
+  action: function (params, queryParams) {
+    Session.set('edit_mode', false);
+    BlazeLayout.render('MainPage', {
+      main: 'QuizzTable',
+    });
+  }
+});
+
+FlowRouter.route('/quizz/scores', {
+  name: 'quizz',
+  action: function (params, queryParams) {
+    BlazeLayout.render('MainPage', {
+      main: 'QuizzScores',
+    });
+  }
+});
+
+FlowRouter.route('/quizz/settings', {
+  name: 'quizz',
+  action: function (params, queryParams) {
+    BlazeLayout.render('MainPage', {
+      main: 'QuizzSettings',
+    });
+  }
+});
 
 
-  FlowRouter.route('/disconnect', {
-    name: 'disconnect',
-    action: function(params, queryParams) {
-      AccountsTemplates.logout();
-      FlowRouter.go('/');
-     }
-  });
+FlowRouter.route('/quizz/edit', {
+  name: 'quizz',
+  action: function (params, queryParams) {
+    Session.set('edit_mode', true);
+    BlazeLayout.render('MainPage', {
+      main: 'QuizzTable',
+    });
+  }
+});
+
+
+FlowRouter.route('/disconnect', {
+  name: 'disconnect',
+  action: function (params, queryParams) {
+    AccountsTemplates.logout();
+    FlowRouter.go('/');
+  }
+});
+
+
+
+// ---------- PUBLIC PAGES / PER CHANNEL ------------
+
+FlowRouter.route('/c/:chan', {
+  name: 'countries',
+  action: function (params, queryParams) {
+    BlazeLayout.render('DirectMap', {
+    });
+
+  }
+});
+
+FlowRouter.route('/c/:chan/commands', {
+  name: 'countries',
+  action: function (params, queryParams) {
+    BlazeLayout.render('DirectCommands', {
+    });
+  }
+});
+

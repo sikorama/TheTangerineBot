@@ -603,8 +603,16 @@ Template.SelectChannel.events({
 
 // Direct access to a map, without needing to be logged
 Template.DirectMap.onCreated(function () {
-let chan = FlowRouter.getParam('chan');
+  let chan = FlowRouter.getParam('chan');
+  // Check if chan exists, and has map enabled
+  this.subscribe('botChannels', { channel: chan}, function () {
+    let bc = BotChannels.findOne({channel: chan, map: {$exists:1}});
+    console.error(bc);
+    if (!bc) 
+      FlowRouter.go('/');    
+  });
+  
   Session.set('sel_channel', chan);
-  console.error(chan);
+//  console.error(chan);
 });
 
