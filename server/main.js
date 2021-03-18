@@ -5,14 +5,16 @@
  */
 
 import { Meteor } from 'meteor/meteor';
-import { UserLocations, 
-         BotChannels, 
-         GreetMessages, 
-         Settings, 
-         QuizzQuestions, 
-         QuizzScores, 
-         Stats,
-         GreetDate } from '../imports/api/collections.js';
+import {
+  UserLocations,
+  BotChannels,
+  GreetMessages,
+  Settings,
+  QuizzQuestions,
+  QuizzScores,
+  Stats,
+  GreetDate
+} from '../imports/api/collections.js';
 import { init_users } from './user_management.js';
 import { init_publications } from './publications.js';
 import { init_quizz } from './quizz.js';
@@ -303,7 +305,7 @@ Meteor.startup(() => {
     'resetGreetTimer': function (uname) {
       if (hasRole(this.userId, ['admin', 'greet'])) {
         if (uname)
-          GreetDate.remove({name:uname});
+          GreetDate.remove({ name: uname });
       }
     }
   });
@@ -532,11 +534,11 @@ Meteor.startup(() => {
 
     // Last Greet (greetings)
     if (username != undefined) {
-      let o={}
+      let o = {}
       o[chan] = d;
-//      console.error(o);
-      GreetDate.upsert({name:username}, {$set:o})
-//      console.error(GreetDate.findOne({name:username}));
+      //      console.error(o);
+      GreetDate.upsert({ name: username }, { $set: o })
+      //      console.error(GreetDate.findOne({name:username}));
     }
   }
 
@@ -550,7 +552,7 @@ Meteor.startup(() => {
 
   // Default regex for parsing requests
   const default_regsonglistreq = /(.*)\s\brequested\s(.*)\s\bat/
-          
+
   // Called every time a message comes in
   function onMessageHandler(target, context, msg, self) {
 
@@ -574,8 +576,37 @@ Meteor.startup(() => {
     if (context.badges)
       if (context.badges.broadcaster)
         isModerator = true;
-
     //    console.error(context, isModerator);
+
+    // Songlisbot requests
+    if (username == "songlistbot" && botchan.map === true) {
+      try {
+        //if (botchan.request === true) {
+        let regsonglistreq = default_regsonglistreq;
+        // Per channel regex
+        if (botchan.requestregex)
+          regsonglistreq = RegExp(botchan.requestregex);
+
+        // Use a regexp per channel
+        let slbparse = msg.search(regsonglistreq);
+        console.warn('regex_result=', slbparse);
+
+        if (slbparse) {
+          let req_user = slbparse[1].toLowerCase();
+          let req_song = slbparse[2];
+          let rul = UserLocations.findOne({ name: req_user });
+          console.info('song request:', req_user, req_song)
+          if (rul) {
+            let objupdate = {
+            }
+            //{lastreq: req_song}
+            objupdate[chan + '-lastreq'] = req_song;
+            UserLocations.update(rul._id, { $set: objupdate })
+          }
+        }
+      } catch (e) { console.error(e) }
+      return;
+    }
 
     // Check if the message starts with @name
     // in that case, extract the name and move it at the end of the message, and process the message
@@ -753,35 +784,6 @@ Meteor.startup(() => {
       // ------------------- MAP -------------------------
       if (botchan.map === true) {
 
-        // Songlisbot requests
-        if (username == "songlistbot") {
-          try {
-              //if (botchan.request === true) {
-              let regsonglistreq=default_regsonglistreq;
-              // Per channel regex
-              if (botchan.requestregex)
-              regsonglistreq = RegExp(botchan.requestregex);
-              
-              // Use a regexp per channel
-              let slbparse = msg.search(regsonglistreq);
-              console.warn('regex_result=',slbparse);
-              
-              if (slbparse) {
-                let req_user = slbparse[1].toLowerCase();
-                let req_song = slbparse[2];
-                let rul = UserLocations.findOne({ name: req_user });
-                console.info('song request:', req_user, req_song)
-                if (rul) {
-                  let objupdate = {
-                  }
-                  //{lastreq: req_song}
-                  objupdate[chan + '-lastreq'] = req_song;
-                  UserLocations.update(rul._id, { $set: objupdate })
-                }
-              }
-          }catch(e) {console.error(e)}
-          return;
-        }
 
 
 
@@ -1184,14 +1186,14 @@ Meteor.startup(() => {
       // In this case, do nothing
       // FIXME: use a database instead (userLoc or a dedicated one)
       let candidate = true;
-      let g = GreetDate.findOne({name:username});
-        if (g)
-          if (g[chan])
-            if (d - g[chan] < 1000 * 60 * 60 * 8) {
-              candidate = false;
-            }
+      let g = GreetDate.findOne({ name: username });
+      if (g)
+        if (g[chan])
+          if (d - g[chan] < 1000 * 60 * 60 * 8) {
+            candidate = false;
+          }
 
-//      console.error(username, candidate,greetDate);
+      //      console.error(username, candidate,greetDate);
 
       if (candidate === true) {
 
