@@ -591,7 +591,7 @@ Meteor.startup(() => {
         let slbparse = msg.search(regsonglistreq);
         console.warn('regex_result=', slbparse);
 
-        if (slbparse) {
+        if (slbparse>=0) {
           let req_user = slbparse[1].toLowerCase();
           let req_song = slbparse[2];
           let rul = UserLocations.findOne({ name: req_user });
