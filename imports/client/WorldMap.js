@@ -45,6 +45,9 @@ Template.WorldMap.onRendered(function () {
     let chan = Session.get('sel_channel');
     let p = BotChannels.findOne({ channel: chan });
 
+    //        return ul[chan+'-lastreq'];
+    let songreqfield=chan+'-lastreq';
+
     let ic;
     if (p)
       ic = [p.map_icon_std, p.map_icon_name, p.map_icon_msg];
@@ -128,6 +131,12 @@ Template.WorldMap.onRendered(function () {
                   txt += item.msg;
                   icon = 2;
                 }
+
+              if (item[songreqfield]) {
+                if (txt.length > 0)
+                 txt += '<br>'
+                txt += item[songreqfield];                
+              }
 
               // Could be stored in db
               let r0 = (Math.random() - 0.5) * 0.02;

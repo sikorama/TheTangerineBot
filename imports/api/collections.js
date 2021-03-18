@@ -86,10 +86,10 @@ export const Stats = new Mongo.Collection('statistics');
                 // Faire une projection pour n'avoir qu'un champ pour les noms, en fonction du flag 'allow'
                 // mapname = dname if() allow==true)
                 if (admin===true) {
-                    return {dname:1, allow:1, msg:1, latitude:1, longitude:1, steamer:1};
+                    return {dname:1, allow:1, msg:1, latitude:1, longitude:1, steamer:1,lastreq:1};
                 }
                 else
-                    return {mapname:1, /*dname:1,*/ allow:1,msg:1, latitude:1, longitude:1/*, streamer:1*/};
+                    return {mapname:1, lastreq:1,/*dname:1,*/ allow:1,msg:1, latitude:1, longitude:1/*, streamer:1*/};
             }
         }
     })

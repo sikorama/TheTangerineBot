@@ -747,8 +747,32 @@ Meteor.startup(() => {
         }
       }
 
+
+
       // ------------------- MAP -------------------------
       if (botchan.map === true) {
+
+      // Songlisbot requests
+      if (username=="songlistbot") {
+        const regsonglistreq=/(.*)\s\brequested\s(.*)\s\bat/
+        let slbparse=msg.search(regsonglistreq);
+        if (slbparse) {
+          let req_user=slbparse[1].toLowerCase();
+          let req_song=slbparse[2];
+          let rul = UserLocations.findOne({name: req_user});
+          console.info('song request:', req_user, req_song)
+          if (rul) {
+            let objupdate = {
+            } 
+            //{lastreq: req_song}
+            objupdate[chan+'-lastreq'] = req_song;
+            UserLocations.update(rul._id, {$set: objupdate})
+          }
+        }
+        return;
+      }
+
+
         //  Depending on the channel, guest account differs.
         // FIXME: passwords should be different
         if (cmd.indexOf('map') == 0) {

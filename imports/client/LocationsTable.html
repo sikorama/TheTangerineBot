@@ -33,8 +33,8 @@
             <th class="sort" name="country">Country</th>
             <th class="sort" name="allow">Allow</th>
             <th class="sort" name="msg">Message</th>
+            <th class="sort" name="proximity">Last Request</th>
             <th class="sort" name="timestamp">Timestamp</th>
-            <th class="sort" name="proximity">Proximity</th>
           </tr>
         </thead>
         <tbody>
@@ -115,12 +115,10 @@
                 {{/if}}
               </td>
               <td>
-                {{FormatDate ul.timestamp}}
+                {{getlastreq ul}}
               </td>
               <td>
-                {{#each c in ul.proximity}}
-                  {{c}}
-                {{/each}}
+                {{FormatDate ul.timestamp}}
               </td>
 
             </tr>

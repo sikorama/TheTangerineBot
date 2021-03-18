@@ -191,6 +191,12 @@ Template.LatestLocations.onCreated(function () {
 });
 
 Template.LatestLocations.helpers({
+  getlastreq(ul) {
+    let chan = Session.get('sel_channel');
+    if (chan) {
+      return ul[chan+'-lastreq'];
+    }
+  },
   getUserLocs() {
     let searchData = Session.get("searchUsers");
     let curSearch = searchData.text;

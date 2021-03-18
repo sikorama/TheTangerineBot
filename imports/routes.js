@@ -168,7 +168,7 @@ FlowRouter.route('/disconnect', {
 // ---------- PUBLIC PAGES / PER CHANNEL ------------
 
 FlowRouter.route('/c/:chan', {
-  name: 'countries',
+  name: 'channel',
   action: function (params, queryParams) {
     BlazeLayout.render('DirectMap', {
     });
@@ -177,7 +177,7 @@ FlowRouter.route('/c/:chan', {
 });
 
 FlowRouter.route('/c/:chan/commands', {
-  name: 'countries',
+  name: 'channel',
   action: function (params, queryParams) {
     BlazeLayout.render('DirectCommands', {
     });
