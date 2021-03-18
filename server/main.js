@@ -19,7 +19,7 @@ import { hasRole } from './user_management.js';
 import { addChannel } from './channels.js';
 import { init_greetings, getGreetMessages, replaceKeywords } from './greetings.js';
 
-import {country_lang,patterns} from './const.js';
+import { country_lang, patterns } from './const.js';
 
 const tmi = require('tmi.js');
 const gtrans = require('googletrans').default;
@@ -37,33 +37,17 @@ if ((botname == undefined) || (botpassword == undefined)) {
 
 botpassword = 'oauth:' + botpassword;
 
-
+// Website url. FIXME: should be http://localhost by default
 let WEBSITE_URL = "https://tangerine.sikorama.fr"
 let wurl = process.env.WEBSITE_URL;
-if (wurl) WEBSITE_URL=wurl;
+if (wurl) WEBSITE_URL = wurl;
 
 // Stack for answering to greetings.
 // Greetings are not immediate in order to add a delay between multiple greetings
-// Only one stack for all greetings
+// Feels more natural, and also ueful in case of on screen notification, to avoid
+// having notifications at the same time
+// Only one stack for all greetings (not per channel)
 let greetingsStack = [];
-
-function pushGreetMessage(target, txt, username) {
-  greetingsStack.push({ target: target, txt: txt });
-  // Store interaction date now, to avoid double messages.
-  let d = new Date();
-  if (username != undefined) {
-    if (username in greetDate) {
-      greetDate[username][target] = d;
-    }
-    else {
-      let o = {};
-      o[target] = d;
-      greetDate[username] = o;
-    }
-//    console.info("Store greet date", greetDate[username]);
-  }
-
-}
 
 // Current Question (contains full object)
 var curQuestion = undefined;
@@ -76,10 +60,10 @@ let gcoptions = {
 
 let geoCoder = gc(gcoptions);
 
-// Derniere date de salutation "user:timestamp" => database?
+// Stores last greeting
 var greetDate = {};
 
-const regext  = /@twitch/gi;
+const regext = /@twitch/gi;
 
 AccountsTemplates.configure({
   // Pour interdire la creation d'un compte par l'interface
@@ -92,7 +76,7 @@ AccountsTemplates.configure({
 /**
  * Find closest person on map,per channel
  */
- function findClosest(uid, chan, nb) {
+function findClosest(uid, chan, nb) {
 
   if (!nb) nb = 5;
 
@@ -109,12 +93,12 @@ AccountsTemplates.configure({
   }
 
   let pipeline = [];
-  let matchobj =  {
+  let matchobj = {
     latitude: { $exists: 1 },
     longitude: { $exists: 1 },
     country: { $exists: 1 },
   };
-  matchobj[chan] = { $exists: 1 } ;
+  matchobj[chan] = { $exists: 1 };
 
   pipeline.push({
     $match: matchobj
@@ -282,8 +266,8 @@ Meteor.startup(() => {
   Meteor.methods({
     // Counts number of people registered on the map, for a given channel
     'getNumPeople': function (ch) {
-      let sobj= {};
-      sobj[ch]= {$exists:true};
+      let sobj = {};
+      sobj[ch] = { $exists: true };
       return UserLocations.find(sobj).count();
     },
     'getNumQuestions': function () {
@@ -338,32 +322,33 @@ Meteor.startup(() => {
       // Check if there is already someone with the same location
       let sameLoc = UserLocations.findOne({ location: item.location, latitude: { $exists: 1 } });
       if (sameLoc) {
-        console.info('Found someone with same location: ',item.location, sameLoc);
+        console.info('Found someone with same location: ', item.location, sameLoc);
         // If it's the same, then do nothing :)
         if (sameLoc._id != item._id) {
-          UserLocations.update(item._id, {$set: {
-            latitude: sameLoc.latitude,
-            longitude: sameLoc.longitude,
-            country: sameLoc.country,
-          }});
+          UserLocations.update(item._id, {
+            $set: {
+              latitude: sameLoc.latitude,
+              longitude: sameLoc.longitude,
+              country: sameLoc.country,
+            }
+          });
         }
         // We can check again very quickly
         setTimeout(Meteor.bindEnvironment(checkLocations), 1000);
       }
-      else
-      {
+      else {
         // Use geoCoder API for convrerting
         geoCoder.geocode(item.location).then(Meteor.bindEnvironment(function (res) {
           let fres = { longitude: "NA" }
           if (res.length > 0)
-          fres = res[0];
+            fres = res[0];
 
-          let upobj= {
-            latitude : parseFloat(fres.latitude),
-            longitude : parseFloat(fres.longitude),
-            country : fres.countryCode
+          let upobj = {
+            latitude: parseFloat(fres.latitude),
+            longitude: parseFloat(fres.longitude),
+            country: fres.countryCode
           }
-          UserLocations.update(item._id, {$set: upobj});
+          UserLocations.update(item._id, { $set: upobj });
 
           let p = Settings.findOne({ param: 'location_interval' });
           if (p !== undefined) i = p.val;
@@ -404,26 +389,26 @@ Meteor.startup(() => {
 
   setTimeout(Meteor.bindEnvironment(checkLocations), 60 * 1000);
 
-/*
-  function checkProximity() {
-    let i = 5;
-    let dateRef = new Date() - 1000 * 3600 * 24;
-    item = UserLocations.findOne({ proximity: { $exists: 0 } });
-    if (item === undefined)
-      item = UserLocations.findOne({ timestamp: { $lt: dateRef } });
-    if (item != undefined) {
-      console.error('proximity update', dateRef, item);
-      findClosest(item._id, 5);
+  /*
+    function checkProximity() {
+      let i = 5;
+      let dateRef = new Date() - 1000 * 3600 * 24;
+      item = UserLocations.findOne({ proximity: { $exists: 0 } });
+      if (item === undefined)
+        item = UserLocations.findOne({ timestamp: { $lt: dateRef } });
+      if (item != undefined) {
+        console.error('proximity update', dateRef, item);
+        findClosest(item._id, 5);
+      }
+      else
+        i = 600;
+      //console.error('next',i);
+      setTimeout(Meteor.bindEnvironment(checkProximity), 1000 * i);
     }
-    else
-      i = 600;
-    //console.error('next',i);
-    setTimeout(Meteor.bindEnvironment(checkProximity), 1000 * i);
-  }
-
-  // Every minute, recomputes user's proximity.
-  setTimeout(Meteor.bindEnvironment(checkProximity), 1000 * 10);
-*/
+  
+    // Every minute, recomputes user's proximity.
+    setTimeout(Meteor.bindEnvironment(checkProximity), 1000 * 10);
+  */
 
   Meteor.methods({
     // get/set parameters
@@ -462,7 +447,7 @@ Meteor.startup(() => {
       if (!chan) return;
       // Check user is owner or admin
       let sobj = {};
-      sobj[chan] = {$exists: true}
+      sobj[chan] = { $exists: true }
 
       let nums = UserLocations.find(sobj).count();
 
@@ -531,11 +516,26 @@ Meteor.startup(() => {
   }
 
   // Updates user interaction timestamp for users who are on the map
-  function updateInteractionStamp(u,chan) {
+  // and also in greetDate array for skipping next greet
+  function updateInteractionStamp(username, u, chan) {
+    // Activity (map)
+    let d = Date.now(); // new Date();
     if (u != undefined) {
       let uo = {};
-      uo[chan] = Date.now();
+      uo[chan] = d
       UserLocations.update(u._id, { $set: uo });
+    }
+
+    // Last Greet (greetings)
+    if (username != undefined) {
+      if (username in greetDate) {
+        greetDate[username][chan] = d;
+      }
+      else {
+        let o = {};
+        o[chan] = d;
+        greetDate[username] = o;
+      }
     }
   }
 
@@ -597,15 +597,15 @@ Meteor.startup(() => {
     // Filter commands (options)
     if (commandName[0] === '!') {
 
-      cmdarray = commandName.split(' ').filter(function(item) {
+      cmdarray = commandName.split(' ').filter(function (item) {
         try {
-          return (item.length>0)
+          return (item.length > 0)
         }
-        catch(e) {
+        catch (e) {
           console.error(e);
           return false;
         }
-      }) ;
+      });
       cmd = cmdarray[0].substring(1).toLowerCase();
     }
 
@@ -752,31 +752,31 @@ Meteor.startup(() => {
       // ------------------- MAP -------------------------
       if (botchan.map === true) {
 
-      // Songlisbot requests
-      if (username=="songlistbot") {
-        const regsonglistreq=/(.*)\s\brequested\s(.*)\s\bat/
-        let slbparse=msg.search(regsonglistreq);
-        if (slbparse) {
-          let req_user=slbparse[1].toLowerCase();
-          let req_song=slbparse[2];
-          let rul = UserLocations.findOne({name: req_user});
-          console.info('song request:', req_user, req_song)
-          if (rul) {
-            let objupdate = {
-            } 
-            //{lastreq: req_song}
-            objupdate[chan+'-lastreq'] = req_song;
-            UserLocations.update(rul._id, {$set: objupdate})
+        // Songlisbot requests
+        if (username == "songlistbot") {
+          const regsonglistreq = /(.*)\s\brequested\s(.*)\s\bat/
+          let slbparse = msg.search(regsonglistreq);
+          if (slbparse) {
+            let req_user = slbparse[1].toLowerCase();
+            let req_song = slbparse[2];
+            let rul = UserLocations.findOne({ name: req_user });
+            console.info('song request:', req_user, req_song)
+            if (rul) {
+              let objupdate = {
+              }
+              //{lastreq: req_song}
+              objupdate[chan + '-lastreq'] = req_song;
+              UserLocations.update(rul._id, { $set: objupdate })
+            }
           }
+          return;
         }
-        return;
-      }
 
 
         //  Depending on the channel, guest account differs.
         // FIXME: passwords should be different
         if (cmd.indexOf('map') == 0) {
-          say(target, "You can access our EarthDay map here: "+WEBSITE_URL+"/c/"+chan);
+          say(target, "You can access our EarthDay map here: " + WEBSITE_URL + "/c/" + chan);
           return;
         }
 
@@ -874,7 +874,7 @@ Meteor.startup(() => {
           return;
         }
 
-        if (cmd==='from') {
+        if (cmd === 'from') {
           geoloc = commandName.substring(5).trim();
           if (geoloc.length < 2) {
             say(target, answername + " Please tell me the country/state/city where you're from, for example: !from Paris,France or !from Japan.");
@@ -949,7 +949,7 @@ Meteor.startup(() => {
 
             let updateObj = { location: doc.location, channels: pdoc.channels, dname: doc.dname };
             // Timestamp for getting active on channel's map
-            updateObj[chan] = now; 
+            updateObj[chan] = now;
             UserLocations.update(pdoc._id, { $set: updateObj, $unset: { country: 1, latitude: 1, longitude: 1, proximity: 1 } });
             say(target, answername + " Ok, i've updated my database!");
             return;
@@ -1127,39 +1127,38 @@ Meteor.startup(() => {
 
     // ---------- catch !so command
     // Extract the 2nd parameter, removes @ symbols (sonitize?)
-    if (isModerator===true && botchan.so === true) {
+    if (isModerator === true && botchan.so === true) {
       // Extract parameter
-      if (cmd==='so') {
+      if (cmd === 'so') {
         //let cmdsplit= cmd.split(' ');
-        console.error('so',cmdarray)
-        if (cmdarray.length>1) {
-            let soname = cmdarray[1];
-            // Remove @
-            if (soname[0]==='@')
-              soname=soname.substring(1);
+        console.error('so', cmdarray)
+        if (cmdarray.length > 1) {
+          let soname = cmdarray[1];
+          // Remove @
+          if (soname[0] === '@')
+            soname = soname.substring(1);
 
-            // Check if this user exists in Greetings Collection
-            let gmlist = getGreetMessages(soname,chan);
-            let gmline='';
-            if (gmlist.length===0) {
-              gmlist= ["@follow @twitch @icon"];
-              gmline = randElement(gmlist);
-            }
-            else
-            {
-              gmline = randElement(gmlist).txt;
-            }
-            console.error('so',gmline);
+          // Check if this user exists in Greetings Collection
+          let gmlist = getGreetMessages(soname, chan);
+          let gmline = '';
+          if (gmlist.length === 0) {
+            gmlist = ["@follow @twitch @icon"];
+            gmline = randElement(gmlist);
+          }
+          else {
+            gmline = randElement(gmlist).txt;
+          }
+          console.error('so', gmline);
 
-            if (gmline.length>0) {
-              gmline = replaceKeywords(gmline,soname);
-              gmline = gmline.replace(regext, "https://twitch.tv/" + soname);
+          if (gmline.length > 0) {
+            gmline = replaceKeywords(gmline, soname);
+            gmline = gmline.replace(regext, "https://twitch.tv/" + soname);
 
-              if (botchan.me === true) {
-                gmline = '/me ' + gmline;
-              }
-              say(target, gmline);
+            if (botchan.me === true) {
+              gmline = '/me ' + gmline;
             }
+            say(target, gmline);
+          }
         }
         return;
       }
@@ -1169,32 +1168,45 @@ Meteor.startup(() => {
     if (botchan.greet === true) {
       // dnow?
       let d = Date.now();
-      // Si ca fait moins de 8 heures, pas de greetings
+      // Check if user has not already been greeted recentky
+      // In this case, do nothing
+      // FIXME: use a database instead (userLoc or a dedicated one)
       let candidate = true;
       if (username in greetDate) {
         let g = greetDate[username];
         if (g)
-          if (target in g)
-            if (d - g[target] < 1000 * 60 * 60 * 8) {
+          if (chan in g)
+            if (d - g[chan] < 1000 * 60 * 60 * 8) {
               candidate = false;
             }
       }
 
-      // Verifie on est dans la base des phrases
+
+//      console.error(username, candidate,greetDate);
+
       if (candidate === true) {
 
-        let gmtext = getGreetMessages(username,chan)
-
         let u = UserLocations.findOne({ name: username });
+        // Update greet timestamp for user on the map
+        // and also for skipping next interaction during 8 hours 
+        updateInteractionStamp(username, u, chan);
 
-        // Si il y a un user sur la map, on met a jour la date de greet, pour la chaine en question
-        updateInteractionStamp(u,chan);
+        // if in mute mode, do nothing
+        // Warning, if muteGreet mode is disabled, 
+        // bot won't immediately greet people if timestamp has recently been updated. 
+        if (botchan.muteGreet === true)
+          return;
+
+        let gmtext = getGreetMessages(username, chan);
 
         let r = -1;
-        // Si gm et u existent,on prend u de facon aléatoire
+        // Check if user in in greet database or in the map
+        // Pick up randomly a message
+        // If user is in both databases, 
+        // - select generic message in 20% of the cases, and a personalized message in 80% of the cases
 
         let selGenSentence = true;
-        if (gmtext.length>0) {
+        if (gmtext.length > 0) {
           if (u != undefined) {
             r = Math.random();
             if (r < 0.8)
@@ -1216,8 +1228,7 @@ Meteor.startup(() => {
                 lang = country_lang[ccode];
               }
             }
-            else
-            {
+            else {
               console.warn('No Country code for ', u)
             }
             lang = lang.toLowerCase();
@@ -1255,7 +1266,7 @@ Meteor.startup(() => {
           let txt = randElement(gmtext).txt;
           //console.error(gm.texts,txt);
 
-          txt = replaceKeywords(txt,dispname);
+          txt = replaceKeywords(txt, dispname);
 
           if ((selGenSentence == false) && botchan.socmd) {
             // Vérifier qu'il y a un @twitch dans la phrase? permet de filtrer ce qui n'est pas !so
@@ -1273,7 +1284,9 @@ Meteor.startup(() => {
           }
           //console.error('me=', botchan.me, 'gensentence=', selGenSentence, '=>', txt);
           //          say(target, txt, username);
-          pushGreetMessage(target, txt, username);
+          //pushGreetMessage(target, txt, username);
+          greetingsStack.push({ target: target, txt: txt });
+
           return;
         }
         //}
