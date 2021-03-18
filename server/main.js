@@ -1181,7 +1181,6 @@ Meteor.startup(() => {
             }
       }
 
-
 //      console.error(username, candidate,greetDate);
 
       if (candidate === true) {
