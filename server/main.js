@@ -548,8 +548,9 @@ Meteor.startup(() => {
   // Connect to Twitch:
   bclient.connect();
 
-
-
+  // Default regex for parsing requests
+  const default_regsonglistreq = /(.*)\s\brequested\s(.*)\s\bat/
+          
   // Called every time a message comes in
   function onMessageHandler(target, context, msg, self) {
 
@@ -754,8 +755,16 @@ Meteor.startup(() => {
 
         // Songlisbot requests
         if (username == "songlistbot") {
-          const regsonglistreq = /(.*)\s\brequested\s(.*)\s\bat/
+          //if (botchan.request === true) {
+          let regsonglistreq=default_regsonglistreq;
+          // Per channel regex
+          if (botchan.requestregex)
+            regsonglistreq = botchan.requestregex;
+
+          // Use a regexp per channel
           let slbparse = msg.search(regsonglistreq);
+          console.warn('regex_result=',slbparse);
+
           if (slbparse) {
             let req_user = slbparse[1].toLowerCase();
             let req_song = slbparse[2];
