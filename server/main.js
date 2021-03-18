@@ -755,31 +755,34 @@ Meteor.startup(() => {
 
         // Songlisbot requests
         if (username == "songlistbot") {
-          //if (botchan.request === true) {
-          let regsonglistreq=default_regsonglistreq;
-          // Per channel regex
-          if (botchan.requestregex)
-            regsonglistreq = botchan.requestregex;
-
-          // Use a regexp per channel
-          let slbparse = msg.search(regsonglistreq);
-          console.warn('regex_result=',slbparse);
-
-          if (slbparse) {
-            let req_user = slbparse[1].toLowerCase();
-            let req_song = slbparse[2];
-            let rul = UserLocations.findOne({ name: req_user });
-            console.info('song request:', req_user, req_song)
-            if (rul) {
-              let objupdate = {
+          try {
+              //if (botchan.request === true) {
+              let regsonglistreq=default_regsonglistreq;
+              // Per channel regex
+              if (botchan.requestregex)
+              regsonglistreq = RegExp(botchan.requestregex);
+              
+              // Use a regexp per channel
+              let slbparse = msg.search(regsonglistreq);
+              console.warn('regex_result=',slbparse);
+              
+              if (slbparse) {
+                let req_user = slbparse[1].toLowerCase();
+                let req_song = slbparse[2];
+                let rul = UserLocations.findOne({ name: req_user });
+                console.info('song request:', req_user, req_song)
+                if (rul) {
+                  let objupdate = {
+                  }
+                  //{lastreq: req_song}
+                  objupdate[chan + '-lastreq'] = req_song;
+                  UserLocations.update(rul._id, { $set: objupdate })
+                }
               }
-              //{lastreq: req_song}
-              objupdate[chan + '-lastreq'] = req_song;
-              UserLocations.update(rul._id, { $set: objupdate })
-            }
-          }
+          }catch(e) {console.error(e)}
           return;
         }
+
 
 
         //  Depending on the channel, guest account differs.
