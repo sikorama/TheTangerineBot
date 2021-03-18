@@ -5,7 +5,14 @@
  */
 
 import { Meteor } from 'meteor/meteor';
-import { UserLocations, BotChannels, GreetMessages, Settings, QuizzQuestions, QuizzScores, Stats } from '../imports/api/collections.js';
+import { UserLocations, 
+         BotChannels, 
+         GreetMessages, 
+         Settings, 
+         QuizzQuestions, 
+         QuizzScores, 
+         Stats,
+         GreetDate } from '../imports/api/collections.js';
 import { init_users } from './user_management.js';
 import { init_publications } from './publications.js';
 import { init_quizz } from './quizz.js';
@@ -59,9 +66,6 @@ let gcoptions = {
 };
 
 let geoCoder = gc(gcoptions);
-
-// Stores last greeting
-var greetDate = {};
 
 const regext = /@twitch/gi;
 
@@ -299,7 +303,7 @@ Meteor.startup(() => {
     'resetGreetTimer': function (uname) {
       if (hasRole(this.userId, ['admin', 'greet'])) {
         if (uname)
-          greetDate[uname] = {};
+          GreetDate.remove({name:uname});
       }
     }
   });
@@ -528,17 +532,13 @@ Meteor.startup(() => {
 
     // Last Greet (greetings)
     if (username != undefined) {
-      if (username in greetDate) {
-        greetDate[username][chan] = d;
-      }
-      else {
-        let o = {};
-        o[chan] = d;
-        greetDate[username] = o;
-      }
+      let o={}
+      o[chan] = d;
+//      console.error(o);
+      GreetDate.upsert({name:username}, {$set:o})
+//      console.error(GreetDate.findOne({name:username}));
     }
   }
-
 
   // Register our event handlers (defined below)
   bclient.on('message', Meteor.bindEnvironment(onMessageHandler));
@@ -1181,14 +1181,12 @@ Meteor.startup(() => {
       // In this case, do nothing
       // FIXME: use a database instead (userLoc or a dedicated one)
       let candidate = true;
-      if (username in greetDate) {
-        let g = greetDate[username];
+      let g = GreetDate.findOne({name:username});
         if (g)
-          if (chan in g)
+          if (g[chan])
             if (d - g[chan] < 1000 * 60 * 60 * 8) {
               candidate = false;
             }
-      }
 
 //      console.error(username, candidate,greetDate);
 

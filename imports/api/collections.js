@@ -9,6 +9,8 @@ export const GreetMessages = new Mongo.Collection('greetmessages');
 export const Settings = new Mongo.Collection('settings');
 export const QuizzQuestions = new Mongo.Collection('quizzquestions');
 export const QuizzScores = new Mongo.Collection('quizzscores');
+export const GreetDate = new Mongo.Collection('greetdate');
+// Deprecated?
 export const Stats = new Mongo.Collection('statistics');
 
 /// Index pour les localisations
