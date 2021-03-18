@@ -578,6 +578,9 @@ Meteor.startup(() => {
         isModerator = true;
     //    console.error(context, isModerator);
 
+    let dnow = new Date();
+    console.error(dnow.toLocaleDateString(), dnow.toLocaleTimeString(), '#' + chan, '< [' + username + ']', commandName);
+
     // Songlisbot requests
     if (username == "songlistbot" && botchan.map === true) {
       try {
@@ -588,10 +591,10 @@ Meteor.startup(() => {
           regsonglistreq = RegExp(botchan.requestregex);
 
         // Use a regexp per channel
-        let slbparse = msg.search(regsonglistreq);
+        let slbparse = commandName.match(regsonglistreq);
         console.warn('regex_result=', slbparse);
-
-        if (slbparse>=0) {
+        
+        if (slbparse) {
           let req_user = slbparse[1].toLowerCase();
           let req_song = slbparse[2];
           let rul = UserLocations.findOne({ name: req_user });
@@ -620,8 +623,6 @@ Meteor.startup(() => {
     }
 
     let lccn = commandName.toLowerCase();
-    let dnow = new Date();
-    console.error(dnow.toLocaleDateString(), dnow.toLocaleTimeString(), '#' + chan, '< [' + username + ']', commandName);
 
     let cmd = '';
     let cmdarray = [];
