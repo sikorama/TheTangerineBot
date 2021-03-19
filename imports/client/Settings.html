@@ -152,8 +152,11 @@
         </td>
 
         <td class="centered">
-          {{>CheckMark b=c.songrequest n="request"}}
-          <input type="text" value="{{c.requestregex}}" class="chanSettings" name="requestregex">
+          {{>CheckMark b=c.songrequest n="songrequest"}}
+          {{#if c.songrequest}}
+            <input type="text" value="{{c.requestregex1}}" class="chanSettings" name="requestregex1">
+            <input type="text" value="{{c.requestregex2}}" class="chanSettings" name="requestregex2">
+          {{/if}}
         </td>
 
         <td class="centered">

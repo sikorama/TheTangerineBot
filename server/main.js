@@ -551,7 +551,8 @@ Meteor.startup(() => {
   bclient.connect();
 
   // Default regex for parsing requests
-  const default_regsonglistreq = /(.*)\s\brequested\s(.*)\s\bat/
+  const default_regsonglistreq1 = /(.*) \brequested\s(.*)\s\bat position/
+  const default_regsonglistreq2 = /@(.*), (.*)added to queue/
 
   // Called every time a message comes in
   function onMessageHandler(target, context, msg, self) {
@@ -584,25 +585,29 @@ Meteor.startup(() => {
     // Songlisbot requests
     if (username == "songlistbot" && botchan.map === true) {
       try {
-        //if (botchan.request === true) {
-        let regsonglistreq = default_regsonglistreq;
-        // Per channel regex
-        if (botchan.requestregex)
-          regsonglistreq = RegExp(botchan.requestregex);
+        // Try default regexs, as songlistbot has different messages for request      
+        let slbparse = commandName.match(default_regsonglistreq1);
+        if (!slbparse)
+          slbparse = commandName.match(default_regsonglistreq2);
 
-        // Use a regexp per channel
-        let slbparse = commandName.match(regsonglistreq);
-        console.warn('regex_result=', slbparse);
-        
+        // Optional regexp (for non standards messages / additional languages)
+        if (!slbparse && botchan.requestregex1)
+          slbparse = commandName.match(RegExp(botchan.requestregex1));        
+        if (!slbparse && botchan.requestregex2)
+          slbparse = commandName.match(RegExp(botchan.requestregex2));        
+
         if (slbparse) {
           let req_user = slbparse[1].toLowerCase();
           let req_song = slbparse[2];
+
           let rul = UserLocations.findOne({ name: req_user });
+          // Removes @
+          if (req_user[0]==='@')
+            req_user=req_user.substring(1);
           console.info('song request:', req_user, req_song)
           if (rul) {
             let objupdate = {
             }
-            //{lastreq: req_song}
             objupdate[chan + '-lastreq'] = req_song;
             UserLocations.update(rul._id, { $set: objupdate })
           }
