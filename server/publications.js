@@ -20,10 +20,8 @@ export function init_publications() {
 Meteor.publish('botChannels', function (sel) {
   if (!sel) sel = {}
   let uid = this.userId;
-
   if (uid)
   {
-    //console.error('subscribe bots channels: ', uid, getUserGroups(uid));
     // If non admin, only publish enabled channels corresponding to groups associated to the user
     if (!hasRole(uid, ['admin'])) {
       sel.channel = {$in : getUserGroups(uid)};
@@ -34,11 +32,12 @@ Meteor.publish('botChannels', function (sel) {
   }
   else 
   {
-   // Limited access for guest users 
-   // FIXME!
+   // Limited access for non logged users 
    // Only required fields
-   return BotChannels.find(sel//, 
-    //{fields: {}}
+   return BotChannels.find(sel
+    // FIXME!
+    //, 
+    //{fields: {map:1,enabled:1}}
     );
   }
   this.ready();

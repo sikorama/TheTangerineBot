@@ -428,7 +428,11 @@ Meteor.startup(() => {
 
   // Channels settings
   Meteor.methods({
-    toggleSettings: function (chanid, field) {
+    removeChannel: function(chanid) {
+      console.warn('Removing channel',chanid);
+      BotChannels.remove(chanid);
+    },
+    toggleChanSettings: function (chanid, field) {
       let bc = BotChannels.findOne(chanid);
       if (bc === undefined)
         return;
@@ -436,6 +440,7 @@ Meteor.startup(() => {
       objset = {};
       objset[field] = !v;
       BotChannels.update(chanid, { $set: objset });
+
     },
     setChanSettings: function (chanid, field, value) {
       let bc = BotChannels.findOne(chanid);
@@ -592,7 +597,7 @@ Meteor.startup(() => {
 
         // Optional regexp (for non standards messages / additional languages)
         if (!slbparse && botchan.requestregex1)
-          slbparse = commandName.match(RegExp(botchan.requestregex1));        
+          slbparse = commandName.match(RegExp(botchan.requestregex1));
         if (!slbparse && botchan.requestregex2)
           slbparse = commandName.match(RegExp(botchan.requestregex2));        
 
@@ -1135,15 +1140,6 @@ Meteor.startup(() => {
         }
       }
     }
-
-    /*
-   3/14/2021 12:48:20 PM #crisortegalive < [crisortegalive] !so  @calvinthomasmusic
-  so [ '!so', '', '@calvinthomasmusic' ]
-  #crisortegalive > /me you must follow https://twitch.tv/ CurseLit
-  so @follow @twitch @icon
-  3/14/2021 12:48:55 PM #crisortegalive < [calvinthomasmusic] :D :D :D
-    */
-
 
     // ---------- catch !so command
     // Extract the 2nd parameter, removes @ symbols (sonitize?)

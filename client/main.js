@@ -167,7 +167,7 @@ Template.PageTop.helpers({
 })
 
 Template.About.onCreated(function () {
-  this.subscribe('EnabledChannels', { enabled: true });
+  this.subscribe('EnabledChannels');
 });
 
 Template.About.helpers({

@@ -8,18 +8,16 @@ import './Settings.html';
 
 // ----------- Channel Management
 Template.Settings.onCreated(function () {
-    this.subscribe("BotChannels");
     this.subscribe("allUsers");
     this.subscribe("statistics");
+    this.subscribe('botChannels');
+
 
     Session.set('curEditChan','');
 });
 
 Template.Settings.helpers({
-    isCurEditChan(chan) {
-        console.error(chan);
-        console.error(Session.get('curEditChan'));
-        
+    isCurEditChan(chan) {        
         return Session.equals('curEditChan',chan);
     },
     getChannels() {
@@ -46,11 +44,16 @@ Template.Settings.events({
             Meteor.call('addChannel', n);
         }
     },
+    'click button.delete': function(event) {
+        let id = getParentId(event.currentTarget);
+        console.error('delete', id);
+        Meteor.call('removeChannel', id);
+    },
     'click .toggleCheck': function (event) {
         let id = getParentId(event.currentTarget);
         let f = event.currentTarget.name;
-        Meteor.call("toggleSettings", id, f);
-        return false;
+        console.error("toggleChanSettings", id, f);
+        Meteor.call("toggleChanSettings", id, f);
     },
     'change .chanSettings': function (event) {
         let id = getParentId(event.currentTarget);
