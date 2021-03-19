@@ -1,6 +1,6 @@
 import { Mongo } from 'meteor/mongo';
 import { Index, MongoDBEngine } from 'meteor/easy:search'
-import {checkUserRole} from './roles.js';
+import { checkUserRole } from './roles.js';
 
 // Collection contenant la localisation déclarée des utilisateurs (ainsi que leur channels)
 export const UserLocations = new Mongo.Collection('userloc');
@@ -16,10 +16,10 @@ export const Stats = new Mongo.Collection('statistics');
 /// Index pour les localisations
 /*const*/ UserLocIndex = new Index({
     collection: UserLocations,
-    fields: ['name', 'msg', 'location','country','streamer'],
+    fields: ['name', 'msg', 'location', 'country', 'streamer'],
     permission: function (options) {
         return true;
-//        return (options.userId);
+        //        return (options.userId);
     },
     // Options de recherche par défaut
     defaultSearchOptions: {
@@ -46,10 +46,10 @@ export const Stats = new Mongo.Collection('statistics');
             // Soit par le dernier greet, quelque soit l'endroit ou on se soit inscrit
             // FIXME: check channel access
             if (options.search.props.hasOwnProperty('channel')) {
-                let chfilter = {$exists:true};
+                let chfilter = { $exists: true };
                 // Add Active filter
                 if (options.search.props.hasOwnProperty('activeSince')) {
-                    chfilter.$gt= options.search.props.activeSince;
+                    chfilter.$gt = options.search.props.activeSince;
                 }
                 selector[options.search.props.channel] = chfilter;
             }
@@ -59,9 +59,9 @@ export const Stats = new Mongo.Collection('statistics');
             //    selector.channels = options.search.props.regchannels;
             // }
 
-           if (options.search.props.hasOwnProperty('msg')) {
-               selector.msg = {
-                   $exists: true,$ne:''
+            if (options.search.props.hasOwnProperty('msg')) {
+                selector.msg = {
+                    $exists: true, $ne: ''
                 };
             }
             if (options.search.props.hasOwnProperty('streamer')) {
@@ -75,23 +75,41 @@ export const Stats = new Mongo.Collection('statistics');
             return (options.search.props.sortby);
         },
 
-        fields: function(searchObject, options) {
-            let fulldata = (options.search.props.map!==true)
+        fields: function (searchObject, options) {
+            let fulldata = (options.search.props.map !== true)
             let admin = checkUserRole('admin streamer', options.userId);
-            if (admin===false ) fulldata=false;
-            if (fulldata===true) {
-                // Toutes les données
-                return {name:0};
-               }
+            if (admin === false) fulldata = false;
+
+            if (fulldata === true) {
+                // All data except name
+                return { name: 0 };
+            }
             else {
-                // Données map, si admin on a tous les noms
+                // Data for map
+                // If public map, only shows allowed names
+                let fobj =
+                {
+                    allow: 1,
+                    msg: 1,
+                    latitude: 1,
+                    longitude: 1,
+                    steamer: 1
+                };
+                if (options.search.props.channel) {
+                    fobj[options.search.props.channel + '-lastreq'] = 1;
+                }
+
                 // Faire une projection pour n'avoir qu'un champ pour les noms, en fonction du flag 'allow'
                 // mapname = dname if() allow==true)
-                if (admin===true) {
-                    return {dname:1, allow:1, msg:1, latitude:1, longitude:1, steamer:1,lastreq:1};
+                if (admin === true) {
+                    fobj.dname = 1;
+                    return fobj;
                 }
-                else
-                    return {mapname:1, lastreq:1,/*dname:1,*/ allow:1,msg:1, latitude:1, longitude:1/*, streamer:1*/};
+                else {
+                    fobj.mapname = 1;
+                    return fobj;
+
+                }
             }
         }
     })
@@ -100,7 +118,7 @@ export const Stats = new Mongo.Collection('statistics');
 // Index pour les questions, uniquemnt pour les admins
 /*const*/ QuizzIndex = new Index({
     collection: QuizzQuestions,
-    fields: ['question', 'answers', 'comment','topics'],
+    fields: ['question', 'answers', 'comment', 'topics'],
     permission: function (options) {
         return checkUserRole('admin', options.userId);
     },
@@ -131,8 +149,8 @@ export const Stats = new Mongo.Collection('statistics');
             // On utilise le champ sortby tel quel
             return (options.search.props.sortby);
         },
-//        fields: function(searchObject, options) {
-//            return {dname:1, allow:1, msg:1, latitude:1, longitude:1};
-//        }
+        //        fields: function(searchObject, options) {
+        //            return {dname:1, allow:1, msg:1, latitude:1, longitude:1};
+        //        }
     })
 });

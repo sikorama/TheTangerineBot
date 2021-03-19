@@ -47,6 +47,7 @@ Template.WorldMap.onRendered(function () {
 
     //        return ul[chan+'-lastreq'];
     let songreqfield=chan+'-lastreq';
+    console.error(songreqfield);
 
     let ic;
     if (p)
@@ -132,6 +133,7 @@ Template.WorldMap.onRendered(function () {
                   icon = 2;
                 }
 
+              console.error(item);
               if (item[songreqfield]) {
                 if (txt.length > 0)
                  txt += '<br>'

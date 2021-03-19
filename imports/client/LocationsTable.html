@@ -115,7 +115,11 @@
                 {{/if}}
               </td>
               <td>
-                {{getlastreq ul}}
+                {{#if edit_mode}}
+                  <input class="edit" type="text" name="lastreq" value="{{getlastreq ul}}">
+                {{else}}
+                  {{getlastreq ul}}
+                {{/if}}
               </td>
               <td>
                 {{FormatDate ul.timestamp}}

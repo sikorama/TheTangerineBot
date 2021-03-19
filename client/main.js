@@ -283,6 +283,15 @@ Template.LatestLocations.events({
     let v = event.target.value;
     let id = getParentId(event.currentTarget);
     let setObj = {}
+
+    if (n==="lastreq") {
+      let chan = Session.get('sel_channel');
+      if (!chan)
+        return;
+      n = chan+'-lastreq';
+      //console.error(n);
+    }
+
     // Clear
     if (event.target.name == 'country') {
       // Verification du code
@@ -291,6 +300,7 @@ Template.LatestLocations.events({
         v = '';
       }
     }
+
 
     if (event.target.name == 'location') {
       UserLocations.update(id, { $unset: { latitude: "", longitude: "", cuntry: "" } })
@@ -307,10 +317,9 @@ Template.LatestLocations.events({
       v = event.target.checked;
     }
 
-
     //    console.error(event.target.id, n, v, typeof v);
     // Set value
-    setObj[event.target.name] = v;
+    setObj[n] = v;
     UserLocations.update(id, { $set: setObj })
   }
 });
