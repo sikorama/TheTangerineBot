@@ -41,8 +41,6 @@
         <th>Translation</th>
         <th>World Map</th>
         <th>Greet</th>
-        <th>catch !so command</th>
-        <th>shoutout command</th>
         <th>Song Requests</th>
         <th>Quizz</th>
       </tr>
@@ -53,14 +51,14 @@
         <td>
           <div>
             {{>CheckMark b=c.enabled n="enabled" c=c}}
-            <div class="{{#if isCurEditChan c._id}} strong {{/if}}">
+            <span class="{{#if isCurEditChan c._id}} strong {{/if}}">
               {{c.channel}}
-            </div>
-
-            {{#if isCurEditChan c._id}}
-            <button class="delete">remove</button>
-            {{/if}}
+            </span>
           </div>
+
+          {{#if isCurEditChan c._id}}
+          <button class="delete">remove</button>
+          {{/if}}
         </td>
         <td class="centered">
           {{>CheckMark b=c.tr n="tr"}}
@@ -72,15 +70,6 @@
           {{#if c.map}}
           <table>
             <tbody>
-              <tr>
-                <td>
-                  Guest Account:
-                </td>
-                <td>
-                  <input type="text" value="{{c.guestAccount}}" class="chanSettings" name="guestAccount">
-                </td>
-              </tr>
-
               <tr>
                 <td>
                   Standard icon:
@@ -122,40 +111,57 @@
         </td>
 
         <td class="centered">
+          {{>CheckMark b=c.greet n="greet"}}
           <table>
             <tbody>
-              <tr>
-                {{>CheckMark b=c.greet n="greet"}}
-              </tr>
               {{#if isCurEditChan c._id}}
-                {{#if c.greet}}
-                  <tr>
-                    <td>/me prefix</td>
-                    <td>{{>CheckMark b=c.me n="me"}}</td>
-                  </tr>
-                  <tr>
-                    <td>Mute</td>
-                    <td>{{>CheckMark b=c.muteGreet n="muteGreet"}}</td>
-                  </tr>
-                {{/if}}
+              {{#if c.greet}}
+              <tr>
+                <td>/me prefix</td>
+                <td>{{>CheckMark b=c.me n="me"}}</td>
+              </tr>
+              <tr>
+                <td>Mute</td>
+                <td>{{>CheckMark b=c.muteGreet n="muteGreet"}}</td>
+              </tr>
+              <tr>
+                <td>
+                  Catch !so Cmd:
+                </td>
+                <td>
+                  {{>CheckMark b=c.so n="so"}}
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  Shoutout Cmd:
+                </td>
+                <td>
+                  <input type="text" value="{{c.socmd}}" class="chanSettings" name="socmd">
+                </td>
+              </tr>
+              {{/if}}
               {{/if}}
             </tbody>
           </table>
         </td>
 
         <td class="centered">
-          {{>CheckMark b=c.so n="so"}}
-        </td>
-
-        <td class="centered chanSettings">
-          <input type="text" value="{{c.socmd}}" class="chanSettings" name="socmd">
-        </td>
-
-        <td class="centered">
           {{>CheckMark b=c.songrequest n="songrequest"}}
+
           {{#if c.songrequest}}
-            <input type="text" value="{{c.requestregex1}}" class="chanSettings" name="requestregex1">
-            <input type="text" value="{{c.requestregex2}}" class="chanSettings" name="requestregex2">
+          <table>
+            <tbody>
+              <tr>
+                <td> RegExp 1 </td>
+                <td> <input type="text" value="{{c.requestregex1}}" class="chanSettings" name="requestregex1"> </td>
+              </tr>
+              <tr>
+                <td> RegExp 2 </td>
+                <td> <input type="text" value="{{c.requestregex2}}" class="chanSettings" name="requestregex2"> </td>
+              </tr>
+            </tbody>
+          </table>
           {{/if}}
         </td>
 
