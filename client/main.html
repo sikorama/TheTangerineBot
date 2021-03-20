@@ -15,21 +15,19 @@
     <div style="float:right;"> 
       <a href="/disconnect">{{curSelChan}} &times;</a>
     </div>
-    <div class="main-title">The Tangerine bot </div>
-     
+    <div class="main-title">The Tangerine bot </div>     
   </div>
 
   <nav class="pure-menu pure-menu-horizontal main-menu">
     <ul class="pure-menu-list main-menu-list">
       {{#if rh_featureEnabled "map"}}
 
-
       <li class="pure-menu-item {{active "map"}}">
         <a href="/map" class="pure-menu-link ">Map</a>
       </li>
 
       <li class="pure-menu-item {{active "countries"}}">
-        <a href="/countries" class="pure-menu-link ">World</a>
+        <a href="/countries" class="pure-menu-link ">Stats</a>
       </li>
       {{/if}}
 

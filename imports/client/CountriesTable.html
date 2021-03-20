@@ -1,87 +1,86 @@
 <template name="Countries">
 
-    <h2>Number of people per country</h2>
+  <button class="selStat pure-button {{#if showStat 1}}pure-button-primary{{/if}}" name="1">Countries</button>
+  <button class="selStat pure-button {{#if showStat 2}}pure-button-primary{{/if}}" name="2">Songs</button>
 
-      {{#with countries=getCountryCount}}
+  {{#if showStat 1}}
+  <h2>Number of people per country</h2>
 
-      <p><strong>{{numPeopleLoc}}</strong>  people registered from <strong>{{countries.length}}</strong> Countries</p>
-      <table class="pure-table">
-        <thead>
-          <tr>
-            <th>Country</th>
-            <th>Percent</th>
-            <th>Count</th>
-          </tr>
-        </thead>
-        <tbody>
-          {{#each c in countries}}
-            {{#if c._id}}
-              <tr>
-                <td>
-                  {{FormatCountryName c._id}}
-                </td>
-                <td>
-                  {{c.p}} %
-                </td>
-                <td>
-                  {{c.t}}
-                </td>
-              </tr>
-            {{/if}}
-          {{/each}}
+  {{#with countries=getCountryCount}}
 
-        </tbody>
-      </table>
+  <p><strong>{{numPeopleLoc}}</strong> people registered from <strong>{{countries.length}}</strong> Countries</p>
+  <table class="pure-table">
+    <thead>
+      <tr>
+        <th>Country</th>
+        <th>Percent</th>
+        <th>Count</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each c in countries}}
+      {{#if c._id}}
+      <tr>
+        <td>
+          {{FormatCountryName c._id}}
+        </td>
+        <td>
+          {{c.p}} %
+        </td>
+        <td>
+          {{c.t}}
+        </td>
+      </tr>
+      {{/if}}
+      {{/each}}
 
-      {{/with}}
+    </tbody>
+  </table>
 
-      <h2>Chart</h2>
-      <div>
-        <canvas id="countryChart" height="100px"></canvas>
-      </div>
-
-
-
-
-      <h2>Currently requested Songs</h2>
-
-      {{#with songs=getSongCount}}
+  {{/with}}
 
 <!--
 
+  <h2>Chart</h2>
+  <div>
+    <canvas id="countryChart" height="100px"></canvas>
+  </div>
+-->
+  {{/if}}
+
+
+  {{#if showStat 2}}
+
+  <h2>Currently requested Songs</h2>
+  {{#with songs=getSongCount}}
+  <!--
   <p><strong>{{numPeopleLoc}}</strong>  people registered from <strong>{{countries.length}}</strong> Countries</p>
---> 
-      <table class="pure-table">
-        <thead>
-          <tr>
-            <th>Song</th>
-            <th>Percent</th>
-            <th>Count</th>
-          </tr>
-        </thead>
-        <tbody>
-          {{#each c in songs}}
-            {{#if c._id}}
-              <tr>
-                <td>
-                  {{c._id}}
-                </td>
-                <td>
-                  {{c.p}} %
-                </td>
-                <td>
-                  {{c.t}}
-                </td>
-              </tr>
-            {{/if}}
-          {{/each}}
+-->
+  <table class="pure-table">
+    <thead>
+      <tr>
+        <th>Song</th>
+        <th>Count</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each c in songs}}
+      {{#if c._id}}
+      <tr>
+        <td>
+          {{c._id}}
+        </td>
+        <td>
+          {{c.t}}
+        </td>
+      </tr>
+      {{/if}}
+      {{/each}}
 
-        </tbody>
-      </table>
+    </tbody>
+  </table>
 
-      {{/with}}
+  {{/with}}
+  {{/if}}
 
-
-
-
-  </template>
+</template>

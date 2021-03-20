@@ -147,23 +147,23 @@ Template.registerHelper(
   }
 )
 
-Template.PageTop.onRendered(function() {
-  this.subscribe('botChannels',{ enabled: true });
+Template.PageTop.onRendered(function () {
+  this.subscribe('botChannels', { enabled: true });
 });
 
-Template.registerHelper( 'rh_featureEnabled' , function(feature) {
-    let sc = Session.get('sel_channel');
-    if (!sc) return false;
-    let bc = BotChannels.findOne({channel: sc});
-    if (!bc) return false;
-    return (bc[feature]===true);
+Template.registerHelper('rh_featureEnabled', function (feature) {
+  let sc = Session.get('sel_channel');
+  if (!sc) return false;
+  let bc = BotChannels.findOne({ channel: sc });
+  if (!bc) return false;
+  return (bc[feature] === true);
 });
 
 Template.PageTop.helpers({
   active(s) {
     return ((FlowRouter.getRouteName() === s) ? 'pure-menu-active active' : '');
   },
-  curSelChan() {return Session.get('sel_channel');}
+  curSelChan() { return Session.get('sel_channel'); }
 })
 
 Template.About.onCreated(function () {
@@ -194,7 +194,7 @@ Template.LatestLocations.helpers({
   getlastreq(ul) {
     let chan = Session.get('sel_channel');
     if (chan) {
-      return ul[chan+'-lastreq'];
+      return ul[chan + '-lastreq'];
     }
   },
   getUserLocs() {
@@ -284,11 +284,11 @@ Template.LatestLocations.events({
     let id = getParentId(event.currentTarget);
     let setObj = {}
 
-    if (n==="lastreq") {
+    if (n === "lastreq") {
       let chan = Session.get('sel_channel');
       if (!chan)
         return;
-      n = chan+'-lastreq';
+      n = chan + '-lastreq';
       //console.error(n);
     }
 
@@ -436,36 +436,15 @@ function genColors(c1, a, n) {
   return colors;
 }
 
-Template.Countries.onRendered(function () {
+Template.Countries.events({
+  'click button.selStat': function (ev) {
+    Session.set('statPage', parseInt(ev.currentTarget.name))
+  }
+});
 
-  var ctx = document.getElementById('countryChart').getContext('2d');
-  var myChart = new Chart(ctx, {
-    type: 'doughnut',
-    data: {
-      labels: [],
-      datasets: [{
-        label: 'Countries',
-        data: [],
-        borderWidth: 1,
-      }]
-    },
-    options: {
-      circumference: Math.PI,
-      rotation: Math.PI,
-      title: {
-        display: false,
-        text: 'Countries'
-      },
-      legend: {
-        position: 'right',
-        display: true,
-        labels: {
-          boxWidth: 15,
-          fontSize: 12
-        }
-      }
-    }
-  });
+Template.Countries.onRendered(function () {
+  Session.set('statPage', 1);
+  var ctx = null;
 
   this.autorun(() => {
     let sch = Session.get('sel_channel');
@@ -474,35 +453,63 @@ Template.Countries.onRendered(function () {
       Session.set("numPeopleLoc", res);
     });
 
-    Meteor.call('aggregateUserField', sch,sch+'-lastreq',  function (err, res) {
-      res.sort((a, b) => b.t - a.t);
-      console.error(res);      
-    Session.set('CountPerSong', res);
-    });
-
-
-//    Meteor.call('aggregateCountries', sch, function (err, res) {
-    Meteor.call('aggregateUserField', sch,"country",  function (err, res) {
+    if (Session.equals('statPage', 1)) {
+      Meteor.call('aggregateUserField', sch, sch + '-lastreq', function (err, res) {
         res.sort((a, b) => b.t - a.t);
-      Session.set('CountPerCountry', res);
-
-      //   this.autorun(() => {
-      // Classement par ordre d'alerte
-      myChart.data.datasets[0].backgroundColor = genColors(255, 0.5, res.length);
-      myChart.data.datasets[0].borderColor = genColors(255, 1.0, res.length).reverse();
-
-      myChart.data.labels = res.map(item => { return getCountryName(item._id); });
-
-      myChart.data.datasets[0].data = res.map(item => {
-        return item.t;
+        console.error(res);
+        Session.set('CountPerSong', res);
       });
-      myChart.update();
+    }
 
-    });
+    if (Session.equals('statPage', 2)) {
+      Meteor.call('aggregateUserField', sch, "country", function (err, res) {
+        res.sort((a, b) => b.t - a.t);
+        Session.set('CountPerCountry', res);
 
-
-  })
-
+        /*
+        var ctx = document.getElementById('countryChart').getContext('2d');
+        var myChart = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: [],
+            datasets: [{
+              label: 'Countries',
+              data: [],
+              borderWidth: 1,
+            }]
+          },
+          options: {
+            circumference: Math.PI,
+            rotation: Math.PI,
+            title: {
+              display: false,
+              text: 'Countries'
+            },
+            legend: {
+              position: 'right',
+              display: true,
+              labels: {
+                boxWidth: 15,
+                fontSize: 12
+              }
+            }
+          }
+        });
+      
+        // Classement par ordre d'alerte
+              myChart.data.datasets[0].backgroundColor = genColors(255, 0.5, res.length);
+              myChart.data.datasets[0].borderColor = genColors(255, 1.0, res.length).reverse();
+        
+              myChart.data.labels = res.map(item => { return getCountryName(item._id); });
+        
+              myChart.data.datasets[0].data = res.map(item => {
+                return item.t;
+              });
+              myChart.update();
+              */
+      });
+    }
+  });
 });
 
 Template.Countries.helpers({
@@ -512,9 +519,12 @@ Template.Countries.helpers({
   getSongCount() {
     return Session.get('CountPerSong');
   },
+  showStat(p) {
+    return Session.equals('statPage', parseInt(p));
 
-  
+  }
 });
+
 
 Template.About.events({
   "click .pure-link": function (event) {
@@ -633,14 +643,14 @@ Template.SelectChannel.events({
 Template.DirectMap.onCreated(function () {
   let chan = FlowRouter.getParam('chan');
   // Check if chan exists, and has map enabled
-  this.subscribe('botChannels', { channel: chan}, function () {
-    let bc = BotChannels.findOne({channel: chan, map: {$exists:1}});
+  this.subscribe('botChannels', { channel: chan }, function () {
+    let bc = BotChannels.findOne({ channel: chan, map: { $exists: 1 } });
     console.error(bc);
-    if (!bc) 
-      FlowRouter.go('/');    
+    if (!bc)
+      FlowRouter.go('/');
   });
-  
+
   Session.set('sel_channel', chan);
-//  console.error(chan);
+  //  console.error(chan);
 });
 
