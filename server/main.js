@@ -69,7 +69,7 @@ let gcoptions = {
 
 let geoCoder = gc(gcoptions);
 
-const regext = /@twitch/gi;
+const regext = /@twitch /gi;
 
 AccountsTemplates.configure({
   // Pour interdire la creation d'un compte par l'interface
@@ -395,27 +395,6 @@ Meteor.startup(() => {
 
   setTimeout(Meteor.bindEnvironment(checkLocations), 60 * 1000);
 
-  /*
-    function checkProximity() {
-      let i = 5;
-      let dateRef = new Date() - 1000 * 3600 * 24;
-      item = UserLocations.findOne({ proximity: { $exists: 0 } });
-      if (item === undefined)
-        item = UserLocations.findOne({ timestamp: { $lt: dateRef } });
-      if (item != undefined) {
-        console.error('proximity update', dateRef, item);
-        findClosest(item._id, 5);
-      }
-      else
-        i = 600;
-      //console.error('next',i);
-      setTimeout(Meteor.bindEnvironment(checkProximity), 1000 * i);
-    }
-  
-    // Every minute, recomputes user's proximity.
-    setTimeout(Meteor.bindEnvironment(checkProximity), 1000 * 10);
-  */
-
   Meteor.methods({
     // get/set parameters
     parameter: function (param, val) {
@@ -426,21 +405,24 @@ Meteor.startup(() => {
     }
   })
 
-  // Channels settings
+  // Channels management
   Meteor.methods({
     removeChannel: function(chanid) {
-      console.warn('Removing channel',chanid);
-      BotChannels.remove(chanid);
+      if (this.userId) {
+        console.warn('Removing channel',chanid);
+        BotChannels.remove(chanid);
+      }
     },
     toggleChanSettings: function (chanid, field) {
-      let bc = BotChannels.findOne(chanid);
-      if (bc === undefined)
-        return;
-      let v = bc[field];
-      objset = {};
-      objset[field] = !v;
-      BotChannels.update(chanid, { $set: objset });
-
+      if (this.userId) {
+        let bc = BotChannels.findOne(chanid);
+        if (bc === undefined)
+          return;
+        let v = bc[field];
+        objset = {};
+        objset[field] = !v;
+        BotChannels.update(chanid, { $set: objset });
+      }
     },
     setChanSettings: function (chanid, field, value) {
       let bc = BotChannels.findOne(chanid);
@@ -451,9 +433,48 @@ Meteor.startup(() => {
       BotChannels.update(chanid, { $set: objset });
     },
 
-    // Aggregation pour compter le nombre de personnes par pays
-    // Pourrait etre mis en cache
-    // ou calculé par un observe
+    // Aggregation for counting # of people per country
+    aggregateUserField: function (chan,field) {
+      if (!chan) return;
+      // Check user is owner or admin
+      // Chec 
+      let sobj = {};
+      sobj[chan] = { $exists: true }
+      let idfield="$"+field;
+      let nums = UserLocations.find(sobj).count();
+
+      let pipeline = [];
+      pipeline.push({
+        $match: sobj
+      });
+      pipeline.push({
+        $group: {
+          _id: idfield,
+          t: {
+            $sum: 1
+          }
+        }
+      });
+      pipeline.push({
+        $project: {
+          "t": 1,
+          "p":
+          {
+            $round: [
+
+              { "$multiply": [{ "$divide": ["$t", { "$literal": nums }] }, 100] }
+              , 2
+            ]
+          }
+        }
+      });
+
+      let res = UserLocations.aggregate(pipeline);
+//      console.error(res);
+      return res;
+    },
+
+    // Aggregation for counting # of people per country
     aggregateCountries: function (chan) {
       if (!chan) return;
       // Check user is owner or admin
@@ -489,9 +510,14 @@ Meteor.startup(() => {
       });
 
       let res = UserLocations.aggregate(pipeline);
-      console.error(res);
+//      console.error(res);
       return res;
     }
+
+
+
+
+
   });
 
   UserLocations.allow({
@@ -502,7 +528,6 @@ Meteor.startup(() => {
       if (hasRole(userid, 'admin')) return true;
     }
   });
-
 
   bot_channels = BotChannels.find({ enabled: true }).fetch().map(i => i.channel);
   console.info('Connecting to channels:', bot_channels);
@@ -609,11 +634,13 @@ Meteor.startup(() => {
           // Removes @
           if (req_user[0]==='@')
             req_user=req_user.substring(1);
-          console.info('song request:', req_user, req_song)
+          console.info('-- SONG REQUEST:', req_user, req_song)
           if (rul) {
             let objupdate = {
             }
             objupdate[chan + '-lastreq'] = req_song;
+            console.info(' update:', objupdate);
+
             UserLocations.update(rul._id, { $set: objupdate })
           }
         }
@@ -1168,7 +1195,7 @@ Meteor.startup(() => {
 
           if (gmline.length > 0) {
             gmline = replaceKeywords(gmline, soname);
-            gmline = gmline.replace(regext, "https://twitch.tv/" + soname);
+            gmline = gmline.replace(regext, "https://twitch.tv/" + soname+' ');
 
             if (botchan.me === true) {
               gmline = '/me ' + gmline;
@@ -1290,7 +1317,7 @@ Meteor.startup(() => {
             }
           }
           else
-            txt = txt.replace(regext, "https://twitch.tv/" + username);
+            txt = txt.replace(regext, "https://twitch.tv/" + username+' ');
 
           if (botchan.me === true && selGenSentence === false) {
             txt = '/me ' + txt;

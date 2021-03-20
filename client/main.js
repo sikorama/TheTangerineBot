@@ -474,8 +474,16 @@ Template.Countries.onRendered(function () {
       Session.set("numPeopleLoc", res);
     });
 
-    Meteor.call('aggregateCountries', sch, function (err, res) {
+    Meteor.call('aggregateUserField', sch,sch+'-lastreq',  function (err, res) {
       res.sort((a, b) => b.t - a.t);
+      console.error(res);      
+    Session.set('CountPerSong', res);
+    });
+
+
+//    Meteor.call('aggregateCountries', sch, function (err, res) {
+    Meteor.call('aggregateUserField', sch,"country",  function (err, res) {
+        res.sort((a, b) => b.t - a.t);
       Session.set('CountPerCountry', res);
 
       //   this.autorun(() => {
@@ -500,7 +508,12 @@ Template.Countries.onRendered(function () {
 Template.Countries.helpers({
   getCountryCount() {
     return Session.get('CountPerCountry');
-  }
+  },
+  getSongCount() {
+    return Session.get('CountPerSong');
+  },
+
+  
 });
 
 Template.About.events({

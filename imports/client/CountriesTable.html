@@ -1,7 +1,5 @@
 <template name="Countries">
 
-  {{>SelectChannel}}
-
     <h2>Number of people per country</h2>
 
       {{#with countries=getCountryCount}}
@@ -41,5 +39,49 @@
       <div>
         <canvas id="countryChart" height="100px"></canvas>
       </div>
+
+
+
+
+      <h2>Currently requested Songs</h2>
+
+      {{#with songs=getSongCount}}
+
+<!--
+
+  <p><strong>{{numPeopleLoc}}</strong>  people registered from <strong>{{countries.length}}</strong> Countries</p>
+--> 
+      <table class="pure-table">
+        <thead>
+          <tr>
+            <th>Song</th>
+            <th>Percent</th>
+            <th>Count</th>
+          </tr>
+        </thead>
+        <tbody>
+          {{#each c in songs}}
+            {{#if c._id}}
+              <tr>
+                <td>
+                  {{c._id}}
+                </td>
+                <td>
+                  {{c.p}} %
+                </td>
+                <td>
+                  {{c.t}}
+                </td>
+              </tr>
+            {{/if}}
+          {{/each}}
+
+        </tbody>
+      </table>
+
+      {{/with}}
+
+
+
 
   </template>
