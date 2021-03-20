@@ -38,8 +38,10 @@ const country_names = {
   'AT': 'Austria',
   'AU': 'Australia',
   'AZ': 'Azerbaijan',
+  'BA': 'Bsnia',
   'BE': 'Belgium',
   'BO': 'Bolivia',
+  'BG': 'Burin Faso',
   'BG': 'Bulgaria',
   'BR': 'Brazil',
   'BY': 'Belarus',
@@ -63,6 +65,7 @@ const country_names = {
   'GE': 'Georgia',
   'GR': 'Greece',
   'HU': 'Hungary',
+  'HR': 'Croatia',
   'IE': 'Ireland',
   'IL': 'Israel',
   'IN': 'India',
@@ -76,6 +79,7 @@ const country_names = {
   'LT': 'Lithuania',
   'NE': 'Niger',
   'NL': 'Netherlands',
+  'NO': 'Norway',
   'NZ': 'New Zealand',
   'PA': 'Panama',
   'PE': 'Peru',
@@ -84,8 +88,10 @@ const country_names = {
   'PT': 'Portugal',
   'PY': 'Paraguay',
   'MX': 'Mexico',
+  'MY': 'Malaysia',
   'RO': 'Romania',
   'RU': 'Russia',
+  'RS': 'Serbia',
   'SE': 'Sweden',
   'SI': 'Slovenia',
   'SK': 'Slovakia',
@@ -456,7 +462,7 @@ Template.Countries.onRendered(function () {
     if (Session.equals('statPage', 1)) {
       Meteor.call('aggregateUserField', sch, sch + '-lastreq', function (err, res) {
         res.sort((a, b) => b.t - a.t);
-        console.error(res);
+        //console.error(res);
         Session.set('CountPerSong', res);
       });
     }

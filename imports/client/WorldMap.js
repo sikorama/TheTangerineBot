@@ -133,7 +133,7 @@ Template.WorldMap.onRendered(function () {
                   icon = 2;
                 }
 
-              console.error(item);
+              //console.error(item);
               if (item[songreqfield]) {
                 if (txt.length > 0)
                  txt += '<br>'
