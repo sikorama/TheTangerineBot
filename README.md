@@ -1,7 +1,7 @@
-# theTangerineBot
+# TheTangerineBot
 Twitch Chat Bot initially created for The Tangerine Club
 
-This bot brings some nice features:
+This bot brings a few  nice features:
 - Approximative translation
 - Tangerine World Map
 - Automatic Greetings/Shoutout
@@ -34,7 +34,7 @@ in production environment, you have to setup a MongoDB instance. The easiest way
 
 ## Translation
 
-This is a feature similar to https://github.com/sikorama/translator-bot . It uses google translate througe googletrans npm package. It doesn't require a key, but it has some limitations. It can easily be adapted to use another API. 
+This is a feature similar to https://github.com/sikorama/translator-bot . It uses google translate, via `googletrans` npm package. It doesn't require a key, but it has some limitations. It can easily be adapted to use another API. 
 
 ### Commands
 
