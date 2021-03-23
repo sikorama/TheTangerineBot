@@ -12,23 +12,55 @@ This bot brings some nice features:
 
 # Installation
 
+## Requirements
+In order to use this script you must
+* Create a Twitch channel for your bot. The name of th ebot will be the name of the channel and cannot be changed
+* Generate a key for authenticating your bot, using the Twitch Chat OAuth Password Generator: https://twitchapps.com/tmi/
 
+# Setup
 
-TheTangerineBot is powered by MeteorJs ( https://www.meteor.com )
-So basically, to run the bot in a dev environment, you only need to install Meteor, and launch the bot with `meteor` command.
+TheTangerineBot is powered by MeteorJs ( https://www.meteor.com ). So basically, to run the bot in a dev environment, you only need to install Meteor, and launch the bot with `meteor` command.
 
 
 ```
-meteor
+CHANNEL_NAME=xxx CHANNEL_PASSWORD=xxx meteor
 ```
 
 in production environment, you have to setup a MongoDB instance. The easiest way to achieve this is to use Docker
 
 
 
-
-
 # Features
+
+## Translation
+
+This is a feature similar to https://github.com/sikorama/translator-bot . It uses google translate througe googletrans npm package. It doesn't require a key, but it has some limitations. It can easily be adapted to use another API. 
+
+### Commands
+
+This feature, once enabled, will add these chat commands:
+
+- `!lang` : displays basic information about the feature.
+
+Language related commands:
+
+- `!cn` : Translate to Simplified Chinese    
+- `!en` : Translate to English
+- `!fi` : Translate to Finnish    
+- `!fr` : Translate to French
+- `!de` or `!ge` : Translate to German    
+- `!it` : Translate to Italian
+- `!jp` : Translate to Japanese
+- `!ko` : Translate to Korean
+- `!pl` : Translate to Polish
+- `!pt` or `!br` : Translate to Portuguese
+- `!ro` : Translate to Romanian   
+- `!tu` : Translate to Turkish
+- `!ru` : Translate to Russian
+
+For example: `!pt Hello friends!`
+
+Emoticons should be avoided as it can disturb the language recognition. Also mixing language should be avoided.
 
 ## World Map
 
