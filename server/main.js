@@ -48,7 +48,24 @@ botpassword = 'oauth:' + botpassword;
 
 
 // Cleanup DB
-UserLocations.update({}, { $unset: { proximity: 1 } });
+//UserLocations.update({}, { $unset: { proximity: 1 } });
+// Migrate map messages
+let channames= BotChannels.find().fetch().map((item)=>item.channel);
+console.error('migration:', channames);
+// For each userlLoc with a msg field
+UserLocations.find({ msg: {$exists:1}}).fetch().forEach(function(u) {
+  // Check channels
+  let upobj={};
+  channames.forEach(function(cn) {
+    mf = cn+'-msg';
+    if (u[cn]!=undefined)
+      upobj[mf] = u.msg;
+  });
+  console.error(u, upobj);
+  UserLocations.update(u._id, {$set: opobj});
+//  UserLocations.update(u._id, {$set: opobj, $unset: {msg:1}});
+});
+
 
 // Array to keep track of last active users (per channel)
 let last_active_users = {};
@@ -899,7 +916,9 @@ Meteor.startup(() => {
               say(target, "use '!msg +message' for adding a personalized message on the map");
             }
             else {
-              UserLocations.update(pdoc._id, { $set: { msg: msg, allow: true } });
+              msgobj = {};
+              msgobj[chan+'-msg'] = msg;
+              UserLocations.update(pdoc._id, { $set: { msg: msgobj} });
               say(target, "Ok! " + answername);
             }
             return;

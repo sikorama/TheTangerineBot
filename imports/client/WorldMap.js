@@ -47,6 +47,7 @@ Template.WorldMap.onRendered(function () {
 
     //        return ul[chan+'-lastreq'];
     let songreqfield=chan+'-lastreq';
+    let msgfield=chan+'-msg';
     console.error(songreqfield);
 
     let ic;
@@ -125,15 +126,15 @@ Template.WorldMap.onRendered(function () {
               }
               txt = uname;
 
-              if (item.msg != undefined)
-                if (item.msg.length > 0) {
+              // Message?
+              if ((item[msgfield] != undefined) && (item.msgfield.length > 0)) {
                   if (txt.length > 0)
                     txt += '<br>'
                   txt += item.msg;
                   icon = 2;
                 }
 
-              //console.error(item);
+              // Song request?
               if (item[songreqfield]) {
                 if (txt.length > 0)
                  txt += '<br>'
@@ -144,7 +145,6 @@ Template.WorldMap.onRendered(function () {
               let r0 = (Math.random() - 0.5) * 0.02;
               let r1 = (Math.random() - 0.5) * 0.02;
 
-              // On peut creer des tooltips qui restent affichés en permanence, mais ca risque d'etre confus
               let opt = {};
               if ((icons[icon] != null) && (uname.toLowerCase() != chan)) {
                 opt.icon = icons[icon];
