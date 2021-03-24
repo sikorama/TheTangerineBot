@@ -1,6 +1,7 @@
 import { Template } from 'meteor/templating';
 import { Session } from 'meteor/session';
 import { UserLocations, BotChannels, GreetMessages, Settings } from '../imports/api/collections.js';
+import { getCountryName } from '../imports/api/countrycodes.js';
 import { checkUserRole } from '../imports/api/roles.js';
 import { getParentId, manageSearchEvents } from '../imports/client/tools.js';
 import '../imports/routes.js';
@@ -10,11 +11,12 @@ import '../imports/client/QuizzTable.js';
 import './main.html';
 import '../imports/client/CommandsTable.html';
 import '../imports/client/CountriesTable.html';
-import '../imports/client/GreetingsTable.html';
-import '../imports/client/LocationsTable.html';
+import '../imports/client/GreetingsTable.js';
+import '../imports/client/LocationsTable.js';
 import '../imports/client/about.html';
 import '../imports/client/WorldMap.js';
 import '../imports/client/WorldMap.html';
+
 
 import { Accounts } from 'meteor/accounts-base';
 
@@ -29,81 +31,6 @@ var Chart = require('chart.js');
 Session.setDefault('searchUsers', {});
 Session.setDefault('searchQuizz', {});
 
-const country_names = {
-  'AD': 'Andorra',
-  'AE': 'United Arab Emirates',
-  'AM': 'Armenia',
-  'AR': 'Argentina',
-  'AO': 'Angola',
-  'AT': 'Austria',
-  'AU': 'Australia',
-  'AZ': 'Azerbaijan',
-  'BA': 'Bsnia',
-  'BE': 'Belgium',
-  'BO': 'Bolivia',
-  'BG': 'Burin Faso',
-  'BG': 'Bulgaria',
-  'BR': 'Brazil',
-  'BY': 'Belarus',
-  'CA': 'Canada',
-  'CH': 'Switzerland',
-  'CL': 'Chile',
-  'CN': 'China',
-  'CO': 'Colombia',
-  'CR': 'Costa Rica',
-  'CZ': 'Czech Republic',
-  'DE': 'Germany',
-  'DK': 'Denmark',
-  'DZ': 'Algeria',
-  'EC': 'Ecuador',
-  'EE': 'Estonia',
-  'ES': 'Spain',
-  'FI': 'Finland',
-  'FO': 'Faroe Islands',
-  'FR': 'France',
-  'GB': 'Great Britain',
-  'GE': 'Georgia',
-  'GR': 'Greece',
-  'HU': 'Hungary',
-  'HR': 'Croatia',
-  'IE': 'Ireland',
-  'IL': 'Israel',
-  'IN': 'India',
-  'IR': 'Iran',
-  'IS': 'Iceland',
-  'IT': 'Italy',
-  'JM': 'Jamaica',
-  'JP': 'Japan',
-  'KP': 'North Korea',
-  'LU': 'Luxembourg',
-  'LT': 'Lithuania',
-  'NE': 'Niger',
-  'NL': 'Netherlands',
-  'NO': 'Norway',
-  'NZ': 'New Zealand',
-  'PA': 'Panama',
-  'PE': 'Peru',
-  'PH': 'Philippines',
-  'PL': 'Poland',
-  'PT': 'Portugal',
-  'PY': 'Paraguay',
-  'MX': 'Mexico',
-  'MY': 'Malaysia',
-  'RO': 'Romania',
-  'RU': 'Russia',
-  'RS': 'Serbia',
-  'SE': 'Sweden',
-  'SI': 'Slovenia',
-  'SK': 'Slovakia',
-  'SS': 'Wakanda', //South Soudan
-  'TR': 'Turkey',
-  'TW': 'Taiwan',
-  'UA': 'Ukraine',
-  'US': 'United States',
-  'UY': 'Uruguay',
-  'VE': 'Venezuela',
-  'ZA': 'South Africa'
-}
 
 Template.registerHelper('isUserRole', function (roles) {
   return checkUserRole(roles);
@@ -121,11 +48,6 @@ Template.registerHelper('stringify', function (el) {
   return JSON.stringify(el);
 });
 
-function getCountryName(cn) {
-  if (cn in country_names)
-    return country_names[cn];
-  return cn;
-}
 
 Template.registerHelper(
   "FormatCountryName", getCountryName);
@@ -268,166 +190,6 @@ const manageSortEvent = function (event, field) {
     Session.set(field_dir, 1);
   }
 };
-
-
-Template.LatestLocations.events({
-  'click .delete': function (event) {
-    //let n = event.target.name;
-    //let v = event.target.value;
-    let id = getParentId(event.currentTarget);
-    let res = confirm('Are you sure?');
-    if (res) {
-      UserLocations.remove(id);
-    }
-  },
-  'click th.sort': function (event) {
-    manageSortEvent(event, 'locations');
-  },
-  'input .search': _.debounce(function (event) { manageSearchEvents(event, 'searchUsers'); }, 300),
-  'change .edit': function (event) {
-    let n = event.target.name;
-    let v = event.target.value;
-    let id = getParentId(event.currentTarget);
-    let setObj = {}
-
-    if (n === "lastreq") {
-      let chan = Session.get('sel_channel');
-      if (!chan)
-        return;
-      n = chan + '-lastreq';
-      //console.error(n);
-    }
-
-    // Clear
-    if (event.target.name == 'country') {
-      // Verification du code
-      n = event.target.value.toUpperCase();
-      if (!(n in country_names)) {
-        v = '';
-      }
-    }
-
-
-    if (event.target.name == 'location') {
-      UserLocations.update(id, { $unset: { latitude: "", longitude: "", cuntry: "" } })
-    }
-    if (event.target.name == 'latitude' || event.target.name == 'longitude') {
-      v = parseFloat(v);
-    }
-
-    if (event.target.name == 'allow') {
-      v = event.target.checked;
-    }
-
-    if (event.target.name == 'streamer') {
-      v = event.target.checked;
-    }
-
-    //    console.error(event.target.id, n, v, typeof v);
-    // Set value
-    setObj[n] = v;
-    UserLocations.update(id, { $set: setObj })
-  }
-});
-
-// ------------ Greetings
-Template.Greetings.onCreated(function () {
-  this.subscribe("greetMessages");
-  this.subscribe('GreetChannels');
-  // Pour le champ editeur de l'admin
-  this.subscribe('allUsers');
-});
-
-Template.Greetings.helpers({
-  'greetlines': function (lang) {
-    var v = (lang === 'true');
-    //console.error(v, lang);
-    //GreetMessages.find({ lang: v }).forEach((item) => { console.error(item); })
-    return GreetMessages.find({ lang: v }, { sort: { username: 1 } });
-  },
-  'greetChan': function () {
-
-    return BotChannels.find({
-      enabled: true,
-      greet: true
-    }).fetch().map((item) => { return item.channel });
-  },
-  username(id) {
-    let u = Meteor.users.findOne(id);
-    if (u) return u.username;
-    return false;
-  }
-});
-
-Template.Greetings.events({
-  'change .greetline': function (event) {
-    let id = event.currentTarget.parentElement.id;
-    let name = event.currentTarget.name;
-    //console.error('change greetline ', id,name);
-
-    //    if (name.indexOf('greet') === 0) {
-    let f = name.split('_')[0];
-    let r = name.split('_')[1];
-    let o = {};
-    o[f] = event.currentTarget.value;
-    Meteor.call('updateGreetLine', id, r, o);
-    //    }
-  },
-  'click button.resettimer': function (event) {
-    var name = event.currentTarget.name;
-
-    //console.error('click reset timer',name);
-    if (confirm('Are you sure you want to reset timer for user ' + name + '. Bot will greet again!') === true) {
-      Meteor.call('resetGreetTimer', name);
-    }
-  },
-  'click button': function (event) {
-    //   console.error(event.target.id);
-    //    console.error(event.currentTarget.id);
-    var id = event.currentTarget.parentElement.id;
-    var name = event.currentTarget.name;
-    //console.error('click button', id,name);
-
-    var cl = event.currentTarget.className;
-    if (cl.indexOf('toggleCheck') >= 0) {
-
-      var b = (cl.indexOf('ok') < 0)
-      // console.error("toggle", id, name,b);
-      Meteor.call('updateGreetLine', id, parseInt(name), { enabled: b });
-      return;
-    }
-
-    if (name.indexOf('remove') === 0) {
-      if (confirm('Are you sure you want to permanently delete this Greetings line?') === true) {
-        var r = name.split('_')[1];
-        //console.error('remove', id, r);
-        Meteor.call('removeGreetLine', id, r);
-      }
-      return;
-    }
-
-    if (name === 'confirm_user_greet') {
-      let u = document.getElementsByName('addUserName')[0].value;
-      let t = document.getElementsByName('addUserText')[0].value;
-      let c = document.getElementsByName('addUserChan')[0].value;
-      if (u.length > 0 && t.length > 0) {
-        Meteor.call('addGreetLine', u, t, c);
-        document.getElementsByName('addUserText')[0].value = "";
-      }
-      return;
-    }
-  },
-  // Si on clique sur le nom d'un user, ca remplt l'input 'username'
-  'click .username': function (event) {
-    var id = event.currentTarget.parentElement.id;
-    if (id != undefined) {
-      var gl = GreetMessages.findOne(id);
-      if (gl != undefined) {
-        document.getElementsByName('addUserName')[0].value = gl.username;
-      }
-    }
-  }
-})
 
 
 function rgba(r, g, b, a) {

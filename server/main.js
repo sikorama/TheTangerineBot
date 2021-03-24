@@ -46,6 +46,13 @@ if ((botname == undefined) || (botpassword == undefined)) {
 
 botpassword = 'oauth:' + botpassword;
 
+
+// Cleanup DB
+UserLocations.update({}, { $unset: { proximity: 1 } });
+
+// Array to keep track of last active users (per channel)
+let last_active_users = {};
+
 // Website url. FIXME: should be http://localhost by default
 let WEBSITE_URL = "https://tangerine.sikorama.fr"
 let wurl = process.env.WEBSITE_URL;
@@ -156,6 +163,7 @@ const tr_lang = {
   'cn': ['zh', ''],
   'co': ['ko', ''],
   'de': ['de', 'sagt'],
+  'du': ['du', ''],
   'en': ['en', 'says'],
   'english': ['en', 'says'],
   'eng': ['en', 'says'],
@@ -407,9 +415,9 @@ Meteor.startup(() => {
 
   // Channels management
   Meteor.methods({
-    removeChannel: function(chanid) {
+    removeChannel: function (chanid) {
       if (this.userId) {
-        console.warn('Removing channel',chanid);
+        console.warn('Removing channel', chanid);
         BotChannels.remove(chanid);
       }
     },
@@ -434,13 +442,13 @@ Meteor.startup(() => {
     },
 
     // Aggregation for counting # of people per country
-    aggregateUserField: function (chan,field) {
+    aggregateUserField: function (chan, field) {
       if (!chan) return;
       // Check user is owner or admin
       // Chec 
       let sobj = {};
       sobj[chan] = { $exists: true }
-      let idfield="$"+field;
+      let idfield = "$" + field;
       let nums = UserLocations.find(sobj).count();
 
       let pipeline = [];
@@ -470,54 +478,9 @@ Meteor.startup(() => {
       });
 
       let res = UserLocations.aggregate(pipeline);
-//      console.error(res);
+      //      console.error(res);
       return res;
     },
-
-    // Aggregation for counting # of people per country
-    aggregateCountries: function (chan) {
-      if (!chan) return;
-      // Check user is owner or admin
-      let sobj = {};
-      sobj[chan] = { $exists: true }
-
-      let nums = UserLocations.find(sobj).count();
-
-      let pipeline = [];
-      pipeline.push({
-        $match: sobj
-      });
-      pipeline.push({
-        $group: {
-          _id: "$country",
-          t: {
-            $sum: 1
-          }
-        }
-      });
-      pipeline.push({
-        $project: {
-          "t": 1,
-          "p":
-          {
-            $round: [
-
-              { "$multiply": [{ "$divide": ["$t", { "$literal": nums }] }, 100] }
-              , 2
-            ]
-          }
-        }
-      });
-
-      let res = UserLocations.aggregate(pipeline);
-//      console.error(res);
-      return res;
-    }
-
-
-
-
-
   });
 
   UserLocations.allow({
@@ -624,7 +587,7 @@ Meteor.startup(() => {
         if (!slbparse && botchan.requestregex1)
           slbparse = commandName.match(RegExp(botchan.requestregex1));
         if (!slbparse && botchan.requestregex2)
-          slbparse = commandName.match(RegExp(botchan.requestregex2));        
+          slbparse = commandName.match(RegExp(botchan.requestregex2));
 
         if (slbparse) {
           let req_user = slbparse[1].toLowerCase();
@@ -632,8 +595,8 @@ Meteor.startup(() => {
 
           let rul = UserLocations.findOne({ name: req_user });
           // Removes @
-          if (req_user[0]==='@')
-            req_user=req_user.substring(1);
+          if (req_user[0] === '@')
+            req_user = req_user.substring(1);
           console.info('-- SONG REQUEST:', req_user, req_song)
           if (rul) {
             let objupdate = {
@@ -647,6 +610,8 @@ Meteor.startup(() => {
       } catch (e) { console.error(e) }
       return;
     }
+
+
 
     // Check if the message starts with @name
     // in that case, extract the name and move it at the end of the message, and process the message
@@ -678,6 +643,49 @@ Meteor.startup(() => {
       });
       cmd = cmdarray[0].substring(1).toLowerCase();
     }
+
+
+
+    {
+
+      const exceptnames=['streamelements','songlistbot','nightbot'];
+      if (exceptnames.indexOf(username)<0)  {
+
+      // Keep track os last active users 
+      if (!last_active_users[chan]) {
+        last_active_users[chan] = [];
+      }
+      
+      let index = last_active_users[chan].find(function (val, ind, arr) {
+        return (val.name === dispname);
+      });
+      
+      if (index < 0) {
+        last_active_users[chan].push({ name: dispname, ts: dnow });
+      }
+      else {
+        // Move on the top
+        last_active_users[chan].splice(index, 1);
+        last_active_users[chan].push({ name: dispname, ts: dnow });
+      }
+      
+      // Keep only 20 names in the list
+      if (last_active_users[chan].length > 20) {
+        last_active_users[chan].shift();
+      }
+    }     
+      
+      //console.error(last_active_users);
+      
+      if (cmd === "exceptions" || cmd == 'lastactive') {
+        let res = last_active_users[chan].filter((item) => { return (dnow - item.ts < 1000 * 60 * 30); });
+        if (res.length >= 0) {
+          say(target, res.map((item) => item.name).join());
+        }
+        return;
+      }
+    }
+
 
     // Remove whitespace from chat message
     if (cmd === "statement") {
@@ -942,6 +950,7 @@ Meteor.startup(() => {
                 // ...only siko can do it currently.
                 if (isModerator === true) {
                   username = w.substring(1).toLowerCase();
+                  dispname = w.substring(1);
                   context['display-name'] = w.substring(1);
                   geoloc = geoloc.replace(w, '');
                 }
@@ -1002,7 +1011,7 @@ Meteor.startup(() => {
             let updateObj = { location: doc.location, channels: pdoc.channels, dname: doc.dname };
             // Timestamp for getting active on channel's map
             updateObj[chan] = now;
-            UserLocations.update(pdoc._id, { $set: updateObj, $unset: { country: 1, latitude: 1, longitude: 1, proximity: 1 } });
+            UserLocations.update(pdoc._id, { $set: updateObj, $unset: { country: 1, latitude: 1, longitude: 1 } });
             say(target, answername + " Ok, i've updated my database!");
             return;
           }
@@ -1195,7 +1204,7 @@ Meteor.startup(() => {
 
           if (gmline.length > 0) {
             gmline = replaceKeywords(gmline, soname);
-            gmline = gmline.replace(regext, "https://twitch.tv/" + soname+' ');
+            gmline = gmline.replace(regext, "https://twitch.tv/" + soname + ' ');
 
             if (botchan.me === true) {
               gmline = '/me ' + gmline;
@@ -1317,7 +1326,7 @@ Meteor.startup(() => {
             }
           }
           else
-            txt = txt.replace(regext, "https://twitch.tv/" + username+' ');
+            txt = txt.replace(regext, "https://twitch.tv/" + username + ' ');
 
           if (botchan.me === true && selGenSentence === false) {
             txt = '/me ' + txt;
