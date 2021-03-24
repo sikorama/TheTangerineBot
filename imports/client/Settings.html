@@ -21,7 +21,7 @@
         <th>World Map</th>
         <th>Greet</th>
         <th>Song Requests</th>
-        <th>Quizz</th>
+        <th>More</th>
       </tr>
     </thead>
     <tbody>
@@ -144,7 +144,27 @@
         </td>
 
         <td class="centered">
-          {{>CheckMark b=c.quizz n="quizz"}}
+          <table>
+            <tbody>
+              <tr>
+                <td>
+                  Quizz
+                </td>
+                <td>
+                  {{>CheckMark b=c.quizz n="quizz"}}
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  Active users
+                </td>
+                <td>
+                  {{>CheckMark b=c.active_users n="active_users"}}
+                </td>
+              </tr>
+
+            </tbody>
+          </table>
         </td>
       </tr>
       {{/each}}

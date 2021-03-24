@@ -645,7 +645,7 @@ Meteor.startup(() => {
     }
 
 
-
+    if (botchan.active_users)
     {
 
       const exceptnames=['streamelements','songlistbot','nightbot'];
