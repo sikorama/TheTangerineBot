@@ -45,8 +45,9 @@
 
         <td class="centered">
           {{>CheckMark b=c.map n="map"}}
-          {{#if isCurEditChan c._id}}
           {{#if c.map}}
+          <a href="/c/{{c.channel}}">&#9732; </a>
+          {{#if isCurEditChan c._id}}
           <table>
             <tbody>
               <tr>
@@ -262,6 +263,19 @@
     </tbody>
   </table>
 
+  <h2>Configuration</h2>
+  <table>
+    <tbody>
+      <tr>
+        <td>          
+          Website URL
+        </td>
+        <td>          
+          <input id="URL" value="{{WEBSITE_URL}}">
+        </td>        
+      </tr>
+    </tbody>
+  </table>
   <!--
     <h2>Main Parameters</h2>
     Location Interval (in seconds)

@@ -58,6 +58,7 @@ let WEBSITE_URL = "https://tangerine.sikorama.fr"
 let wurl = process.env.WEBSITE_URL;
 if (wurl) WEBSITE_URL = wurl;
 
+
 // Stack for answering to greetings.
 // Greetings are not immediate in order to add a delay between multiple greetings
 // Feels more natural, and also ueful in case of on screen notification, to avoid
@@ -388,8 +389,9 @@ Meteor.startup(() => {
   }
 
   Settings.remove({});
-
+  
   if (Settings.findOne() === undefined) {
+    Settings.insert({ param: 'URL', val: WEBSITE_URL});
     Settings.insert({ param: 'location_interval', val: 60 });
     Settings.insert({ param: 'quizz_enabled_topics', val: [] });
   }
@@ -836,7 +838,8 @@ Meteor.startup(() => {
         //  Depending on the channel, guest account differs.
         // FIXME: passwords should be different
         if (cmd.indexOf('map') == 0) {
-          say(target, "You can access our EarthDay map here: " + WEBSITE_URL + "/c/" + chan);
+          let url = Settings.findOne({ param: 'WEBSITE_URL' });
+          say(target, "You can access our EarthDay map here: " + url + "/c/" + chan);
           return;
         }
 

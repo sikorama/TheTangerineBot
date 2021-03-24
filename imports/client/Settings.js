@@ -11,12 +11,18 @@ Template.Settings.onCreated(function () {
     this.subscribe("allUsers");
     this.subscribe("statistics");
     this.subscribe('botChannels');
-
+    this.subscribe('settings');
 
     Session.set('curEditChan','');
 });
 
 Template.Settings.helpers({
+    WEBSITE_URL() {
+        let p = Settings.findOne({ param:'URL'});
+        console.error(p);
+        if (p)
+            return p.val;
+    },
     isCurEditChan(chan) {        
         return Session.equals('curEditChan',chan);
     },
@@ -27,8 +33,6 @@ Template.Settings.helpers({
         return Meteor.users.find();
     },
     stats(c) {
-        //let a = Stats.find().fetch();
-        //console.error(JSON.stringify(a));
         return Stats.find({chan: '#'+c}, {sort: {month: 1}});
     },
     userHasRole(uid,role) {
@@ -64,7 +68,8 @@ Template.Settings.events({
         Meteor.call("setChanSettings", id, f, v);
     },
     "change .settings": function (event) {
-        let v = parseInt(event.currentTarget.value);
+        let v = event.currentTarget.value;
+
         Meteor.call('parameter', event.currentTarget.id, v);
         return false;
     },
