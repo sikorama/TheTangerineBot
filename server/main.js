@@ -70,8 +70,7 @@ UserLocations.find({ msg: {$exists:1}}).fetch().forEach(function(u) {
 // Array to keep track of last active users (per channel)
 let last_active_users = {};
 
-// Website url. FIXME: should be http://localhost by default
-let WEBSITE_URL = "https://tangerine.sikorama.fr"
+let WEBSITE_URL = "http://localhost"
 let wurl = process.env.WEBSITE_URL;
 if (wurl) WEBSITE_URL = wurl;
 
@@ -405,7 +404,7 @@ Meteor.startup(() => {
     }
   }
 
-  Settings.remove({});
+//  Settings.remove({});
   
   if (Settings.findOne() === undefined) {
     Settings.insert({ param: 'URL', val: WEBSITE_URL});
@@ -695,11 +694,17 @@ Meteor.startup(() => {
     }     
       
       //console.error(last_active_users);
-      
       if (cmd === "exceptions" || cmd == 'lastactive') {
-        let res = last_active_users[chan].filter((item) => { return (dnow - item.ts < 1000 * 60 * 30); });
-        if (res.length >= 0) {
-          say(target, res.map((item) => item.name).join());
+        if (isModerator) {
+          console.error('last active=', last_active_users);
+
+          let res = last_active_users[chan].filter((item) => { return (dnow - item.ts < 1000 * 60 * 30); });
+
+          if (res.length >= 0) {
+            let extxt = res.map((item) => item.name).join();
+            console.error(extxt);
+            say(target,extxt);
+          }
         }
         return;
       }
@@ -849,9 +854,10 @@ Meteor.startup(() => {
       // ------------------- MAP -------------------------
       if (botchan.map === true) {
         //  Depending on the channel, guest account differs.
-        // FIXME: passwords should be different
         if (cmd.indexOf('map') == 0) {
-          let url = Settings.findOne({ param: 'WEBSITE_URL' });
+          let url = Settings.findOne({ param: 'URL' });
+          console.error(url);
+
           if (url) {
             say(target, "You can access our EarthDay map here: " + url.val + "/c/" + chan);
           }
@@ -1242,7 +1248,6 @@ Meteor.startup(() => {
       let d = Date.now();
       // Check if user has not already been greeted recentky
       // In this case, do nothing
-      // FIXME: use a database instead (userLoc or a dedicated one)
       let candidate = true;
       let g = GreetDate.findOne({ name: username });
       if (g)
