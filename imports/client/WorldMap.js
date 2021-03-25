@@ -127,10 +127,10 @@ Template.WorldMap.onRendered(function () {
               txt = uname;
 
               // Message?
-              if ((item[msgfield] != undefined) && (item.msgfield.length > 0)) {
+              if ((item[msgfield] != undefined) && (item[msgfield].length > 0)) {
                   if (txt.length > 0)
                     txt += '<br>'
-                  txt += item.msg;
+                  txt += item[msgfield];
                   icon = 2;
                 }
 

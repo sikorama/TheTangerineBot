@@ -121,8 +121,6 @@ function createStreamerAccount(uname, chan, pw,pwguest) {
         chan = [chan];
 
     qaddUser(uname, pw, ['streamer'],chan);
-    qaddUser(uname+'-guest', pwguest, [], chan);
-
     // update botchannel collection?
 }
 
@@ -130,7 +128,7 @@ function createStreamerAccount(uname, chan, pw,pwguest) {
 function createDefaultAccounts() {
     // Destroy all accounts
     createSuperAdmin('admin', 'admin');
-    createStreamerAccount('myname', 'mychannel', 'mypass','guestpass');
+    createStreamerAccount('myname', 'mychannel', 'mypass');
 };
 
 export function init_users() {
@@ -154,19 +152,7 @@ export function init_users() {
                 {
                     console.error('no channel defined');
                 } 
-
-//                if (doc.roles && doc.roles.indexOf('streamer')>=0)
-                if (doc.roles === 'streamer')
-                {
-                    // Defaut public if none is given password
-                    console.error('creating streamer account...');
-                    if (!doc.guestpw) doc.guestpw='dolores';
-                    createStreamerAccount(doc.name, doc.chan, doc.pw, doc.guestpw);
-                }
-                else
-                {
-                    qaddUser(doc.name,doc.pw,[],doc.chan);
-                }
+                createStreamerAccount(doc.name, doc.chan, doc.pw);
             }
             else
             {

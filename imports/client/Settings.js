@@ -94,12 +94,6 @@ Template.Settings.events({
         doc.name = document.getElementById('accountName').value.trim();
         doc.chan = document.getElementById('accountChan').value.trim();
         doc.pw = document.getElementById('accountPass').value.trim();
-        doc.guestpass = document.getElementById('accountGuestPass').value.trim();
-        
-        if (document.getElementById('accountStreamer').checked === true)
-            doc.roles= "streamer";
-
-            console.error(doc);
         Meteor.call("insertUser",doc);
     },
     'click .channelEdit' : function(event) {

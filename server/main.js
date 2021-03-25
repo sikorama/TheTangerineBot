@@ -62,8 +62,8 @@ UserLocations.find({ msg: {$exists:1}}).fetch().forEach(function(u) {
       upobj[mf] = u.msg;
   });
   console.error(u, upobj);
-  UserLocations.update(u._id, {$set: opobj});
-//  UserLocations.update(u._id, {$set: opobj, $unset: {msg:1}});
+  UserLocations.update(u._id, {$set: upobj});
+//  UserLocations.update(u._id, {$set: upobj, $unset: {msg:1}});
 });
 
 
@@ -848,15 +848,13 @@ Meteor.startup(() => {
 
       // ------------------- MAP -------------------------
       if (botchan.map === true) {
-
-
-
-
         //  Depending on the channel, guest account differs.
         // FIXME: passwords should be different
         if (cmd.indexOf('map') == 0) {
           let url = Settings.findOne({ param: 'WEBSITE_URL' });
-          say(target, "You can access our EarthDay map here: " + url + "/c/" + chan);
+          if (url) {
+            say(target, "You can access our EarthDay map here: " + url.val + "/c/" + chan);
+          }
           return;
         }
 

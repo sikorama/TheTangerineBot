@@ -54,13 +54,8 @@ export const Stats = new Mongo.Collection('statistics');
                 selector[options.search.props.channel] = chfilter;
             }
 
-            // Soit par le tableau channels  (donc la ou on s'est enregistré)
-            //if (options.search.props.hasOwnProperty('regchannel')) {
-            //    selector.channels = options.search.props.regchannels;
-            // }
-
             if (options.search.props.hasOwnProperty('msg')) {
-                selector.msg = {
+                selector[options.search.props.channel+'-msg'] = {
                     $exists: true, $ne: ''
                 };
             }
@@ -87,16 +82,20 @@ export const Stats = new Mongo.Collection('statistics');
             else {
                 // Data for map
                 // If public map, only shows allowed names
+                // FIXME Also chan should be mandatory
+                let chan =options.search.props.channel; 
+                
                 let fobj =
                 {
                     allow: 1,
-                    msg: 1,
                     latitude: 1,
                     longitude: 1,
                     steamer: 1
                 };
-                if (options.search.props.channel) {
-                    fobj[options.search.props.channel + '-lastreq'] = 1;
+
+                if (chan) {
+                    fobj[chan + '-lastreq'] = 1;
+                    fobj[chan + '-msg'] = 1;
                 }
 
                 // Faire une projection pour n'avoir qu'un champ pour les noms, en fonction du flag 'allow'
@@ -108,7 +107,6 @@ export const Stats = new Mongo.Collection('statistics');
                 else {
                     fobj.mapname = 1;
                     return fobj;
-
                 }
             }
         }
