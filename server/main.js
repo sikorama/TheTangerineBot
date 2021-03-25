@@ -50,7 +50,7 @@ botpassword = 'oauth:' + botpassword;
 // Cleanup DB
 //UserLocations.update({}, { $unset: { proximity: 1 } });
 // Migrate map messages
-let channames= BotChannels.find().fetch().map((item)=>item.channel);
+/*let channames= BotChannels.find().fetch().map((item)=>item.channel);
 console.error('migration:', channames);
 // For each userlLoc with a msg field
 UserLocations.find({ msg: {$exists:1}}).fetch().forEach(function(u) {
@@ -63,9 +63,10 @@ UserLocations.find({ msg: {$exists:1}}).fetch().forEach(function(u) {
   });
   console.error(u, upobj);
   UserLocations.update(u._id, {$set: upobj});
-//  UserLocations.update(u._id, {$set: upobj, $unset: {msg:1}});
 });
+*/
 
+//  UserLocations.update(u._id, {$unset: {msg:1}});
 
 // Array to keep track of last active users (per channel)
 let last_active_users = {};
@@ -922,7 +923,7 @@ Meteor.startup(() => {
             else {
               msgobj = {};
               msgobj[chan+'-msg'] = msg;
-              UserLocations.update(pdoc._id, { $set: { msg: msgobj} });
+              UserLocations.update(pdoc._id, { $set: msgobj });
               say(target, "Ok! " + answername);
             }
             return;
