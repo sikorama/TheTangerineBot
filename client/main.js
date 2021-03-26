@@ -1,7 +1,7 @@
 import { Template } from 'meteor/templating';
 import { Session } from 'meteor/session';
 import { UserLocations, BotChannels, GreetMessages, Settings } from '../imports/api/collections.js';
-import { getCountryName } from '../imports/api/countrycodes.js';
+import { getCountryName } from '../imports/api/countrycodes.js';
 import { checkUserRole } from '../imports/api/roles.js';
 import { getParentId, manageSearchEvents } from '../imports/client/tools.js';
 import '../imports/routes.js';
@@ -204,83 +204,50 @@ function genColors(c1, a, n) {
   return colors;
 }
 
-Template.Countries.events({
+Template.Stats.events({
   'click button.selStat': function (ev) {
     Session.set('statPage', parseInt(ev.currentTarget.name))
   }
 });
 
-Template.Countries.onRendered(function () {
+Template.Stats.onRendered(function () {
   Session.set('statPage', 1);
   var ctx = null;
 
   this.autorun(() => {
     let sch = Session.get('sel_channel');
     if (!sch) return;
+
     Meteor.call("getNumPeople", sch, function (err, res) {
       Session.set("numPeopleLoc", res);
     });
+    let page = Session.get('statPage');
 
-    if (Session.equals('statPage', 1)) {
-      Meteor.call('aggregateUserField', sch, sch + '-lastreq', function (err, res) {
-        res.sort((a, b) => b.t - a.t);
-        //console.error(res);
-        Session.set('CountPerSong', res);
-      });
-    }
-
-    if (Session.equals('statPage', 2)) {
-      Meteor.call('aggregateUserField', sch, "country", function (err, res) {
-        res.sort((a, b) => b.t - a.t);
-        Session.set('CountPerCountry', res);
-
-        /*
-        var ctx = document.getElementById('countryChart').getContext('2d');
-        var myChart = new Chart(ctx, {
-          type: 'doughnut',
-          data: {
-            labels: [],
-            datasets: [{
-              label: 'Countries',
-              data: [],
-              borderWidth: 1,
-            }]
-          },
-          options: {
-            circumference: Math.PI,
-            rotation: Math.PI,
-            title: {
-              display: false,
-              text: 'Countries'
-            },
-            legend: {
-              position: 'right',
-              display: true,
-              labels: {
-                boxWidth: 15,
-                fontSize: 12
-              }
-            }
-          }
+    switch (page) {
+      case 1:
+        Meteor.call('aggregateUserField', sch, sch + '-lastreq', function (err, res) {
+          res.sort((a, b) => b.t - a.t);
+          //console.error(res);
+          Session.set('CountPerSong', res);
         });
-      
-        // Classement par ordre d'alerte
-              myChart.data.datasets[0].backgroundColor = genColors(255, 0.5, res.length);
-              myChart.data.datasets[0].borderColor = genColors(255, 1.0, res.length).reverse();
-        
-              myChart.data.labels = res.map(item => { return getCountryName(item._id); });
-        
-              myChart.data.datasets[0].data = res.map(item => {
-                return item.t;
-              });
-              myChart.update();
-              */
-      });
+        break;
+      case 2:
+        Meteor.call('aggregateUserField', sch, "country", function (err, res) {
+          res.sort((a, b) => b.t - a.t);
+          Session.set('CountPerCountry', res);
+        });
+        break;
+      case 3:
+        Meteor.call('getActiveUsers', sch, function (err, res) {
+          console.error(err, res);
+          Session.set('activeUsers', res);
+        });
+        break;
     }
   });
 });
 
-Template.Countries.helpers({
+Template.Stats.helpers({
   getCountryCount() {
     return Session.get('CountPerCountry');
   },
@@ -289,7 +256,9 @@ Template.Countries.helpers({
   },
   showStat(p) {
     return Session.equals('statPage', parseInt(p));
-
+  },
+  getActiveUsers() {
+    return Session.get('activeUsers');
   }
 });
 

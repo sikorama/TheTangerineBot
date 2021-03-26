@@ -40,7 +40,7 @@ FlowRouter.route('/countries', {
   name: 'countries',
   action: function (params, queryParams) {
     BlazeLayout.render('MainPage', {
-      main: 'Countries',
+      main: 'Stats',
     });
   }
 });

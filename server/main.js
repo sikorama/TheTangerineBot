@@ -262,8 +262,24 @@ Meteor.startup(() => {
   Meteor.methods({
     // Admins can add channels from client
     addChannel: function (chan) {
+      if (!chan)
+        return [];
+
       if (hasRole(this.userId, ['admin']))
-        addChannel(chan, ["enabled"]);
+        addChannel(chan.toLowerCase(), ["enabled"]);
+    }
+  })
+
+  Meteor.methods({
+    getActiveUsers: function (chan) {
+      
+      if (!chan)
+        return [];
+      if (!last_active_users[chan]) return [];
+      if (this.userId)
+        return last_active_users[chan];
+
+        return [];
     }
   })
 
@@ -405,10 +421,10 @@ Meteor.startup(() => {
     }
   }
 
-//  Settings.remove({});
-  
+  //  Settings.remove({});
+
   if (Settings.findOne() === undefined) {
-    Settings.insert({ param: 'URL', val: WEBSITE_URL});
+    Settings.insert({ param: 'URL', val: WEBSITE_URL });
     Settings.insert({ param: 'location_interval', val: 60 });
     Settings.insert({ param: 'quizz_enabled_topics', val: [] });
   }
@@ -597,35 +613,38 @@ Meteor.startup(() => {
     // Songlisbot requests
     if (username == "songlistbot" && botchan.map === true) {
       try {
-        // Try default regexs, as songlistbot has different messages for request      
-        let slbparse = commandName.match(default_regsonglistreq1);
-        if (!slbparse)
-          slbparse = commandName.match(default_regsonglistreq2);
+        if (botchan.songrequest) {
+          // Try default regexs, as songlistbot has different messages for request      
+          let slbparse = commandName.match(default_regsonglistreq1);
+          if (!slbparse)
+            slbparse = commandName.match(default_regsonglistreq2);
 
-        // Optional regexp (for non standards messages / additional languages)
-        if (!slbparse && botchan.requestregex1)
-          slbparse = commandName.match(RegExp(botchan.requestregex1));
-        if (!slbparse && botchan.requestregex2)
-          slbparse = commandName.match(RegExp(botchan.requestregex2));
+          // Optional regexp (for non standards messages / additional languages)
+          if (!slbparse && botchan.requestregex1)
+            slbparse = commandName.match(RegExp(botchan.requestregex1));
+          if (!slbparse && botchan.requestregex2)
+            slbparse = commandName.match(RegExp(botchan.requestregex2));
 
-        if (slbparse) {
-          let req_user = slbparse[1].toLowerCase();
-          let req_song = slbparse[2];
+          if (slbparse) {
+            let req_user = slbparse[1].toLowerCase();
+            let req_song = slbparse[2];
 
-          let rul = UserLocations.findOne({ name: req_user });
-          // Removes @
-          if (req_user[0] === '@')
-            req_user = req_user.substring(1);
-          console.info('-- SONG REQUEST:', req_user, req_song)
-          if (rul) {
-            let objupdate = {
+            let rul = UserLocations.findOne({ name: req_user });
+            // Removes @
+            if (req_user[0] === '@')
+              req_user = req_user.substring(1);
+            console.info('-- SONG REQUEST:', req_user, req_song)
+            if (rul) {
+              let objupdate = {
+              }
+              objupdate[chan + '-lastreq'] = req_song;
+              console.info(' => update map:', objupdate);
+
+              UserLocations.update(rul._id, { $set: objupdate })
             }
-            objupdate[chan + '-lastreq'] = req_song;
-            console.info(' update:', objupdate);
-
-            UserLocations.update(rul._id, { $set: objupdate })
           }
         }
+
       } catch (e) { console.error(e) }
       return;
     }
@@ -663,48 +682,46 @@ Meteor.startup(() => {
       cmd = cmdarray[0].substring(1).toLowerCase();
     }
 
+    if (botchan.active_users) {
+      const exceptnames = ['streamelements', 'songlistbot', 'nightbot'];
+      if (exceptnames.indexOf(username) < 0) {
 
-    if (botchan.active_users)
-    {
+        // Keep track os last active users 
+        if (!last_active_users[chan]) {
+          last_active_users[chan] = [];
+        }
 
-      const exceptnames=['streamelements','songlistbot','nightbot'];
-      if (exceptnames.indexOf(username)<0)  {
+        let ar = last_active_users[chan];
+        let index = ar.findIndex(val => val.name === dispname);
 
-      // Keep track os last active users 
-      if (!last_active_users[chan]) {
-        last_active_users[chan] = [];
+        //console.error('find', dispname, index)
+        if (index >= 0) {
+          // Remove last occurence with this user
+          ar.splice(index, 1);
+        }
+        ar.push({ name: dispname, ts: dnow, msg: msg });
+
+        // Keep only 20 names in the list
+        if (ar.length > 20) {
+          ar.shift();
+        }
+        last_active_users[chan] = ar;
+        //console.error(last_active_users[chan]);
       }
-      
-      let index = last_active_users[chan].find(function (val, ind, arr) {
-        return (val.name === dispname);
-      });
-      
-      if (index < 0) {
-        last_active_users[chan].push({ name: dispname, ts: dnow });
-      }
-      else {
-        // Move on the top
-        last_active_users[chan].splice(index, 1);
-        last_active_users[chan].push({ name: dispname, ts: dnow });
-      }
-      
-      // Keep only 20 names in the list
-      if (last_active_users[chan].length > 20) {
-        last_active_users[chan].shift();
-      }
-    }     
-      
+
+
       //console.error(last_active_users);
       if (cmd === "exceptions" || cmd == 'lastactive') {
         if (isModerator) {
           console.error('last active=', last_active_users);
 
           let res = last_active_users[chan].filter((item) => { return (dnow - item.ts < 1000 * 60 * 30); });
+          console.error(res);
 
           if (res.length >= 0) {
             let extxt = res.map((item) => item.name).join();
             console.error(extxt);
-            say(target,extxt);
+            say(target, extxt);
           }
         }
         return;
@@ -922,7 +939,7 @@ Meteor.startup(() => {
             }
             else {
               msgobj = {};
-              msgobj[chan+'-msg'] = msg;
+              msgobj[chan + '-msg'] = msg;
               UserLocations.update(pdoc._id, { $set: msgobj });
               say(target, "Ok! " + answername);
             }

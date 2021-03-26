@@ -1,14 +1,15 @@
-<template name="Countries">
+<template name="Stats">
 
   <button class="selStat pure-button {{#if showStat 1}}pure-button-primary{{/if}}" name="1">Countries</button>
   <button class="selStat pure-button {{#if showStat 2}}pure-button-primary{{/if}}" name="2">Songs</button>
+  <button class="selStat pure-button {{#if showStat 3}}pure-button-primary{{/if}}" name="3">Active Users</button>
 
   {{#if showStat 1}}
   <h2>Number of people per country</h2>
 
-  {{#with countries=getCountryCount}}
+  {{#let countries=getCountryCount}}
 
-  <p><strong>{{numPeopleLoc}}</strong> people registered from <strong>{{countries.length}}</strong> Countries</p>
+  <p><strong>{{numPeopleLoc}}</strong> people registered from <strong>{{countries.length}}</strong> </p>
   <table class="pure-table">
     <thead>
       <tr>
@@ -37,9 +38,9 @@
     </tbody>
   </table>
 
-  {{/with}}
+  {{/let}}
 
-<!--
+  <!--
 
   <h2>Chart</h2>
   <div>
@@ -52,9 +53,9 @@
   {{#if showStat 2}}
 
   <h2>Currently requested Songs</h2>
-  {{#with songs=getSongCount}}
+  {{#let songs=getSongCount}}
   <!--
-  <p><strong>{{numPeopleLoc}}</strong>  people registered from <strong>{{countries.length}}</strong> Countries</p>
+  <p><strong>{{numPeopleLoc}}</strong>  people registered from <strong>{{countries.length}}</strong> </p>
 -->
   <table class="pure-table">
     <thead>
@@ -80,7 +81,43 @@
     </tbody>
   </table>
 
-  {{/with}}
+  {{/let}}
   {{/if}}
+
+
+
+  {{#if showStat 3}}
+
+  <h2>Last Active Users</h2>
+  {{#let ausers=getActiveUsers}}
+  {{ausers}}
+  <table class="pure-table">
+    <thead>
+      <tr>
+        <th>Timestamp</th>
+        <th>User</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each c in ausers}}
+      <tr>
+        <td>
+          {{c.name}}
+        </td>
+        <td>
+          {{c.ts}}
+        </td>
+        <td>
+          {{c.msg}}
+        </td>
+      </tr>
+      {{/each}}
+
+    </tbody>
+  </table>
+
+  {{/let}}
+  {{/if}}
+
 
 </template>
