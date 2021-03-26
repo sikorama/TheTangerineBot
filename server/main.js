@@ -711,16 +711,16 @@ Meteor.startup(() => {
 
 
       //console.error(last_active_users);
-      if (cmd === "exceptions" || cmd == 'lastactive') {
+      if (cmd === "exception" || cmd === "exceptions" || cmd == 'lastactive') {
         if (isModerator) {
           console.error('last active=', last_active_users);
 
           let res = last_active_users[chan].filter((item) => { return (dnow - item.ts < 1000 * 60 * 30); });
-          console.error(res);
+          //console.error(res);
 
           if (res.length >= 0) {
-            let extxt = res.map((item) => item.name).join();
-            console.error(extxt);
+            let extxt = res.map((item) => item.name).join(', ');
+            //console.error(extxt);
             say(target, extxt);
           }
         }
