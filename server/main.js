@@ -827,7 +827,14 @@ Meteor.startup(() => {
       if (cmd in tr_lang) {
         let ll = tr_lang[cmd];
         //console.error(ll);
-        let txt = commandName.substring(1 + cmd.length);
+        // Remove some words (emotes for example)
+        let txt = commandName.replace(/ LUL/g,'');
+        
+        // TODO: remove Urls too
+
+
+        // Remove command
+        txt = txt.substring(1 + cmd.length);
         // Min/Max length of text to translate
         let lazy = false;
         if (txt.length > 2) {
@@ -844,6 +851,7 @@ Meteor.startup(() => {
             return;
           }
 
+
           // Translate text
           gtrans(txt, { to: ll[0] }).then(res => {
             if (lazy === true) {
@@ -851,9 +859,23 @@ Meteor.startup(() => {
               say(target, context['display-name'] + ', ' + txt + '/' + res.text);
             }
             else {
+              
               // Actually Translate text
               // TODO: Check is translated text == original text. In that case it
               // means the command was not correctly used (ex: "!en hello friends")
+
+              // Filter the answer to avoid jokes like:
+
+              // 3/26/2021 11:43:05 !en me está picando la cara
+              // 3/26/2021 11:43:05 says: I'm fucking my face              
+
+              //res.text = res.text.replace(/fuck/g,'****');
+              if (res.text.indexOf('fuck')>=0) {
+                res.text="I think that would be offensive if i said that";
+                say(target, context['display-name'] + ' ' + res.text);
+                return;
+              }
+
               say(target, context['display-name'] + ' ' + ll[1] + ': ' + res.text);
             }
           }).catch(err => {

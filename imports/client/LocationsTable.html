@@ -51,9 +51,10 @@
                   {{/if}}
 
                 {{#if edit_mode}}
-                <input class="edit" type="text" name="name" value={{ul.name}}>
-                <input class="edit" type="text" name="dname" value={{ul.dname}}>
-                <input class="edit" type="text" name="mapname" value={{ul.mapname}}>
+
+                <input title="Private name" class="edit" type="text" name="dname" value={{ul.dname}}>
+                <input title="Public name" class="edit" type="text" name="mapname" value={{ul.mapname}}>
+
                 {{else}}
                 <a href="https://twitch.tv/{{ul.dname}}" target="_blank">{{#if ul.dname}} {{ul.dname}} {{else}} {{ul.mapname}} {{/if}}</a>
                 {{/if}}
@@ -101,10 +102,21 @@
 
               </td>
               <td>
+                {{#if edit_mode}}
+                {{#if ul.allow}}
+                  <input title="Show nickname?" class="edit" type="checkbox" name="allow" checked >
+                  {{else}}
+                  <input title="Show nickname?" class="edit" type="checkbox" name="allow" >
+                {{/if}}
+
+                  {{else}}
+
                 {{#if ul.allow}}
                   &check;
                 {{else}}
                   &cross;
+                {{/if}}
+
                 {{/if}}
               </td>
               <td>
