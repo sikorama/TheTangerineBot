@@ -5,7 +5,8 @@ import {
   Settings,
   QuizzQuestions,
   QuizzScores,
-  Stats
+  Stats,
+  Images
 } from '../imports/api/collections.js';
 
 import { hasRole,getUserGroups } from './user_management.js';
@@ -144,6 +145,26 @@ Meteor.publish('GreetChannels', function () {
     this.ready();
   });
 
+  //Images.remove({});
 
+  Meteor.publish('images', function (sel) {
+    if (!sel) sel = {}
+//    return (Images.find(sel).cursor);
+    return (Images.collection.find(sel));
+  });
+/*
+  Images.allow({
+    insert(userid, doc) {
+      if (userid) return true;
+    },
+    update(userid, doc) {
+//      if (userid) return true;
+    },
+    remove(userid, doc) {
+//      if (userid) return true;
+    }
+  });
+
+*/
 
 }

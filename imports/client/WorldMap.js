@@ -1,7 +1,7 @@
 import './WorldMap.html'
 import { Session } from 'meteor/session';
 import { checkUserRole } from '../api/roles.js';
-import { BotChannels } from '../api/collections.js';
+import { BotChannels, Images } from '../api/collections.js';
 import { getParentId, manageSearchEvents } from './tools.js';
 
 var L = require('leaflet');
@@ -15,6 +15,9 @@ Template.WorldMap.onCreated(function () {
 
 Template.WorldMap.onRendered(function () {
   let sc = Session.get('sel_channel');
+
+  //TODO: use handlers s1.ready
+  this.s1 = this.subscribe('images');
 
   this.subscribe('botChannels', { channel: sc }, function () {
 
@@ -61,7 +64,14 @@ Template.WorldMap.onRendered(function () {
     let icons = ic.map((item) => {
       if (item === null) return null;
       if (item.length === 0) return null;
-      if (item === "/tang1.png") return null;
+      if (item[0] != "/") {
+        let im = Images.findOne({name:item});
+        if (!im) return null;
+        console.error(im);
+        console.error(im.link());
+        
+        item = im.link();
+      }
       return L.icon({
         iconUrl: item,
         iconsize: [32, 32],

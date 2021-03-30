@@ -1,16 +1,21 @@
 import { Mongo } from 'meteor/mongo';
 import { Index, MongoDBEngine } from 'meteor/easy:search'
+import { FilesCollection } from 'meteor/ostrio:files';
 import { checkUserRole } from './roles.js';
 
-// Collection contenant la localisation déclarée des utilisateurs (ainsi que leur channels)
-export const UserLocations = new Mongo.Collection('userloc');
+// Channels 
 export const BotChannels = new Mongo.Collection('botchannels');
+// USers regitered on the map
+export const UserLocations = new Mongo.Collection('userloc');
+// Auto greet messages
 export const GreetMessages = new Mongo.Collection('greetmessages');
+export const GreetDate = new Mongo.Collection('greetdate');
+
 export const Settings = new Mongo.Collection('settings');
+
 export const QuizzQuestions = new Mongo.Collection('quizzquestions');
 export const QuizzScores = new Mongo.Collection('quizzscores');
-export const GreetDate = new Mongo.Collection('greetdate');
-// Deprecated?
+
 export const Stats = new Mongo.Collection('statistics');
 
 /// Index pour les localisations
@@ -55,7 +60,7 @@ export const Stats = new Mongo.Collection('statistics');
             }
 
             if (options.search.props.hasOwnProperty('msg')) {
-                selector[options.search.props.channel+'-msg'] = {
+                selector[options.search.props.channel + '-msg'] = {
                     $exists: true, $ne: ''
                 };
             }
@@ -83,8 +88,8 @@ export const Stats = new Mongo.Collection('statistics');
                 // Data for map
                 // If public map, only shows allowed names
                 // FIXME Also chan should be mandatory
-                let chan =options.search.props.channel; 
-                
+                let chan = options.search.props.channel;
+
                 let fobj =
                 {
                     allow: 1,
@@ -151,4 +156,23 @@ export const Stats = new Mongo.Collection('statistics');
         //            return {dname:1, allow:1, msg:1, latitude:1, longitude:1};
         //        }
     })
+});
+
+// Map badges
+//export const 
+
+export const Images = new FilesCollection({
+    debug: true,
+    collectionName: 'Images',
+    // Required to let you remove uploaded file
+    allowClientCode: false,
+    onBeforeUpload: function (file) {
+        // Allow upload files under 100Kb, and only in png/jpg/jpeg formats
+        console.error('before upload', file);
+        if ((file.size <= 100 * 1024) && /png|jpg/i.test(file.extension)) {
+            return true;
+        } else {
+            return 'File too big or wrong extension !';
+        }
+    }
 });

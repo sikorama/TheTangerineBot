@@ -4,14 +4,13 @@
 
   <!-- TODO: use an image collection, and generate options -->
   <datalist id="imagelist">
+    {{#each i in iconnames}}
+    <option value="{{i}}"></option>
+    {{/each}}
     <option value="/default.png"></option>
-    <option value="/tang1.png"></option>
-    <option value="/tang2.png"></option>
-    <option value="/tang3.png"></option>
-    <option value="/tang4.png"></option>
-    <option value="/tang5.png"></option>
     <option value="/favicon-32.png"></option>
   </datalist>
+
 
   <table class="pure-table">
     <thead>
@@ -58,7 +57,7 @@
                   <input class="chanSettings" value="{{c.map_icon_std}}" list="imagelist" name="map_icon_std">
                 </td>
                 <td>
-                  <img src="{{c.map_icon_std}}">
+                  <img src="{{getIcon c.map_icon_std}}">
                 </td>
               </tr>
               <tr>
@@ -69,7 +68,7 @@
                   <input class="chanSettings" value="{{c.map_icon_name}}" list="imagelist" name="map_icon_name">
                 </td>
                 <td>
-                  <img src="{{c.map_icon_name}}">
+                  <img src="{{getIcon c.map_icon_name}}">
                 </td>
               </tr>
               <tr>
@@ -80,7 +79,7 @@
                   <input class="chanSettings" value="{{c.map_icon_msg}}" list="imagelist" name="map_icon_msg">
                 </td>
                 <td>
-                  <img src="{{c.map_icon_msg}}">
+                  <img src="{{getIcon c.map_icon_msg}}">
                 </td>
               </tr>
             </tbody>
@@ -255,16 +254,40 @@
     </tbody>
   </table>
 
+  <h2>Map Badges Files</h2>
+  <div>
+    Add a picture: {{>UploadForm}}
+  </div>
+
+  <table class="pure-table">
+    <tbody>
+      {{#each p in pictures}}
+      <tr>
+        <td>
+          <img class="pure-img" src="{{link p}}">
+        </td>
+        <td>
+          <a href="{{link p}}" target="_blank" rel="noopener noreferrer">
+            {{p.name}}
+          </a>
+          ({{p.size}} bytes)
+        </td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
+
+
   <h2>Configuration</h2>
   <table>
     <tbody>
       <tr>
-        <td>          
+        <td>
           Website URL
         </td>
-        <td>          
+        <td>
           <input id="URL" value="{{WEBSITE_URL}}">
-        </td>        
+        </td>
       </tr>
     </tbody>
   </table>
@@ -278,4 +301,18 @@
 
   <br>
   <img src="/bot.png">
+</template>
+
+
+<template name="UploadForm">
+  {{#with currentUpload}}
+  {{stringify file}}
+  Uploading <b>{{file.name}}</b>:
+
+  <!--
+  <span id="progress">{{progress.get}}%</span>
+-->
+  {{else}}
+  <input id="fileInput" type="file">
+  {{/with}}
 </template>
