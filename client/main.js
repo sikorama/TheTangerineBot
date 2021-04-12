@@ -3,7 +3,6 @@ import { Session } from 'meteor/session';
 import { UserLocations, BotChannels, GreetMessages, Settings } from '../imports/api/collections.js';
 import { getCountryName } from '../imports/api/countrycodes.js';
 import { checkUserRole } from '../imports/api/roles.js';
-import { getParentId, manageSearchEvents } from '../imports/client/tools.js';
 import '../imports/routes.js';
 import '../imports/client/Settings.js';
 import '../imports/client/QuizzTable.js';
@@ -104,92 +103,8 @@ Template.About.helpers({
   }
 })
 
-// ------------ User localization
-Template.LatestLocations.onCreated(function () {
-  Session.set('locations_sort_field', 'name');
-  Session.set('locations_sort_dir', 1);
-  Session.setDefault('locations_limit', 50);
-  Session.setDefault('locations_page', 1);
-  Session.setDefault('locations_count', 0);
-
-  Session.set('searchUsers', {});
-  Meteor.call("getNumPeople", function (err, res) {
-    Session.set("numPeopleLoc", res);
-  });
-});
-
-Template.LatestLocations.helpers({
-  getlastreq(ul) {
-    let chan = Session.get('sel_channel');
-    if (chan) {
-      return ul[chan + '-lastreq'];
-    }
-  },
-  getUserLocs() {
-    let searchData = Session.get("searchUsers");
-    let curSearch = searchData.text;
-    if (curSearch === undefined)
-      curSearch = '';
-
-    let prop = {};
-
-    if (searchData.streamer === true) {
-      prop.streamer = true;
-    }
-
-    if (searchData.msg === true) {
-      prop.msg = true;
-    }
-    if (searchData.show === true) {
-      prop.show = true;
-    }
-
-    prop.channel = Session.get('sel_channel');
-    //console.error(prop);
-
-    // sort:
-    let sn = Session.get('locations_sort_field', 'username');
-    let sd = Session.get('locations_sort_dir', 1);
-    let sortobj = {};
-    sortobj[sn] = sd;
-    prop.sortby = sortobj;
-
-    let l = Session.get('locations_limit');
-    if (l === undefined) l = 50;
-
-    let s = parseInt(Session.get('locations_page') - 1);
-    s *= l;
-
-    let res = UserLocIndex.search(curSearch, {
-      limit: l,
-      skip: s,
-      props: prop,
-    });
-
-    //    console.error(res.count());
-    Session.set('locations_count', res.count())
-    return res.mongoCursor;
-  },
-  numLocations() {
-    return Session.get('locations_count');
-  }
-});
 
 
-
-const manageSortEvent = function (event, field) {
-  let n = event.currentTarget.getAttribute('name');
-  field_name = field + '_sort_field';
-  field_dir = field + '_sort_dir';
-  if (Session.equals(field_name, n)) {
-    let d = Session.get(field_dir);
-    Session.set(field_dir, -d);
-  }
-  else {
-    Session.set(field_name, n);
-    Session.set(field_dir, 1);
-  }
-};
 
 
 function rgba(r, g, b, a) {
@@ -211,17 +126,24 @@ Template.Stats.events({
 });
 
 Template.Stats.onRendered(function () {
-  Session.set('statPage', 1);
+  this.subscribe('botChannels', { enabled: true });
+
+  Session.setDefault('statPage', 1);
+  Session.setDefault('numPeopleLoc', 0);
+
   var ctx = null;
 
   this.autorun(() => {
-    let sch = Session.get('sel_channel');
-    if (!sch) return;
+    console.info('autorun');
 
-    Meteor.call("getNumPeople", sch, function (err, res) {
-      Session.set("numPeopleLoc", res);
-    });
+    let sch = Session.get('sel_channel');
+    if (!sch) {
+      console.error("no channel selected!");
+      return;
+    }
+
     let page = Session.get('statPage');
+    console.info('autorun',sch,page);
 
     switch (page) {
       case 1:
@@ -232,6 +154,9 @@ Template.Stats.onRendered(function () {
         });
         break;
       case 2:
+        Meteor.call("getNumPeople", sch, function (err, res) {
+          Session.set("numPeopleLoc", res);
+        });
         Meteor.call('aggregateUserField', sch, "country", function (err, res) {
           res.sort((a, b) => b.t - a.t);
           Session.set('CountPerCountry', res);
@@ -259,6 +184,14 @@ Template.Stats.helpers({
   },
   getActiveUsers() {
     return Session.get('activeUsers');
+  },
+  statsEnabled() {
+    let bc = BotChannels.findOne({ channel: chan });
+    if (bc) {
+      return bc.active_users;
+    }
+    this.subscribe('botChannels', { enabled: true });
+
   }
 });
 

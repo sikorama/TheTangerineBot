@@ -2,6 +2,7 @@
 import { Session } from 'meteor/session';
 import { Settings,QuizzScores } from '../api/collections.js';
 import './QuizzTable.html';
+import { manageSortEvent,getParentId, manageSearchEvents } from './tools.js';
 
 const topics = [
     "Art",

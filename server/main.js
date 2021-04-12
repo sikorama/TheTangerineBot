@@ -701,8 +701,8 @@ Meteor.startup(() => {
         }
         ar.push({ name: dispname, ts: dnow, msg: msg });
 
-        // Keep only 20 names in the list
-        if (ar.length > 20) {
+        // Keep only 40 names in the list
+        if (ar.length > 40) {
           ar.shift();
         }
         last_active_users[chan] = ar;
@@ -715,7 +715,7 @@ Meteor.startup(() => {
         if (isModerator) {
           console.error('last active=', last_active_users);
 
-          let res = last_active_users[chan].filter((item) => { return (dnow - item.ts < 1000 * 60 * 30); });
+          let res = last_active_users[chan].filter((item) => { return (dnow - item.ts < 1000 * 60 * 60 *2); });
           //console.error(res);
 
           if (res.length >= 0) {

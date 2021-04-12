@@ -25,3 +25,19 @@ export function getParentId(el) {
     console.error(vname, sel);
     Session.set(vname, sel);
   }
+
+
+  export function manageSortEvent(event, field) {
+    let n = event.currentTarget.getAttribute('name');
+    field_name = field + '_sort_field';
+    field_dir = field + '_sort_dir';
+    if (Session.equals(field_name, n)) {
+      let d = Session.get(field_dir);
+      Session.set(field_dir, -d);
+    }
+    else {
+      Session.set(field_name, n);
+      Session.set(field_dir, 1);
+    }
+  };
+  

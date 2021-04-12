@@ -34,7 +34,6 @@ Template.WorldMap.onRendered(function () {
 
     }
 
-    console.error(searchOptions);
     Session.set("searchUsers", searchOptions);
 
     // Create Map
@@ -51,7 +50,6 @@ Template.WorldMap.onRendered(function () {
     //        return ul[chan+'-lastreq'];
     let songreqfield=chan+'-lastreq';
     let msgfield=chan+'-msg';
-    console.error(songreqfield);
 
     let ic;
     if (p)
@@ -59,17 +57,13 @@ Template.WorldMap.onRendered(function () {
     else
       ic = ["/default.png", "/default.png", "/default.png"];
 
-    console.error('ICONS', chan, ic);
-
     let icons = ic.map((item) => {
       if (item === null) return null;
       if (item.length === 0) return null;
       if (item[0] != "/") {
         let im = Images.findOne({name:item});
         if (!im) return null;
-        console.error(im);
-        console.error(im.link());
-        
+                
         item = im.link();
       }
       return L.icon({
@@ -100,12 +94,10 @@ Template.WorldMap.onRendered(function () {
       cursor.forEach(function (item) {
         try {
           if (item._id in markers) {
-            //console.error('item deja present', item._id)
             newmarkers[item._id] = markers[item._id];
             markers[item._id] = undefined;
           }
           else {
-            //console.error('nouvel item', item._id)
 
             if (!isNaN(item.latitude)) {
               let uname = ''
@@ -120,7 +112,6 @@ Template.WorldMap.onRendered(function () {
                 }
               }
               else {
-                //              console.error(item);
                 if (item.mapname) {
                   uname = item.mapname;
                   icon = 1;
@@ -131,7 +122,6 @@ Template.WorldMap.onRendered(function () {
               }
 
               if (uname === undefined) {
-                //                console.error('uname===undefined',uname);
                 uname = '';
               }
               txt = uname;
@@ -178,7 +168,6 @@ Template.WorldMap.onRendered(function () {
       let ak = Object.keys(markers);
       if (ak.length > 0) {
         ak.forEach(function (k) {
-          //  console.error(k);
           let mm = markers[k];
           if (mm != undefined) {
             mymap.removeLayer(mm);
@@ -215,10 +204,13 @@ Template.WorldMap.onRendered(function () {
         if (searchData.streamer === true) {
           prop.streamer = true;
         }
-
+        
         let chan = Session.get('sel_channel');
-        //console.error('sel_channel=', c);
         prop.channel = chan;
+        
+        if (searchData.lastreq === true) {
+          prop.latreq = chan;
+        }
 
         if (searchData.activeSince === true) {
           let ad = 8;

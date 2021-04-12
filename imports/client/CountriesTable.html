@@ -2,14 +2,16 @@
 
   <button class="selStat pure-button {{#if showStat 1}}pure-button-primary{{/if}}" name="1">Countries</button>
   <button class="selStat pure-button {{#if showStat 2}}pure-button-primary{{/if}}" name="2">Songs</button>
-  <button class="selStat pure-button {{#if showStat 3}}pure-button-primary{{/if}}" name="3">Active Users</button>
-
+  {{#if statsEnabled}}
+    <button class="selStat pure-button {{#if showStat 3}}pure-button-primary{{/if}}" name="3">Active Users</button>
+  {{/if}}
+  
   {{#if showStat 1}}
   <h2>Number of people per country</h2>
 
   {{#let countries=getCountryCount}}
 
-  <p><strong>{{numPeopleLoc}}</strong> people registered from <strong>{{countries.length}}</strong> </p>
+  <p><strong>{{numPeopleLoc}}</strong> people registered from <strong>{{countries.length}} countries</strong> </p>
   <table class="pure-table">
     <thead>
       <tr>

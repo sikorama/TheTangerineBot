@@ -11,7 +11,6 @@
     <option value="/favicon-32.png"></option>
   </datalist>
 
-
   <table class="pure-table">
     <thead>
       <tr>
@@ -130,6 +129,8 @@
           {{#if c.songrequest}}
           <table>
             <tbody>
+              {{#if isCurEditChan c._id}}
+
               <tr>
                 <td> RegExp 1 </td>
                 <td> <input type="text" value="{{c.requestregex1}}" class="chanSettings" name="requestregex1"> </td>
@@ -138,6 +139,7 @@
                 <td> RegExp 2 </td>
                 <td> <input type="text" value="{{c.requestregex2}}" class="chanSettings" name="requestregex2"> </td>
               </tr>
+              {{/if}}
             </tbody>
           </table>
           {{/if}}

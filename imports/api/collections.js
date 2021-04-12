@@ -64,6 +64,13 @@ export const Stats = new Mongo.Collection('statistics');
                     $exists: true, $ne: ''
                 };
             }
+
+            if (options.search.props.hasOwnProperty('lastreq')) {
+                selector[options.search.props.request + '-lastreq'] = {
+                    $exists: true, $ne: ''
+                };
+            }
+
             if (options.search.props.hasOwnProperty('streamer')) {
                 selector.streamer = true
             }
@@ -162,7 +169,7 @@ export const Stats = new Mongo.Collection('statistics');
 //export const 
 
 export const Images = new FilesCollection({
-    debug: true,
+    //debug: true,
     collectionName: 'Images',
     // Required to let you remove uploaded file
     allowClientCode: false,
