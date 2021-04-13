@@ -9,65 +9,63 @@ import {
   Images
 } from '../imports/api/collections.js';
 
-import { hasRole,getUserGroups } from './user_management.js';
+import { hasRole, getUserGroups } from './user_management.js';
 
 
 export function init_publications() {
 
 
-//
-// ---------------------- CHANNELS -------------------------------
-//
-Meteor.publish('botChannels', function (sel) {
-  if (!sel) sel = {}
-  let uid = this.userId;
-  if (uid)
-  {
-    // If non admin, only publish enabled channels corresponding to groups associated to the user
-    if (!hasRole(uid, ['admin'])) {
-      sel.channel = {$in : getUserGroups(uid)};
-      sel.enabled = true;
+  //
+  // ---------------------- CHANNELS -------------------------------
+  //
+  Meteor.publish('botChannels', function (sel) {
+    if (!sel) sel = {}
+    let uid = this.userId;
+    if (uid) {
+      // If non admin, only publish enabled channels corresponding to groups associated to the user
+      if (!hasRole(uid, ['admin'])) {
+        sel.channel = { $in: getUserGroups(uid) };
+        sel.enabled = true;
+      }
+      //console.info('Publication BotChannels, sel=', sel,BotChannels.findOne(sel));
+      return BotChannels.find(sel);
     }
-    //console.info('Publication BotChannels, sel=', sel,BotChannels.findOne(sel));
-    return BotChannels.find(sel);
-  }
-  else 
-  {
-   // Limited access for non logged users 
-   // Only required fields
-   return BotChannels.find(sel
-    // FIXME!
-    //, 
-    //{fields: {map:1,enabled:1}}
-    );
-  }
-  this.ready();
-});
-
-//Publish the list of all channels where the bot is enabled
-Meteor.publish('EnabledChannels', function (sel) {
-  sel.enabled = true;
-  return BotChannels.find(sel, { fields: { enabled: 1, channel: 1 } })
-});
-
-// Liste des channels qui ont la fonction greet activée
-Meteor.publish('GreetChannels', function () {
-  if (hasRole(this.userId, ['admin', 'greet'])) {
-    let sel = {
-      enabled: true,
-      greet: true
+    else {
+      // Limited access for non logged users 
+      // Only required fields
+      return BotChannels.find(sel
+        // FIXME!
+        //, 
+        //{fields: {map:1,enabled:1}}
+      );
     }
-    return BotChannels.find(sel);
-  }
-  this.ready();
-});
+    this.ready();
+  });
+
+  //Publish the list of all channels where the bot is enabled
+  Meteor.publish('EnabledChannels', function (sel) {
+    sel.enabled = true;
+    return BotChannels.find(sel, { fields: { enabled: 1, channel: 1 } })
+  });
+
+  // Liste des channels qui ont la fonction greet activée
+  Meteor.publish('GreetChannels', function () {
+    if (hasRole(this.userId, ['admin', 'greet'])) {
+      let sel = {
+        enabled: true,
+        greet: true
+      }
+      return BotChannels.find(sel);
+    }
+    this.ready();
+  });
 
 
 
 
-//
-// ---------------------- QUIZZ -------------------------------
-//
+  //
+  // ---------------------- QUIZZ -------------------------------
+  //
 
   Meteor.publish('quizzQuestions', function (sel) {
     if (hasRole(this.userId, ['admin', 'quizz'])) {
@@ -87,9 +85,9 @@ Meteor.publish('GreetChannels', function () {
     //this.ready();
   });
 
-//
-// ---------------------- LOCATIONS -------------------------------
-//
+  //
+  // ---------------------- LOCATIONS -------------------------------
+  //
 
   UserLocations.before.insert(function (userid, doc) {
     console.error('before insert', doc);
@@ -113,9 +111,9 @@ Meteor.publish('GreetChannels', function () {
 
 
 
-//
-// ---------------------- GREET MESSAGES -------------------------------
-//
+  //
+  // ---------------------- GREET MESSAGES -------------------------------
+  //
 
   Meteor.publish('greetMessages', function (sel) {
     if (hasRole(this.userId, ['admin', 'greet'])) {
@@ -133,9 +131,9 @@ Meteor.publish('GreetChannels', function () {
     this.ready();
   });
 
-//
-// ---------------------- TRANSLATOR USAGE STATS -------------------------------
-//
+  //
+  // ---------------------- TRANSLATOR USAGE STATS -------------------------------
+  //
 
   Meteor.publish('statistics', function (sel) {
     if (hasRole(this.userId, ['streamer'])) {
@@ -145,26 +143,24 @@ Meteor.publish('GreetChannels', function () {
     this.ready();
   });
 
-  //Images.remove({});
-
   Meteor.publish('images', function (sel) {
     if (!sel) sel = {}
-//    return (Images.find(sel).cursor);
+    //    return (Images.find(sel).cursor);
     return (Images.collection.find(sel));
   });
-/*
+
   Images.allow({
     insert(userid, doc) {
       if (userid) return true;
     },
     update(userid, doc) {
-//      if (userid) return true;
+      if (userid) return true;
     },
     remove(userid, doc) {
 //      if (userid) return true;
+      if (hasRole(userid, 'admin')) 
+        return true;
+      
     }
   });
-
-*/
-
 }

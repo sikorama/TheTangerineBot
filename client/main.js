@@ -103,10 +103,6 @@ Template.About.helpers({
   }
 })
 
-
-
-
-
 function rgba(r, g, b, a) {
   return 'rgba(' + Math.floor(r) + ',' + Math.floor(g) + ',' + Math.floor(b) + ',' + a + ')';
 }
@@ -143,23 +139,27 @@ Template.Stats.onRendered(function () {
     }
 
     let page = Session.get('statPage');
-    console.info('autorun',sch,page);
+    console.info('autorun', sch, page);
 
     switch (page) {
       case 1:
-        Meteor.call('aggregateUserField', sch, sch + '-lastreq', function (err, res) {
-          res.sort((a, b) => b.t - a.t);
-          //console.error(res);
-          Session.set('CountPerSong', res);
-        });
-        break;
-      case 2:
         Meteor.call("getNumPeople", sch, function (err, res) {
           Session.set("numPeopleLoc", res);
         });
         Meteor.call('aggregateUserField', sch, "country", function (err, res) {
           res.sort((a, b) => b.t - a.t);
           Session.set('CountPerCountry', res);
+        });
+        break;
+      case 2:
+        Meteor.call('aggregateUserField', sch, sch + '-lastreq', function (err, res) {
+          if (err)
+            console.error(err);
+
+          res.sort((a, b) => b.t - a.t);
+          console.error(res);
+          Session.set('CountPerSong', res);
+
         });
         break;
       case 3:
@@ -186,22 +186,23 @@ Template.Stats.helpers({
     return Session.get('activeUsers');
   },
   statsEnabled() {
+    let chan = Session.get('sel_channel');
+    if (!chan)
+      return false;
     let bc = BotChannels.findOne({ channel: chan });
     if (bc) {
       return bc.active_users;
     }
-    this.subscribe('botChannels', { enabled: true });
+    return false;
 
   }
 });
-
 
 Template.About.events({
   "click .pure-link": function (event) {
     if (event.target.id === 'logout') AccountsTemplates.logout();	// A la place de Meteor.logout()
   }
 });
-
 
 Template.ShowMore.helpers({
   selected(v) {

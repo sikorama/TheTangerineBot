@@ -120,6 +120,14 @@ Template.Settings.events({
         else
             Session.set('curEditChan', id);
 
+    },
+    'click span[name="remove-picture"]': function(event) {
+        let id = getParentId(event.target);
+        console.error('remove image',id);
+        let res = confirm('Are you sure?');
+        if (res===true) 
+            Images.collection.remove(id);
+        
     }
 });
 

@@ -264,17 +264,21 @@
   <table class="pure-table">
     <tbody>
       {{#each p in pictures}}
-      <tr>
+      {{#if p}}
+      <tr id={{p._id}}>
         <td>
           <img class="pure-img" src="{{link p}}">
         </td>
         <td>
           <a href="{{link p}}" target="_blank" rel="noopener noreferrer">
             {{p.name}}
-          </a>
+          </a>          
           ({{p.size}} bytes)
+          <span name="remove-picture" class="autohide delete">&#9746;</span>
+
         </td>
       </tr>
+      {{/if}}
       {{/each}}
     </tbody>
   </table>
