@@ -209,7 +209,7 @@ Template.WorldMap.onRendered(function () {
         prop.channel = chan;
         
         if (searchData.lastreq === true) {
-          prop.latreq = chan;
+          prop.lastreq = chan;
         }
 
         if (searchData.activeSince === true) {

@@ -66,7 +66,7 @@ export const Stats = new Mongo.Collection('statistics');
             }
 
             if (options.search.props.hasOwnProperty('lastreq')) {
-                selector[options.search.props.request + '-lastreq'] = {
+                selector[options.search.props.channel + '-lastreq'] = {
                     $exists: true, $ne: ''
                 };
             }
