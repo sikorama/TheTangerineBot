@@ -152,15 +152,32 @@
         <td>Discord Notifications</td>
         <td></td>
         <td>
-          RAID Channel Hook URL
-          <br>
-          <input type="text" value="{{c.discord_raid_url}}" class="chanSettings" name="discord_raid_url">
-          <br>
-          Going LIVE Hook URLS
-          <br>
-          <input type="text" value="{{c.discord_goinglive_url1}}" class="chanSettings" name="discord_goinglive_url1">
-          <br>
-          <input type="text" value="{{c.discord_goinglive_url2}}" class="chanSettings" name="discord_goinglive_url2">
+          <table>
+            <tbody>
+              <tr>
+                <td>
+                  RAID Channel Hook URL
+                </td>
+                <td>
+                  <input type="text" value="{{c.discord_raid_url}}" class="chanSettings" name="discord_raid_url">
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  Going LIVE Hook URLS
+                </td>
+                <td>
+                  <input type="text" value="{{c.discord_goinglive_url1}}" class="chanSettings" name="discord_goinglive_url1">
+                </td>
+              </tr>
+              <tr>
+                  <td></td>
+                  <td>
+                    <input type="text" value="{{c.discord_goinglive_url2}}" class="chanSettings" name="discord_goinglive_url2">
+                  </td>
+                </tr>
+            </tbody>
+          </table>
         </td>
       </tr>
       <tr>
