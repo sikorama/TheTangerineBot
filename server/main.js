@@ -13,7 +13,8 @@ import {
   QuizzQuestions,
   QuizzScores,
   Stats,
-  GreetDate
+  GreetDate,
+  Raiders
 } from '../imports/api/collections.js';
 import { init_users } from './user_management.js';
 import { init_publications } from './publications.js';
@@ -30,6 +31,8 @@ import { init_greetings, getGreetMessages, replaceKeywords } from './greetings.j
 
 import { country_lang, patterns } from './const.js';
 
+import {sendRaidChannelDiscord} from './notifications.js';
+
 const tmi = require('tmi.js');
 const gtrans = require('googletrans').default;
 const gc = require('node-geocoder');
@@ -38,6 +41,8 @@ const PhraseIt = require('phraseit');
 let botname = process.env.CHANNEL_NAME;
 let botpassword = process.env.CHANNEL_PASSWORD;
 
+let bot_discord_url = process.env.BOT_DISCORD_HOOK;
+
 // TODO: If no channel & password, then exit...
 if ((botname == undefined) || (botpassword == undefined)) {
   console.error('No CHANNEL_NAME or CHANNEL_PASSWORD environment variable found. Exiting.');
@@ -45,26 +50,6 @@ if ((botname == undefined) || (botpassword == undefined)) {
 }
 
 botpassword = 'oauth:' + botpassword;
-
-
-// Cleanup DB
-//UserLocations.update({}, { $unset: { proximity: 1 } });
-// Migrate map messages
-/*let channames= BotChannels.find().fetch().map((item)=>item.channel);
-console.error('migration:', channames);
-// For each userlLoc with a msg field
-UserLocations.find({ msg: {$exists:1}}).fetch().forEach(function(u) {
-  // Check channels
-  let upobj={};
-  channames.forEach(function(cn) {
-    mf = cn+'-msg';
-    if (u[cn]!=undefined)
-      upobj[mf] = u.msg;
-  });
-  console.error(u, upobj);
-  UserLocations.update(u._id, {$set: upobj});
-});
-*/
 
 //  UserLocations.update(u._id, {$unset: {msg:1}});
 
@@ -272,14 +257,14 @@ Meteor.startup(() => {
 
   Meteor.methods({
     getActiveUsers: function (chan) {
-      
+
       if (!chan)
         return [];
       if (!last_active_users[chan]) return [];
       if (this.userId)
         return last_active_users[chan];
 
-        return [];
+      return [];
     }
   })
 
@@ -370,7 +355,7 @@ Meteor.startup(() => {
       // Check if there is already someone with the same location
       let sameLoc = UserLocations.findOne({ location: item.location, latitude: { $exists: 1 } });
       if (sameLoc) {
-        console.info('Found someone with same location: ', item.location, sameLoc);
+//        console.info('Found someone with same location: ', item.location, sameLoc);
         // If it's the same, then do nothing :)
         if (sameLoc._id != item._id) {
           UserLocations.update(item._id, {
@@ -722,7 +707,7 @@ Meteor.startup(() => {
         if (isModerator) {
           console.error('last active=', last_active_users);
 
-          let res = last_active_users[chan].filter((item) => { return (dnow - item.ts < 1000 * 60 * 60 *2); });
+          let res = last_active_users[chan].filter((item) => { return (dnow - item.ts < 1000 * 60 * 60 * 2); });
           //console.error(res);
 
           if (res.length >= 0) {
@@ -835,8 +820,8 @@ Meteor.startup(() => {
         let ll = tr_lang[cmd];
         //console.error(ll);
         // Remove some words (emotes for example)
-        let txt = commandName.replace(/ LUL/g,'');
-        
+        let txt = commandName.replace(/ LUL/g, '');
+
         // TODO: remove Urls too
 
 
@@ -866,7 +851,7 @@ Meteor.startup(() => {
               say(target, context['display-name'] + ', ' + txt + '/' + res.text);
             }
             else {
-              
+
               // Actually Translate text
               // TODO: Check is translated text == original text. In that case it
               // means the command was not correctly used (ex: "!en hello friends")
@@ -877,8 +862,8 @@ Meteor.startup(() => {
               // 3/26/2021 11:43:05 says: I'm fucking my face              
 
               //res.text = res.text.replace(/fuck/g,'****');
-              if (res.text.indexOf('fuck')>=0) {
-                res.text="I think that would be offensive if i said that";
+              if (res.text.indexOf('fuck') >= 0) {
+                res.text = "I think that would be offensive if i said that";
                 say(target, context['display-name'] + ' ' + res.text);
                 return;
               }
@@ -1452,39 +1437,48 @@ Meteor.startup(() => {
   };
 
   // Called every time the bot connects to Twitch chat
-  function onConnectedHandler(addr, port) {    
+  function onConnectedHandler(addr, port) {
     try {
-    console.log(`* Connected to ${addr}:${port}`);
-    } catch(e) {
+      console.log(`* Connected to ${addr}:${port}`);
+    } catch (e) {
       console.error(e);
     }
   }
 
-  function onRaidedHandler(channel,raider, vcount, tags) {
+  function onRaidedHandler(channel, raider, vcount, tags) {
     try {
-      console.log(`>>>> ${channel} Raided by ${raider} with ${count} viewers, $(tags)`);
-      Raiders.upsert({raider:raider, channel:channel}, {$inc: {count: 1, viewers:vcount} });
-    } catch(e) {
+//      console.log(`>>>> ${channel} Raided by ${raider} with ${vcount} viewers, ${tags}`);
+
+      Raiders.upsert({ raider: raider, channel: channel }, { $inc: { count: 1, viewers: vcount } });
+      console.error(bot_discord_url);
+
+      if (bot_discord_url)
+      sendRaidChannelDiscord(raider + " is raiding "+channel+" with " + vcount + " viewers", raider, channel, bot_discord_url);
+
+    } catch (e) {
       console.error(e);
     }
   }
 
-  function onStateHandler(channel,state) {
+//  onRaidedHandler('fernandosouzaguitar','duobarao',10);
+  
+  
+  function onStateHandler(channel, state) {
     try {
-      console.log(`>>>>>> ${channel} State changed`, JSON.stringify(state));  
-    } catch(e) {
+      console.log(`>>>>>> ${channel} State changed`, JSON.stringify(state));
+    } catch (e) {
       console.error(e);
     }
 
   }
 
-  function onActionHandler(channel,userstate,message,self) {
+  function onActionHandler(channel, userstate, message, self) {
     try {
       if (self) return;
-      console.log(`>>>> ${channel} Action ${userstate} m=${message}`);  
-    } catch(e) {
+      console.log('>>>>',channel,'Action',JSON.Stringify(userstate),'m=',message);
+    } catch (e) {
       console.error(e);
     }
   }
-    
+
 });

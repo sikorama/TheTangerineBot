@@ -131,6 +131,18 @@ export function init_publications() {
     this.ready();
   });
 
+
+  // ------------------- RAIDERS --------------
+
+  Meteor.publish('raiders', function (sel) {
+    //if (hasRole(this.userId, 'admin')) {
+    if (this.userId) {
+      if (!sel) sel = {}
+      return Settings.find(sel);
+    }
+    this.ready();
+  });
+
   //
   // ---------------------- TRANSLATOR USAGE STATS -------------------------------
   //
