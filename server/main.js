@@ -31,7 +31,7 @@ import { init_greetings, getGreetMessages, replaceKeywords } from './greetings.j
 
 import { country_lang, patterns } from './const.js';
 
-import {sendRaidChannelDiscord} from './notifications.js';
+import {sendRaidChannelDiscord,sendChannelDiscord} from './notifications.js';
 
 const tmi = require('tmi.js');
 const gtrans = require('googletrans').default;
@@ -1452,8 +1452,15 @@ Meteor.startup(() => {
       Raiders.upsert({ raider: raider, channel: channel }, { $inc: { count: 1, viewers: vcount } });
       console.error(bot_discord_url);
 
+      let title = raider + " is raiding "+channel+" with " + vcount + " viewers";
       if (bot_discord_url)
-      sendRaidChannelDiscord(raider + " is raiding "+channel+" with " + vcount + " viewers", raider, channel, bot_discord_url);
+        sendRaidChannelDiscord(title, raider, channel, bot_discord_url);
+
+      // Check if the target channel
+      let bc = BotChannels.fondOne({channel: channel});
+      if (bc &&bc.discord_raid_url) {
+        sendChannelDiscord(title, raider,bc.discord_raid_url);
+      }
 
     } catch (e) {
       console.error(e);
@@ -1475,7 +1482,7 @@ Meteor.startup(() => {
   function onActionHandler(channel, userstate, message, self) {
     try {
       if (self) return;
-      console.log('>>>>',channel,'Action',JSON.Stringify(userstate),'m=',message);
+      console.log('>>>>',channel,'Action',JSON.stringify(userstate),'m=',message);
     } catch (e) {
       console.error(e);
     }

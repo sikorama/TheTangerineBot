@@ -19,6 +19,7 @@
         <th>World Map</th>
         <th>Greet</th>
         <th>Song Requests</th>
+        <th>Notifications</th>
         <th>More</th>
       </tr>
     </thead>
@@ -143,6 +144,14 @@
             </tbody>
           </table>
           {{/if}}
+        </td>
+
+        <td> 
+          RAID Channel Hook URL
+          <input type="text" value="{{c.discord_raid_url}}" class="chanSettings" name="discord_raid_url">
+          Going LIVE Hook URLS
+          <input type="text" value="{{c.discord_goinglive_url1}}" class="chanSettings" name="c.discord_goinglive_url1">
+          <input type="text" value="{{c.discord_goinglive_url2}}" class="chanSettings" name="c.discord_goinglive_url2">
         </td>
 
         <td class="centered">
@@ -282,6 +291,7 @@
       {{/each}}
     </tbody>
   </table>
+
 
 
   <h2>Configuration</h2>
