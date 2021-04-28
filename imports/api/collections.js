@@ -18,6 +18,9 @@ export const QuizzScores = new Mongo.Collection('quizzscores');
 
 export const Stats = new Mongo.Collection('statistics');
 
+export const Raiders = new Mongo.Collection('raiders');
+
+
 /// Index pour les localisations
 /*const*/ UserLocIndex = new Index({
     collection: UserLocations,

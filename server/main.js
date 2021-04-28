@@ -571,9 +571,14 @@ Meteor.startup(() => {
   }
 
   // Register our event handlers (defined below)
-  bclient.on('message', Meteor.bindEnvironment(onMessageHandler));
-  //  bclient.on('message', onMessageHandler);
+  //bclient.on('message', Meteor.bindEnvironment(onMessageHandler));
+  bclient.on('chat', Meteor.bindEnvironment(onMessageHandler));
+
   bclient.on('connected', onConnectedHandler);
+
+  bclient.on('raided', Meteor.bindEnvironment(onRaidedHandler));
+  bclient.on('roomstate', Meteor.bindEnvironment(onStateHandler));
+  bclient.on('action', onActionHandler);
 
   // Connect to Twitch:
   bclient.connect();
@@ -581,6 +586,8 @@ Meteor.startup(() => {
   // Default regex for parsing requests
   const default_regsonglistreq1 = /(.*) \brequested\s(.*)\s\bat position/
   const default_regsonglistreq2 = /@(.*), (.*)added to queue/
+
+
 
   // Called every time a message comes in
   function onMessageHandler(target, context, msg, self) {
@@ -1445,8 +1452,39 @@ Meteor.startup(() => {
   };
 
   // Called every time the bot connects to Twitch chat
-  function onConnectedHandler(addr, port) {
+  function onConnectedHandler(addr, port) {    
+    try {
     console.log(`* Connected to ${addr}:${port}`);
+    } catch(e) {
+      console.error(e);
+    }
   }
 
+  function onRaidedHandler(channel,raider, vcount, tags) {
+    try {
+      console.log(`>>>> ${channel} Raided by ${raider} with ${count} viewers, $(tags)`);
+      Raiders.upsert({raider:raider, channel:channel}, {$inc: {count: 1, viewers:vcount} });
+    } catch(e) {
+      console.error(e);
+    }
+  }
+
+  function onStateHandler(channel,state) {
+    try {
+      console.log(`>>>>>> ${channel} State changed`, JSON.stringify(state));  
+    } catch(e) {
+      console.error(e);
+    }
+
+  }
+
+  function onActionHandler(channel,userstate,message,self) {
+    try {
+      if (self) return;
+      console.log(`>>>> ${channel} Action ${userstate} m=${message}`);  
+    } catch(e) {
+      console.error(e);
+    }
+  }
+    
 });
