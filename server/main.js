@@ -558,12 +558,10 @@ Meteor.startup(() => {
   // Register our event handlers (defined below)
   //bclient.on('message', Meteor.bindEnvironment(onMessageHandler));
   bclient.on('chat', Meteor.bindEnvironment(onMessageHandler));
-
   bclient.on('connected', onConnectedHandler);
-
   bclient.on('raided', Meteor.bindEnvironment(onRaidedHandler));
-  bclient.on('roomstate', Meteor.bindEnvironment(onStateHandler));
-  bclient.on('action', onActionHandler);
+//  bclient.on('roomstate', Meteor.bindEnvironment(onStateHandler));
+//  bclient.on('action', onActionHandler);
 
   // Connect to Twitch:
   bclient.connect();
