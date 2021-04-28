@@ -191,7 +191,7 @@ Template.Stats.helpers({
   getraids() {
     let sch = Session.get('sel_channel');
 //    console.error('getraids',sch);
-    return Raiders.find({channel:sch}, {sort: {count: 1}});
+    return Raiders.find({channel:sch}, {sort: {count: -1}});
   },
   statsEnabled() {
     let chan = Session.get('sel_channel');

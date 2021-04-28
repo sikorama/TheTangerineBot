@@ -27,7 +27,11 @@ Template.Settings.helpers({
         return Session.equals('curEditChan', chan);
     },
     getChannels() {
-        return BotChannels.find();
+        let sch = Session.get('sel_channel');
+        return BotChannels.find({channel:sch});
+    },
+    getStatChannels() {
+        return BotChannels.find({});
     },
     users() {
         return Meteor.users.find();

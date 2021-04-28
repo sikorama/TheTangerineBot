@@ -10,43 +10,40 @@
     <option value="/default.png"></option>
     <option value="/favicon-32.png"></option>
   </datalist>
+  {{#each c in getChannels}}
 
-  <table class="pure-table">
+  <table class="pure-table"  id="{{c._id}}">
     <thead>
       <tr>
-        <th>Channel</th>
-        <th>Translation</th>
-        <th>World Map</th>
-        <th>Greet</th>
-        <th>Song Requests</th>
-        <th>Notifications</th>
-        <th>More</th>
+        <th>Feature</th>
+        <th>Enabled</th>
+        <th>Parameters</th>
       </tr>
     </thead>
     <tbody>
-      {{#each c in getChannels}}
-      <tr id="{{c._id}}" class="channelEdit">
-        <td>
-          <div>
-            {{>CheckMark b=c.enabled n="enabled" c=c}}
-            <span class="{{#if isCurEditChan c._id}} strong {{/if}}">
-              {{c.channel}}
-            </span>
-          </div>
-
-          {{#if isCurEditChan c._id}}
-          <button class="delete">remove</button>
-          {{/if}}
+      <tr>
+        <td>Bot Active</td>
+        <td class="centered">
+          {{>CheckMark b=c.enabled n="enabled" c=c}}
         </td>
+        <td>
+          <button class="delete">remove</button>
+        </td>
+      </tr>
+
+      <tr class="channelEdit">
+        <td> Translation</td>
         <td class="centered">
           {{>CheckMark b=c.tr n="tr"}}
         </td>
+      </tr>
 
+      <tr>
+        <td> Map <a href="/c/{{c.channel}}">&#9732; </a>
+        </td>
+        <td class="centered">{{>CheckMark b=c.map n="map"}}</td>
         <td class="centered">
-          {{>CheckMark b=c.map n="map"}}
           {{#if c.map}}
-          <a href="/c/{{c.channel}}">&#9732; </a>
-          {{#if isCurEditChan c._id}}
           <table>
             <tbody>
               <tr>
@@ -85,14 +82,18 @@
             </tbody>
           </table>
           {{/if}}
-          {{/if}}
         </td>
+      </tr>
 
+      <tr>
+        <td>Greetings</td>
         <td class="centered">
           {{>CheckMark b=c.greet n="greet"}}
+        </td>
+        <td>
+
           <table>
             <tbody>
-              {{#if isCurEditChan c._id}}
               {{#if c.greet}}
               <tr>
                 <td>/me prefix</td>
@@ -119,18 +120,20 @@
                 </td>
               </tr>
               {{/if}}
-              {{/if}}
             </tbody>
           </table>
         </td>
+      </tr>
 
+      <tr>
+        <td>Song Requests Detection</td>
         <td class="centered">
           {{>CheckMark b=c.songrequest n="songrequest"}}
-
+        </td>
+        <td>
           {{#if c.songrequest}}
           <table>
             <tbody>
-              {{#if isCurEditChan c._id}}
 
               <tr>
                 <td> RegExp 1 </td>
@@ -140,47 +143,45 @@
                 <td> RegExp 2 </td>
                 <td> <input type="text" value="{{c.requestregex2}}" class="chanSettings" name="requestregex2"> </td>
               </tr>
-              {{/if}}
             </tbody>
           </table>
           {{/if}}
         </td>
-
-        <td> 
+      </tr>
+      <tr>
+        <td>Discord Notifications</td>
+        <td></td>
+        <td>
           RAID Channel Hook URL
+          <br>
           <input type="text" value="{{c.discord_raid_url}}" class="chanSettings" name="discord_raid_url">
+          <br>
           Going LIVE Hook URLS
-          <input type="text" value="{{c.discord_goinglive_url1}}" class="chanSettings" name="c.discord_goinglive_url1">
-          <input type="text" value="{{c.discord_goinglive_url2}}" class="chanSettings" name="c.discord_goinglive_url2">
-        </td>
-
-        <td class="centered">
-          <table>
-            <tbody>
-              <tr>
-                <td>
-                  Quizz
-                </td>
-                <td>
-                  {{>CheckMark b=c.quizz n="quizz"}}
-                </td>
-              </tr>
-              <tr>
-                <td>
-                  Active users
-                </td>
-                <td>
-                  {{>CheckMark b=c.active_users n="active_users"}}
-                </td>
-              </tr>
-
-            </tbody>
-          </table>
+          <br>
+          <input type="text" value="{{c.discord_goinglive_url1}}" class="chanSettings" name="discord_goinglive_url1">
+          <br>
+          <input type="text" value="{{c.discord_goinglive_url2}}" class="chanSettings" name="discord_goinglive_url2">
         </td>
       </tr>
-      {{/each}}
+      <tr>
+        <td>Quizz</td>
+        <td>
+          {{>CheckMark b=c.quizz n="quizz"}}
+        </td>
+      </tr>
+
+      <tr>
+        <td>
+          Active users
+        </td>
+        <td>
+          {{>CheckMark b=c.active_users n="active_users"}}
+        </td>
+      </tr>
+
     </tbody>
   </table>
+  {{/each}}
 
   {{#if isUserRole "admin greet"}}
 
@@ -194,6 +195,8 @@
     </tbody>
   </table>
 
+
+
   <h2>Translation stats</h2>
   <!-- todo: format correctly year/months-->
   <table class="pure-table">
@@ -201,7 +204,7 @@
       <th>Channel</th>
     </thead>
     <tbody>
-      {{#each c in getChannels}}
+      {{#each c in getStatChannels}}
       <tr>
         <td>
           {{c.channel}}
@@ -281,7 +284,7 @@
         <td>
           <a href="{{link p}}" target="_blank" rel="noopener noreferrer">
             {{p.name}}
-          </a>          
+          </a>
           ({{p.size}} bytes)
           <span name="remove-picture" class="autohide delete">&#9746;</span>
 

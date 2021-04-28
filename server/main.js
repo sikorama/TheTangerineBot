@@ -1465,7 +1465,8 @@ Meteor.startup(() => {
     }
   }
 
-//  onRaidedHandler('fernandosouzaguitar','duobarao',10);
+ onRaidedHandler('fernandosouzaguitar','duobarao',10);
+ onRaidedHandler('sikorama','duobarao',11);
   
   
   function onStateHandler(channel, state) {
