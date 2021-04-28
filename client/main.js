@@ -1,6 +1,6 @@
 import { Template } from 'meteor/templating';
 import { Session } from 'meteor/session';
-import { UserLocations, BotChannels, GreetMessages, Settings } from '../imports/api/collections.js';
+import { BotChannels, Raiders} from '../imports/api/collections.js';
 import { getCountryName } from '../imports/api/countrycodes.js';
 import { checkUserRole } from '../imports/api/roles.js';
 import '../imports/routes.js';
@@ -139,7 +139,7 @@ Template.Stats.onRendered(function () {
     }
 
     let page = Session.get('statPage');
-    console.info('autorun', sch, page);
+//    console.info('autorun', sch, page);
 
     switch (page) {
       case 1:
@@ -164,9 +164,12 @@ Template.Stats.onRendered(function () {
         break;
       case 3:
         Meteor.call('getActiveUsers', sch, function (err, res) {
-          console.error(err, res);
+          //console.error(err, res);
           Session.set('activeUsers', res);
         });
+        break;
+      case 4: 
+        this.subscribe('raiders', { channel: sch });
         break;
     }
   });
@@ -184,6 +187,11 @@ Template.Stats.helpers({
   },
   getActiveUsers() {
     return Session.get('activeUsers');
+  },
+  getraids() {
+    let sch = Session.get('sel_channel');
+//    console.error('getraids',sch);
+    return Raiders.find({channel:sch}, {sort: {count: 1}});
   },
   statsEnabled() {
     let chan = Session.get('sel_channel');

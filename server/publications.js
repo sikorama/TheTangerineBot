@@ -6,15 +6,12 @@ import {
   QuizzQuestions,
   QuizzScores,
   Stats,
+  Raiders,
   Images
 } from '../imports/api/collections.js';
 
 import { hasRole, getUserGroups } from './user_management.js';
-
-
 export function init_publications() {
-
-
   //
   // ---------------------- CHANNELS -------------------------------
   //
@@ -138,7 +135,7 @@ export function init_publications() {
     //if (hasRole(this.userId, 'admin')) {
     if (this.userId) {
       if (!sel) sel = {}
-      return Settings.find(sel);
+      return Raiders.find(sel);
     }
     this.ready();
   });

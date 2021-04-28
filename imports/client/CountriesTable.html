@@ -5,6 +5,7 @@
   {{#if statsEnabled}}
     <button class="selStat pure-button {{#if showStat 3}}pure-button-primary{{/if}}" name="3">Active Users</button>
   {{/if}}
+  <button class="selStat pure-button {{#if showStat 4}}pure-button-primary{{/if}}" name="4">Raids</button>
   
   {{#if showStat 1}}
   <h2>Number of people per country</h2>
@@ -92,7 +93,6 @@
 
   <h2>Last Active Users</h2>
   {{#let ausers=getActiveUsers}}
-  {{ausers}}
   <table class="pure-table">
     <thead>
       <tr>
@@ -120,6 +120,42 @@
 
   {{/let}}
   {{/if}}
+
+
+
+  {{#if showStat 4}}
+
+  <h2>Raids Leaderboards</h2>
+  {{#let raiders=getraids}}
+  <table class="pure-table">
+    <thead>
+      <tr>
+        <th>Channel</th>
+        <th>Number of raids</th>
+        <th>Total viewers</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each c in raiders}}
+      <tr>
+        <td>
+          {{c.raider}}
+        </td>
+        <td>
+          {{c.count}}
+        </td>
+        <td>
+          {{c.viewers}}
+        </td>
+      </tr>
+      {{/each}}
+
+    </tbody>
+  </table>
+
+  {{/let}}
+  {{/if}}
+
 
 
 </template>

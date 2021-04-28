@@ -1448,16 +1448,14 @@ Meteor.startup(() => {
   function onRaidedHandler(channel, raider, vcount, tags) {
     try {
 //      console.log(`>>>> ${channel} Raided by ${raider} with ${vcount} viewers, ${tags}`);
-
       Raiders.upsert({ raider: raider, channel: channel }, { $inc: { count: 1, viewers: vcount } });
-      console.error(bot_discord_url);
-
+      //console.error(bot_discord_url);
       let title = raider + " is raiding "+channel+" with " + vcount + " viewers";
       if (bot_discord_url)
         sendRaidChannelDiscord(title, raider, channel, bot_discord_url);
 
       // Check if the target channel
-      let bc = BotChannels.fondOne({channel: channel});
+      let bc = BotChannels.findOne({channel: channel});
       if (bc &&bc.discord_raid_url) {
         sendChannelDiscord(title, raider,bc.discord_raid_url);
       }
