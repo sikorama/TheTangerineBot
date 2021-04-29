@@ -41,7 +41,6 @@ const PhraseIt = require('phraseit');
 let botname = process.env.CHANNEL_NAME;
 let botpassword = process.env.CHANNEL_PASSWORD;
 
-var bot_discord_url = process.env.BOT_DISCORD_HOOK;
 
 
 // TODO: If no channel & password, then exit...
@@ -50,6 +49,13 @@ if ((botname == undefined) || (botpassword == undefined)) {
   process.exit(-1);
 }
 
+// Hooks globaux
+var bot_discord_raid_url = process.env.BOT_DISCORD_RAID_HOOK;
+
+var bot_discord_live_url = process.env.BOT_DISCORD_LIVE_HOOK;
+if (bot_discord_live_url) 
+  Settings.upsert({param:'discord_goinglive'}, {$set:{val: bot_discord_live_url}})
+
 client_id = process.env.CLIENT_ID;
 client_secret = process.env.CLIENT_SECRET;
 
@@ -57,8 +63,6 @@ console.error('client_id=',client_id);
 if (client_id!=undefined) {
   Meteor.setInterval( function() {checkLiveChannels(client_id,client_secret)},1000*60)
 } 
-
-//BotChannels.
 
 botpassword = 'oauth:' + botpassword;
 
@@ -1457,12 +1461,11 @@ Meteor.startup(() => {
 
   function onRaidedHandler(channel, raider, vcount, tags) {
     try {
-      console.log(`>>>> ${channel} Raided by ${raider} with ${vcount} viewers, ${tags}`);
-      
-      console.error(bot_discord_url);
+      console.log(`>>>> ${channel} Raided by ${raider} with ${vcount} viewers, ${tags}`);      
+      console.error(bot_discord_raid_url);
       let title = raider + " is raiding "+channel+" with " + vcount + " viewers";
       if (bot_discord_url)
-      sendRaidChannelDiscord(title, raider, channel, bot_discord_url);
+      sendRaidChannelDiscord(title, raider, channel, bot_discord_raid_url);
       
       // Check if there is a  target channel for raids
       let bc = BotChannels.findOne({channel: channel});

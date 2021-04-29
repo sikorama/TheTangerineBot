@@ -23,9 +23,6 @@ export function sendDiscord(title, discord_url, embeds) {
   });
 }
 
-export function sendLiveDiscord(channel, discord_url) {
-  sendChannelDiscord(channel + " is now live!", channel, discord_url);
-}
 
 function genChanEmbed(channel) {
   let embed = {
@@ -41,6 +38,15 @@ function genChanEmbed(channel) {
 export function sendChannelDiscord(text, channel, discord_url) {
   let embed = genChanEmbed(channel);
   sendDiscord(text, discord_url, [embed]);
+}
+
+export function sendLiveDiscord(doc, discord_url) {
+  let title = doc.user_name + " is now live! @everyone";
+  let embed = genChanEmbed(doc.user_login);
+  embed.footer = {
+    text: doc.title
+  }
+  sendDiscord(title, discord_url, [embed]);
 }
 
 
@@ -98,7 +104,6 @@ export function checkLiveChannels(client_id, client_private) {
     streamer_name = 'sikorama';
 
     let channels = BotChannels.find().fetch().map((item) => item.channel);
-    //  channels = ["sikorama","douteuxtv1","moman"]
 
     let headers = {
       'Client-ID': client_id,
@@ -112,28 +117,36 @@ export function checkLiveChannels(client_id, client_private) {
       headers: headers,
     }, Meteor.bindEnvironment(function (err, res) {
       if (!err) {
-        console.info("helix: ", JSON.parse(res.body));
+//        console.info("helix: ", JSON.parse(res.body));
         let body = JSON.parse(res.body);
         channels.forEach((chan) => {
           let f = body.data.find((item) => item.user_login == chan);
-          console.error(chan, f);
           if (f) {
-
             let c = BotChannels.findOne({ channel: chan });
             if (c) {
               if (c.live !== true) {
+                console.error(chan, f);
+
                 if (c.discord_goinglive_url1)
-                  sendLiveDiscord(chan, c.discord_goinglive_url1)
+                  sendLiveDiscord(f, c.discord_goinglive_url1)
                 if (c.discord_goinglive_url2)
-                  sendLiveDiscord(chan, c.discord_goinglive_url2)
+                  sendLiveDiscord(f, c.discord_goinglive_url2)
+
+                  let glob_discord_goinglive = Settings.findOne({ param: 'discord_goinglive' });
+                  if (glob_discord_goinglive )
+                    if (glob_discord_goinglive.val )                
+                      sendLiveDiscord(f, glob_discord_goinglive.val)
               }
-              BotChannels.upsert({ channel: chan }, { $set: { live: true } })
-              BotChannels.upsert({ channel: chan }, { $set: { live_started: f.started_at } })
-              BotChannels.upsert({ channel: chan }, { $set: { live_title: f.title } })
+              BotChannels.upsert({ channel: chan }, {
+                $set: {
+                 live: true, 
+                 live_started: f.started_at ,
+                 live_title: f.title,
+                 live_thumbnail_url: f.thumbnail_url 
+                }})
             }
           }
           else {
-
             BotChannels.upsert({ channel: chan }, { $set: { live: false } })
           }
         })
