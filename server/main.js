@@ -31,7 +31,7 @@ import { init_greetings, getGreetMessages, replaceKeywords } from './greetings.j
 
 import { country_lang, patterns } from './const.js';
 
-import {sendRaidChannelDiscord,sendChannelDiscord,checkLiveChannels} from './notifications.js';
+import { sendRaidChannelDiscord, sendChannelDiscord, checkLiveChannels } from './notifications.js';
 
 const tmi = require('tmi.js');
 const gtrans = require('googletrans').default;
@@ -54,20 +54,20 @@ var bot_discord_raid_url = process.env.BOT_DISCORD_RAID_HOOK;
 
 var bot_discord_live_url = process.env.BOT_DISCORD_LIVE_HOOK;
 
-if (bot_discord_live_url) 
-  Settings.upsert({param:'discord_goinglive'}, {$set:{val: bot_discord_live_url}})
+if (bot_discord_live_url)
+  Settings.upsert({ param: 'discord_goinglive' }, { $set: { val: bot_discord_live_url } })
 
-if (bot_discord_raid_url) 
-  Settings.upsert({param:'discord_raid'}, {$set:{val: bot_discord_raid_url}})
+if (bot_discord_raid_url)
+  Settings.upsert({ param: 'discord_raid' }, { $set: { val: bot_discord_raid_url } })
 
 
 client_id = process.env.CLIENT_ID;
 client_secret = process.env.CLIENT_SECRET;
 
-console.error('client_id=',client_id);
-if (client_id!=undefined) {
-  Meteor.setInterval( function() {checkLiveChannels(client_id,client_secret)},1000*60)
-} 
+console.error('client_id=', client_id);
+if (client_id != undefined) {
+  Meteor.setInterval(function () { checkLiveChannels(client_id, client_secret) }, 1000 * 60)
+}
 
 botpassword = 'oauth:' + botpassword;
 
@@ -376,7 +376,7 @@ Meteor.startup(() => {
       // Check if there is already someone with the same location
       let sameLoc = UserLocations.findOne({ location: item.location, latitude: { $exists: 1 } });
       if (sameLoc) {
-//        console.info('Found someone with same location: ', item.location, sameLoc);
+        //        console.info('Found someone with same location: ', item.location, sameLoc);
         // If it's the same, then do nothing :)
         if (sameLoc._id != item._id) {
           UserLocations.update(item._id, {
@@ -581,8 +581,8 @@ Meteor.startup(() => {
   bclient.on('chat', Meteor.bindEnvironment(onMessageHandler));
   bclient.on('connected', onConnectedHandler);
   bclient.on('raided', Meteor.bindEnvironment(onRaidedHandler));
-//  bclient.on('roomstate', Meteor.bindEnvironment(onStateHandler));
-//  bclient.on('action', onActionHandler);
+  //  bclient.on('roomstate', Meteor.bindEnvironment(onStateHandler));
+  //  bclient.on('action', onActionHandler);
 
   // Connect to Twitch:
   bclient.connect();
@@ -1466,19 +1466,25 @@ Meteor.startup(() => {
 
   function onRaidedHandler(channel, raider, vcount, tags) {
     try {
-      console.log(`>>>> ${channel} Raided by ${raider} with ${vcount} viewers, ${tags}`);      
+      console.log(`>>>> ${channel} Raided by ${raider} with ${vcount} viewers, ${tags}`);
       console.error(bot_discord_raid_url);
-      let title = raider + " is raiding "+channel+" with " + vcount + " viewers";
-      if (bot_discord_url)
-      sendRaidChannelDiscord(title, raider, channel, bot_discord_raid_url);
-      
-      // Check if there is a  target channel for raids
-      let bc = BotChannels.findOne({channel: channel});
-      if (bc &&bc.discord_raid_url) {
-        console.error(discord_raid_url);
-        sendChannelDiscord(title, raider,bc.discord_raid_url);
+      try {
+        let title = raider + " is raiding " + channel + " with " + vcount + " viewers";
+
+        if (bot_discord_raid_url)
+          sendRaidChannelDiscord(title, raider, channel, bot_discord_raid_url);
+
+        // Check if there is a  target channel for raids
+        let bc = BotChannels.findOne({ channel: channel });
+        if (bc && bc.discord_raid_url) {
+          console.error(discord_raid_url);
+        }
       }
- 
+      catch (e) {
+        console.error(e);
+      }
+      sendChannelDiscord(title, raider, bc.discord_raid_url);
+
       Raiders.upsert({ raider: raider, channel: channel }, { $inc: { count: 1, viewers: parseInt(vcount) } });
 
     } catch (e) {
@@ -1486,10 +1492,10 @@ Meteor.startup(() => {
     }
   }
 
-// onRaidedHandler('fernandosouzaguitar','duobarao',10);
-// onRaidedHandler('sikorama','duobarao',11);
-  
-  
+  // onRaidedHandler('fernandosouzaguitar','duobarao',10);
+  // onRaidedHandler('sikorama','duobarao',11);
+
+
   function onStateHandler(channel, state) {
     try {
       console.log(`>>>>>> ${channel} State changed`, JSON.stringify(state));
@@ -1502,7 +1508,7 @@ Meteor.startup(() => {
   function onActionHandler(channel, userstate, message, self) {
     try {
       if (self) return;
-      console.log('>>>>',channel,'Action',JSON.stringify(userstate),'m=',message);
+      console.log('>>>>', channel, 'Action', JSON.stringify(userstate), 'm=', message);
     } catch (e) {
       console.error(e);
     }
