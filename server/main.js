@@ -693,7 +693,8 @@ Meteor.startup(() => {
       cmd = cmdarray[0].substring(1).toLowerCase();
     }
 
-    if (botchan.active_users) {
+    
+    if (botchan.active_users===true) {
       const exceptnames = ['streamelements', 'songlistbot', 'nightbot'];
       if (exceptnames.indexOf(username) < 0) {
 
@@ -739,7 +740,7 @@ Meteor.startup(() => {
       }
     }
 
-
+    
     // Remove whitespace from chat message
     if (cmd === "statement") {
       say(target, randSentence());
@@ -810,6 +811,8 @@ Meteor.startup(() => {
 
     }
 
+
+    
     const langExpl = ['For example !en will translate your sentence in english. Or !pt to translate into portuguese.',
       'Available translation commands: !cn !de !en !es !fi !fr !it !jp !kr !pl !pt !ro !ru !tu ...'
     ];
@@ -900,6 +903,7 @@ Meteor.startup(() => {
         }
       }
 
+    }
 
 
       // ------------------- MAP -------------------------
@@ -1095,7 +1099,6 @@ Meteor.startup(() => {
         }
       }
 
-    }
 
     if (botchan.quizz === true) {
 
@@ -1254,6 +1257,8 @@ Meteor.startup(() => {
       }
     }
 
+    
+
     // ---------- catch !so command
     // Extract the 2nd parameter, removes @ symbols (sonitize?)
     if (isModerator === true && botchan.so === true) {
@@ -1293,6 +1298,7 @@ Meteor.startup(() => {
       }
     }
 
+    
     // ------------------- GREET ----------------------
     if (botchan.greet === true) {
       // dnow?
