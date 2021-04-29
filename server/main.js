@@ -1477,6 +1477,10 @@ Meteor.startup(() => {
 //      if chan[0]==='#'
       chan = chan.substring(1);
 
+      let bc = BotChannels.findOne({ channel: chan });
+      if(bc.discord!== true) 
+        return;
+
       console.log(`>>>> ${channel} ${chan} Raided by ${raider} with ${vcount} viewers, ${tags}`);
       console.error(bot_discord_raid_url);
  
@@ -1491,7 +1495,6 @@ Meteor.startup(() => {
 
         // Per channel URL(s)
         // Check if there is a  target channel for raids
-        let bc = BotChannels.findOne({ channel: chan });
         if (bc && bc.discord_raid_url) {
           console.error('discord channel raid hook', discord_raid_url);
 //          sendChannelDiscord(title, raider, bc.discord_raid_url);

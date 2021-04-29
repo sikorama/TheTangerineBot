@@ -124,19 +124,22 @@ export function checkLiveChannels(client_id, client_private) {
           if (f) {
             let c = BotChannels.findOne({ channel: chan });
             if (c) {
+
               if (c.live !== true) {
                 console.error(chan, f);
-
-                if (c.discord_goinglive_url1)
-                  sendLiveDiscord(f, c.discord_goinglive_url1)
-                if (c.discord_goinglive_url2)
-                  sendLiveDiscord(f, c.discord_goinglive_url2)
-
-                  let glob_discord_goinglive = Settings.findOne({ param: 'discord_goinglive' });
-                  if (glob_discord_goinglive )
+                  if (c.discord===true) {
+                    if (c.discord_goinglive_url1)
+                    sendLiveDiscord(f, c.discord_goinglive_url1)
+                    if (c.discord_goinglive_url2)
+                    sendLiveDiscord(f, c.discord_goinglive_url2)
+                    
+                    let glob_discord_goinglive = Settings.findOne({ param: 'discord_goinglive' });
+                    if (glob_discord_goinglive )
                     if (glob_discord_goinglive.val )                
-                      sendLiveDiscord(f, glob_discord_goinglive.val)
+                    sendLiveDiscord(f, glob_discord_goinglive.val)
+                  }
               }
+
               BotChannels.upsert({ channel: chan }, {
                 $set: {
                  live: true, 

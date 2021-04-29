@@ -20,6 +20,8 @@ export const Stats = new Mongo.Collection('statistics');
 
 export const Raiders = new Mongo.Collection('raiders');
 
+export const DiscordHooks = new Mongo.Collection('dhooks');
+
 
 /// Index pour les localisations
 /*const*/ UserLocIndex = new Index({
