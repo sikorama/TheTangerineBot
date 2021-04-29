@@ -41,6 +41,7 @@ export function init_publications() {
 
   //Publish the list of all channels where the bot is enabled
   Meteor.publish('EnabledChannels', function (sel) {
+    if (!sel) sel = {};
     sel.enabled = true;
     return BotChannels.find(sel, { fields: { enabled: 1, channel: 1 } })
   });

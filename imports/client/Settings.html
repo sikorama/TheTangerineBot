@@ -340,7 +340,23 @@
           Website URL
         </td>
         <td>
-          <input id="URL" value="{{WEBSITE_URL}}">
+          <input id="URL" name="URL" value="{{getParamVal "URL"}}">
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Global Going live Discord Hook
+        </td>
+        <td>
+          <textarea id="discord_goinglive" name="discord_goinglive" value="{{getParamVal "discord_goinglive"}}"></textarea>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Global Raid Discord Hook
+        </td>
+        <td>
+          <textarea id="discord_raid" name="discord_raid" value="{{getParamVal "discord_raid"}}"></textarea>
         </td>
       </tr>
     </tbody>

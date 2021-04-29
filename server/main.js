@@ -53,8 +53,13 @@ if ((botname == undefined) || (botpassword == undefined)) {
 var bot_discord_raid_url = process.env.BOT_DISCORD_RAID_HOOK;
 
 var bot_discord_live_url = process.env.BOT_DISCORD_LIVE_HOOK;
+
 if (bot_discord_live_url) 
   Settings.upsert({param:'discord_goinglive'}, {$set:{val: bot_discord_live_url}})
+
+if (bot_discord_raid_url) 
+  Settings.upsert({param:'discord_raid'}, {$set:{val: bot_discord_raid_url}})
+
 
 client_id = process.env.CLIENT_ID;
 client_secret = process.env.CLIENT_SECRET;

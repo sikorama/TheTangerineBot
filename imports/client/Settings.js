@@ -17,6 +17,12 @@ Template.Settings.onCreated(function () {
 });
 
 Template.Settings.helpers({
+    getParamVal(param) {
+        let p = Settings.findOne({ param: param });
+        console.error(p);
+        if (p)
+            return p.val;
+    },
     WEBSITE_URL() {
         let p = Settings.findOne({ param: 'URL' });
         console.error(p);
@@ -89,7 +95,8 @@ Template.Settings.events({
     },
     "change .settings": function (event) {
         let v = event.currentTarget.value;
-
+        let id = event.currentTarget.name;
+        console.info(id,'<-',v);
         Meteor.call('parameter', event.currentTarget.id, v);
         return false;
     },
