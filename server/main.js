@@ -1479,14 +1479,17 @@ Meteor.startup(() => {
 
         // Global URL(s)
         if (bot_discord_raid_url)
-          sendRaidChannelDiscord(title, raider, chan, bot_discord_raid_url);
+        sendChannelDiscord(title, chan, bot_discord_raid_ur);
+        //sendRaidChannelDiscord(title, raider, chan, bot_discord_raid_url);
+
 
         // Per channel URL(s)
         // Check if there is a  target channel for raids
         let bc = BotChannels.findOne({ channel: chan });
         if (bc && bc.discord_raid_url) {
           console.error('discord channel raid hook', discord_raid_url);
-          sendChannelDiscord(title, raider, bc.discord_raid_url);
+//          sendChannelDiscord(title, raider, bc.discord_raid_url);
+          sendChannelDiscord(title, chan, bc.discord_raid_url);
         }
       }
       catch (e) {
