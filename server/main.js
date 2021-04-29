@@ -1469,21 +1469,24 @@ Meteor.startup(() => {
       console.log(`>>>> ${channel} Raided by ${raider} with ${vcount} viewers, ${tags}`);
       console.error(bot_discord_raid_url);
       try {
+
         let title = raider + " is raiding " + channel + " with " + vcount + " viewers";
 
+        // Global URL(s)
         if (bot_discord_raid_url)
           sendRaidChannelDiscord(title, raider, channel, bot_discord_raid_url);
 
+        // Per channel URL(s)
         // Check if there is a  target channel for raids
         let bc = BotChannels.findOne({ channel: channel });
         if (bc && bc.discord_raid_url) {
           console.error(discord_raid_url);
+          sendChannelDiscord(title, raider, bc.discord_raid_url);
         }
       }
       catch (e) {
         console.error(e);
       }
-      sendChannelDiscord(title, raider, bc.discord_raid_url);
 
       Raiders.upsert({ raider: raider, channel: channel }, { $inc: { count: 1, viewers: parseInt(vcount) } });
 
