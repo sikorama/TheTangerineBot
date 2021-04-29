@@ -1466,21 +1466,26 @@ Meteor.startup(() => {
 
   function onRaidedHandler(channel, raider, vcount, tags) {
     try {
-      console.log(`>>>> ${channel} Raided by ${raider} with ${vcount} viewers, ${tags}`);
-      console.error(bot_discord_raid_url);
-      try {
+      
+      let chan = channel.toLowerCase();
+//      if chan[0]==='#'
+      chan = chan.substring(1);
 
-        let title = raider + " is raiding " + channel + " with " + vcount + " viewers";
+      console.log(`>>>> ${channel} ${chan} Raided by ${raider} with ${vcount} viewers, ${tags}`);
+      console.error(bot_discord_raid_url);
+ 
+      try {
+        let title = raider + " is raiding " + chan + " with " + vcount + " viewers";
 
         // Global URL(s)
         if (bot_discord_raid_url)
-          sendRaidChannelDiscord(title, raider, channel, bot_discord_raid_url);
+          sendRaidChannelDiscord(title, raider, chan, bot_discord_raid_url);
 
         // Per channel URL(s)
         // Check if there is a  target channel for raids
-        let bc = BotChannels.findOne({ channel: channel });
+        let bc = BotChannels.findOne({ channel: chan });
         if (bc && bc.discord_raid_url) {
-          console.error(discord_raid_url);
+          console.error('discord channel raid hook', discord_raid_url);
           sendChannelDiscord(title, raider, bc.discord_raid_url);
         }
       }
@@ -1488,7 +1493,7 @@ Meteor.startup(() => {
         console.error(e);
       }
 
-      Raiders.upsert({ raider: raider, channel: channel }, { $inc: { count: 1, viewers: parseInt(vcount) } });
+      Raiders.upsert({ raider: raider, channel: chan }, { $inc: { count: 1, viewers: parseInt(vcount) } });
 
     } catch (e) {
       console.error(e);
