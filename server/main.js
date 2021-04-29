@@ -1479,7 +1479,7 @@ Meteor.startup(() => {
 
         // Global URL(s)
         if (bot_discord_raid_url)
-        sendChannelDiscord(title, chan, bot_discord_raid_ur);
+        sendChannelDiscord(title, chan, bot_discord_raid_url);
         //sendRaidChannelDiscord(title, raider, chan, bot_discord_raid_url);
 
 
@@ -1503,8 +1503,8 @@ Meteor.startup(() => {
     }
   }
 
-  // onRaidedHandler('fernandosouzaguitar','duobarao',10);
-  // onRaidedHandler('sikorama','duobarao',11);
+//   onRaidedHandler('#fernandosouzaguitar','duobarao',10);
+//   onRaidedHandler('#sikorama','duobarao',11);
 
 
   function onStateHandler(channel, state) {
