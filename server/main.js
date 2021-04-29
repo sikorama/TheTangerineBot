@@ -31,7 +31,7 @@ import { init_greetings, getGreetMessages, replaceKeywords } from './greetings.j
 
 import { country_lang, patterns } from './const.js';
 
-import {sendRaidChannelDiscord,sendChannelDiscord} from './notifications.js';
+import {sendRaidChannelDiscord,sendChannelDiscord,checkLiveChannels} from './notifications.js';
 
 const tmi = require('tmi.js');
 const gtrans = require('googletrans').default;
@@ -43,13 +43,25 @@ let botpassword = process.env.CHANNEL_PASSWORD;
 
 var bot_discord_url = process.env.BOT_DISCORD_HOOK;
 
+
 // TODO: If no channel & password, then exit...
 if ((botname == undefined) || (botpassword == undefined)) {
   console.error('No CHANNEL_NAME or CHANNEL_PASSWORD environment variable found. Exiting.');
   process.exit(-1);
 }
 
+client_id = process.env.CLIENT_ID;
+client_secret = process.env.CLIENT_SECRET;
+
+console.error('client_id=',client_id);
+if (client_id!=undefined) {
+  Meteor.setInterval( function() {checkLiveChannels(client_id,client_secret)},1000*60)
+} 
+
+//BotChannels.
+
 botpassword = 'oauth:' + botpassword;
+
 
 //  UserLocations.update(u._id, {$unset: {msg:1}});
 
@@ -1446,19 +1458,20 @@ Meteor.startup(() => {
   function onRaidedHandler(channel, raider, vcount, tags) {
     try {
       console.log(`>>>> ${channel} Raided by ${raider} with ${vcount} viewers, ${tags}`);
-      Raiders.upsert({ raider: raider, channel: channel }, { $inc: { count: 1, viewers: vcount } });
       
       console.error(bot_discord_url);
       let title = raider + " is raiding "+channel+" with " + vcount + " viewers";
       if (bot_discord_url)
-        sendRaidChannelDiscord(title, raider, channel, bot_discord_url);
-
+      sendRaidChannelDiscord(title, raider, channel, bot_discord_url);
+      
       // Check if there is a  target channel for raids
       let bc = BotChannels.findOne({channel: channel});
       if (bc &&bc.discord_raid_url) {
         console.error(discord_raid_url);
         sendChannelDiscord(title, raider,bc.discord_raid_url);
       }
+ 
+      Raiders.upsert({ raider: raider, channel: channel }, { $inc: { count: 1, viewers: parseInt(vcount) } });
 
     } catch (e) {
       console.error(e);

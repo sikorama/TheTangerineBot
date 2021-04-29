@@ -12,6 +12,10 @@
   </datalist>
   {{#each c in getChannels}}
 
+  {{#if c.live}} 
+  LIVE - {{c.title}} - {{c.started_at}}
+  {{/if}}
+
   <table class="pure-table"  id="{{c._id}}">
     <thead>
       <tr>
@@ -195,6 +199,20 @@
           {{>CheckMark b=c.active_users n="active_users"}}
         </td>
       </tr>
+
+      <tr>
+        <td>
+          Main Team
+        </td>
+        <td>
+        </td>
+        <td>
+          <td>
+            <input type="text" value="{{c.team}}" class="chanSettings" name="team">
+          </td>
+        </td>
+      </tr>
+
 
     </tbody>
   </table>

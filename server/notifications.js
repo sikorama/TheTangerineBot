@@ -1,3 +1,4 @@
+import { BotChannels, Settings } from '../imports/api/collections';
 
 let httpreq = require('httpreq');
 
@@ -47,6 +48,105 @@ export function sendRaidChannelDiscord(text, channel, raider, discord_url) {
   let embedc1 = genChanEmbed(channel);
   let embedc2 = genChanEmbed(raider);
   sendDiscord(text, discord_url, [embedc1, embedc2]);
+}
+
+export function getTwitchToken(client_id, client_secret) {
+
+
+
+  console.error('Regenerate Twitch TOKEN');
+  body = {
+    'client_id': client_id,
+    'client_secret': client_secret,
+    "grant_type": 'client_credentials'
+  }
+  let url = 'https://id.twitch.tv/oauth2/token';
+
+  httpreq.post(url, {
+    //    headers: header,
+    json: body
+
+  }, Meteor.bindEnvironment(function (err, res) {
+    if (!err) {
+      //    console.info("get oauth", res);
+      let body = JSON.parse(res.body);
+      if (body) {
+        console.info(body.access_token);
+        Settings.upsert({ param: 'client_token' }, { $set: { val: body.access_token } });
+        Settings.upsert({ param: 'client_token_raw' }, { $set: { val: body } });
+        Settings.upsert({ param: 'client_token_expiration' }, { $set: { val: body.expires_in } });
+      }
+    } else {
+      console.error("get oauth", err);
+    }
+  }));
+}
+
+
+export function checkLiveChannels(client_id, client_private) {
+  try {
+
+    let token_param = Settings.findOne({ param: 'client_token' });
+
+    if (!token_param) {
+      getTwitchToken(client_id, client_private);
+      return;
+    }
+
+    let client_token = token_param.val;
+
+    streamer_name = 'sikorama';
+
+    let channels = BotChannels.find().fetch().map((item) => item.channel);
+    //  channels = ["sikorama","douteuxtv1","moman"]
+
+    let headers = {
+      'Client-ID': client_id,
+      'Authorization': 'Bearer ' + client_token
+    }
+
+    let url = "https://api.twitch.tv/helix/streams?";
+    url += channels.map((item) => 'user_login=' + item).join('&');
+
+    httpreq.get(url, {
+      headers: headers,
+    }, Meteor.bindEnvironment(function (err, res) {
+      if (!err) {
+        console.info("helix: ", JSON.parse(res.body));
+        let body = JSON.parse(res.body);
+        channels.forEach((chan) => {
+          let f = body.data.find((item) => item.user_login == chan);
+          console.error(chan, f);
+          if (f) {
+
+            let c = BotChannels.findOne({ channel: chan });
+            if (c) {
+              if (c.live !== true) {
+                if (c.discord_goinglive_url1)
+                  sendLiveDiscord(chan, c.discord_goinglive_url1)
+                if (c.discord_goinglive_url2)
+                  sendLiveDiscord(chan, c.discord_goinglive_url2)
+              }
+              BotChannels.upsert({ channel: chan }, { $set: { live: true } })
+              BotChannels.upsert({ channel: chan }, { $set: { live_started: f.started_at } })
+              BotChannels.upsert({ channel: chan }, { $set: { live_title: f.title } })
+            }
+          }
+          else {
+
+            BotChannels.upsert({ channel: chan }, { $set: { live: false } })
+          }
+        })
+      } else {
+        console.error("helix Err:", err);
+        // probably means the token has expired
+        getTwitchToken(client_id, client_private);
+      }
+    }));
+  } catch (e) {
+    console.error(e);
+  }
+
 }
 
 /*
