@@ -50,10 +50,18 @@ export function sendLiveDiscord(doc, discord_url,options) {
     if (options.everyone) 
       title= '@everyone, '+title; 
 
-      embed.footer = {
-        text: doc.title
+//  let embeds=[];
+    let embed={}
+    embed.image = {
+      url: 'https://static-cdn.jtvnw.net/jtv_user_pictures/'+doc.tag_ids[0]+'-profile-300x300.png'
       }
-    
+
+    embed.footer = {
+      text: doc.title
+      }
+
+    console.error(embed);
+      
 /*      let embed = {
       title: "https://twitch.tv/" + channel,
       url: "https://twitch.tv/" + channel,
@@ -63,7 +71,8 @@ export function sendLiveDiscord(doc, discord_url,options) {
     }
   */  
 
-  sendDiscord(title, discord_url,[embed}]);
+//  sendDiscord(title, discord_url,[embed]);
+  sendDiscord(title, discord_url);
 
   //  let title = doc.user_name + " is now live! @everyone" ;
   /*let embed = genChanEmbed(doc.user_login);
