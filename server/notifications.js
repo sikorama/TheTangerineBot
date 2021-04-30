@@ -14,15 +14,11 @@ export function sendDiscord(title, discord_url, embeds) {
   httpreq.post(discord_url, {
     json: payload
   }, function (err, res) {
-    if (!err) {
-      console.info("sendDiscord: ", JSON.stringify(res));
-    } else {
+    if (err) {
       console.error("sendDiscord error:", err);
-      console.error("sendDiscord res:", res);
     }
   });
 }
-
 
 function genChanEmbed(channel) {
   let embed = {
@@ -35,45 +31,42 @@ function genChanEmbed(channel) {
   return embed;
 }
 
+
 export function sendChannelDiscord(text, channel, discord_url) {
   let embed = genChanEmbed(channel);
   sendDiscord(text, discord_url, [embed]);
 }
 
-export function sendLiveDiscord(doc, discord_url,options) {
-  let title = '\n**'+doc.user_name+'**'+ " is now live! " ;
-  title+='\nhttps://twitch.tv/'+doc.user_login;
-  title+='\n'+'_'+doc.title+'_'; 
+export function sendLiveDiscord(doc, discord_url, options) {
+  let title = '\n**' + doc.user_name + '**' + " is now live! ";
+  title += '\nhttps://twitch.tv/' + doc.user_login;
+  title += '\n' + '_' + doc.title + '_';
 
   if (options)
-    if (options.everyone) 
-      title= '@everyone, '+title; 
-  
- // title += '\n'+title;
+    if (options.everyone)
+      title = '@everyone, ' + title;
 
+  let embed = {}
+  embed.image = {
+    url: 'https://static-cdn.jtvnw.net/jtv_user_pictures/' + doc.tag_ids[0] + '-profile-300x300.png'
+  }
 
-//  let embeds=[];
-    let embed={}
-    embed.image = {
-      url: 'https://static-cdn.jtvnw.net/jtv_user_pictures/'+doc.tag_ids[0]+'-profile-300x300.png'
+  embed.footer = {
+    text: doc.title
+  }
+
+  console.error(embed);
+
+  /*      let embed = {
+        title: "https://twitch.tv/" + channel,
+        url: "https://twitch.tv/" + channel,
+        image: {
+          url: 'https://static-cdn.jtvnw.net/previews-ttv/live_user_' + channel + '-640x400.jpg'
+        }
       }
+    */
 
-    embed.footer = {
-      text: doc.title
-      }
-
-    console.error(embed);
-      
-/*      let embed = {
-      title: "https://twitch.tv/" + channel,
-      url: "https://twitch.tv/" + channel,
-      image: {
-        url: 'https://static-cdn.jtvnw.net/previews-ttv/live_user_' + channel + '-640x400.jpg'
-      }
-    }
-  */  
-
-//  sendDiscord(title, discord_url,[embed]);
+  //  sendDiscord(title, discord_url,[embed]);
   sendDiscord(title, discord_url);
 
   //  let title = doc.user_name + " is now live! @everyone" ;
@@ -93,9 +86,6 @@ export function sendRaidChannelDiscord(text, channel, raider, discord_url) {
 }
 
 export function getTwitchToken(client_id, client_secret) {
-
-
-
   console.error('Regenerate Twitch TOKEN');
   body = {
     'client_id': client_id,
@@ -124,10 +114,8 @@ export function getTwitchToken(client_id, client_secret) {
   }));
 }
 
-
 export function checkLiveChannels(client_id, client_private) {
   try {
-
     let token_param = Settings.findOne({ param: 'client_token' });
 
     if (!token_param) {
@@ -136,11 +124,8 @@ export function checkLiveChannels(client_id, client_private) {
     }
 
     let client_token = token_param.val;
-
     streamer_name = 'sikorama';
-
     let channels = BotChannels.find().fetch().map((item) => item.channel);
-
     let headers = {
       'Client-ID': client_id,
       'Authorization': 'Bearer ' + client_token
@@ -153,44 +138,61 @@ export function checkLiveChannels(client_id, client_private) {
       headers: headers,
     }, Meteor.bindEnvironment(function (err, res) {
       if (!err) {
-//        console.info("helix: ", JSON.parse(res.body));
+        //        console.info("helix: ", JSON.parse(res.body));
         let body = JSON.parse(res.body);
         channels.forEach((chan) => {
           let f = body.data.find((item) => item.user_login == chan);
+          // If there is nothing, then it's not live
           if (f) {
+            let setobj = {              
+                live: true,
+                live_started: f.started_at,
+                live_title: f.title,
+                live_thumbnail_url: f.thumbnail_url
+            }
+
             let c = BotChannels.findOne({ channel: chan });
             if (c) {
 
+              let d = Date.now();
+              // If we were not live, we'll send a notification
               if (c.live !== true) {
-                console.error(chan, f);
-                  if (c.discord===true) {
+
+                let cooldown = false;
+                if (c.notifdate)
+                  if (d - c.notifdate < 1000 * 60 * 60 * 4) {
+                    cooldown = true;
+                  }
+
+                if (cooldown === false) {
+                  setobj.notifdate  = d;
+                  console.error(d,chan, f);
+
+                  if (c.discord === true) {
                     let glob_discord_goinglive = Settings.findOne({ param: 'discord_goinglive' });
-                    if (glob_discord_goinglive )
-                    if (glob_discord_goinglive.val )                
-                    sendLiveDiscord(f, glob_discord_goinglive.val)
+                    if (glob_discord_goinglive)
+                      if (glob_discord_goinglive.val)
+                        sendLiveDiscord(f, glob_discord_goinglive.val)
 
                     if (c.discord_goinglive_url1)
-                      sendLiveDiscord(f, c.discord_goinglive_url1, {everyone:true})
+                      sendLiveDiscord(f, c.discord_goinglive_url1, { everyone: true })
                     if (c.discord_goinglive_url2)
-                      sendLiveDiscord(f, c.discord_goinglive_url2, {everyone:true})
+                      sendLiveDiscord(f, c.discord_goinglive_url2, { everyone: true })
                   }
+                }
               }
-
-              BotChannels.upsert({ channel: chan }, {
-                $set: {
-                 live: true, 
-                 live_started: f.started_at ,
-                 live_title: f.title,
-                 live_thumbnail_url: f.thumbnail_url 
-                }})
             }
+            // Updates database
+            BotChannels.upsert({ channel: chan }, {
+              $set: setobj
+            });            
           }
           else {
             BotChannels.upsert({ channel: chan }, { $set: { live: false } })
           }
         })
       } else {
-        console.error("helix Err:", err);
+        console.error("Helix Server Err:", err);
         // probably means the token has expired
         getTwitchToken(client_id, client_private);
       }
