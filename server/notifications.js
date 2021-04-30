@@ -41,7 +41,7 @@ export function sendChannelDiscord(text, channel, discord_url) {
 }
 
 export function sendLiveDiscord(doc, discord_url,options) {
-  let title = doc.user_name+ " is now live! " ;
+  let title = '**'+doc.user_name+'**'+ " is now live! " ;
   title+='https://twitch.tv/'+doc.user_login+'';
   title+='\n'+doc.title; 
   'https://twitch.tv/'+doc.user_login;
@@ -49,6 +49,9 @@ export function sendLiveDiscord(doc, discord_url,options) {
   if (options)
     if (options.everyone) 
       title= '@everyone, '+title; 
+  
+  title += '\n'+title;
+
 
 //  let embeds=[];
     let embed={}
