@@ -1471,9 +1471,7 @@ Meteor.startup(() => {
 
   function onRaidedHandler(channel, raider, vcount, tags) {
     try {
-      
       let chan = channel.toLowerCase();
-//      if chan[0]==='#'
       chan = chan.substring(1);
       let num = parseInt(vcount);
 
@@ -1485,39 +1483,37 @@ Meteor.startup(() => {
         
       let bc = BotChannels.findOne({ channel: chan });
 
-      if(bc.discord!== true) 
-        return;
-
       console.log(`>>>> ${channel} ${chan} Raided by ${raider} with ${num} viewers, ${tags}`);
-//      console.error(bot_discord_raid_url);
- 
+
       try {
-        let title = raider + " is raiding " + chan + " with " + num + " viewers";
-        title += '\n';
-        title += 'https://twitch.tv/'+raider;
-        //sendDiscord(title, bot_discord_raid_url);
-
-
-        // Global URL(s)
-        if (bot_discord_raid_url)
-        sendDiscord(title, bot_discord_raid_url);
-        //sendChannelDiscord(title, chan, bot_discord_raid_url);
-        //sendRaidChannelDiscord(title, raider, chan, bot_discord_raid_url);
-
-
-        // Per channel URL(s)
-        // Check if there is a  target channel for raids
-        if (bc && bc.discord_raid_url) {
-          console.error('discord channel raid hook', discord_raid_url);
-          sendDiscord(title, bc.discord_raid_url);
-          //sendChannelDiscord(title, chan, bc.discord_raid_url);
-        }
+        Raiders.upsert({ raider: raider, channel: chan }, { $inc: { count: 1, viewers: parseInt(vcount) } });
       }
       catch (e) {
         console.error(e);
       }
 
-      Raiders.upsert({ raider: raider, channel: chan }, { $inc: { count: 1, viewers: parseInt(vcount) } });
+      if(bc.discord!== true) 
+        return;
+ 
+      try {
+        let title = raider + " is raiding " + chan + " with " + num + " viewers";
+        title += '\n';
+        title += 'https://twitch.tv/'+raider;
+
+        // Global URL(s)
+        if (bot_discord_raid_url)
+          sendDiscord(title, bot_discord_raid_url);
+
+        // Per channel URL(s)
+        // Check if there is a  target channel for raids
+        if (bc.discord_raid_url && bc.discord_raid_url.length>1) {
+          console.error('discord channel raid hook', bc.discord_raid_url);
+          sendDiscord(title, bc.discord_raid_url);
+        }
+      }
+      catch (e) {
+        console.error(e);
+      }
 
     } catch (e) {
       console.error(e);
