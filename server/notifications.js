@@ -159,13 +159,13 @@ export function checkLiveChannels(client_id, client_private) {
               if (c.live !== true) {
 
                 let cooldown = false;
-                if (c.notifdate)
-                  if (d - c.notifdate < 1000 * 60 * 60 * 4) {
+                if (c.live_notifdate)
+                  if (d - c.live_notifdate < 1000 * 60 * 60 * 4) {
                     cooldown = true;
                   }
 
                 if (cooldown === false) {
-                  setobj.notifdate  = d;
+                  setobj.live_notifdate  = d;
                   console.error(d,chan, f);
 
                   if (c.discord === true) {

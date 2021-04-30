@@ -45,6 +45,17 @@ FlowRouter.route('/countries', {
   }
 });
 
+FlowRouter.route('/live', {
+  name: 'live',
+  action: function (params, queryParams) {
+    BlazeLayout.render('MainPage', {
+      main: 'LiveChannels',
+    });
+  }
+});
+
+
+
 FlowRouter.route('/from', {
   name: 'from',
   action: function (params, queryParams) {

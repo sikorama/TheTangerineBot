@@ -35,6 +35,11 @@
         <a href="/commands" class="pure-menu-link ">Commands</a>
       </li>
 
+      <li class="pure-menu-item {{active "live"}}">
+        <a href="/live" class="pure-menu-link ">Live</a>
+      </li>
+
+
       {{#if isUserRole "admin"}}
       {{#if rh_featureEnabled "map"}}
       <li class="pure-menu-item {{active "from"}}">
@@ -87,6 +92,8 @@
     </div>
 
     <p>Follow me on <a href="http://twich.tv/TheTangerineBot">twich.tv/TheTangerineBot</a></p>
+    <p>Fork me on <a href="https://github.com/sikorama/TheTangerineBot">github</a></p>
+
   </div>
   {{/if}}
 </template>

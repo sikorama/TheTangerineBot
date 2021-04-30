@@ -1,15 +1,10 @@
 <template name="About">
 
+  <h1>About</h1>
   The Tangerine Bot is a friendly little bot i (sikorama) have developped for The Tangerine Club, a fantastic band you
   can find on twitch, bandcamp, instagram, and many other social networks.
-
-  This bot is currently working for some streamers, such as:
-
-  {{#each c in enchan}}
-  <a href="http://twich.tv/{{c.channel}}">{{c.channel}} &bull;
-  </a>
-  {{/each}}
-
+  This is an open source project. Code is available on <a href="https://github.com/sikorama/TheTangerineBot"> github </a>!
+  You'll also find there a minimalistic bot, easy to deply, that performs translation only.
 
   <h4> Collected data</h4>
   All data are collected for the solely purpose of improving your interaction with the bot/the streamer.
@@ -36,35 +31,31 @@
     </li>
   </ul>
 
-  <h4>Contact</h4>
-  Contact me here:
-  <a href="mailto:sikoogle+tangerine@gmail.com" class="pure-menu-link"></a>
-
-  <br>
-  Source code available on <a href="https://github.com/sikorama/TheTangerineBot"> github </a>!
-  You'll also find here a minimalistic bot, easy to deply, that performs translation only.
-
   <br>
   Also note i'm not affiliated with 'tangerine-bot', a bot aimed to help moderate your discord server. Check it here :
   <a href="tangerinebot.com"> tangerinebot.com</a>
   (source code available <a href="https://github.com/tangerine-bot/tangerine">here</a>).
 
-  <br>
-  Logged as {{currentUser.username}} <a href="/" id="logout" class="pure-link">(Disconnect)</a>
+  {{#if currentUser}}
+    <h4>Session</h4>
+    Logged as {{currentUser.username}} <a href="/" id="logout" class="pure-link">(Disconnect)</a>
+  {{/if}}
+
+</template>
+
+
+<template name="LiveChannels">
 
   <h1>Currently Live</h1>
   <div>
-
-
-
-    <table class="table table-striped table-hover">
+    <table class="table table-striped table-hover ">
       <tbody>
         {{#each r in livechan 3}}
         <tr>
           {{#each w in r }}
           {{#if w}}
-          <td>
-            <img src="http://static-cdn.jtvnw.net/previews-ttv/live_user_{{w.channel}}-320x240.jpg"
+          <td class="live-table">
+            <img src="http://static-cdn.jtvnw.net/previews-ttv/live_user_{{w.channel}}-320x200.jpg"
               title="https://twitch.tv/{{w.channel}}">
           </td>
           {{/if}}
@@ -86,7 +77,15 @@
         {{/each}}
       </tbody>
     </table>
-
   </div>
 
+  <h3>Chats where the bot is active</h3>
+  <div>  
+    This instance is currently active in the chat of these channels:
+    
+    {{#each c in enchan}}
+    <a href="http://twich.tv/{{c.channel}}">{{c.channel}} &bull; </a>
+    {{/each}}    
+  </div>
+  
 </template>

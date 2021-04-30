@@ -93,12 +93,12 @@ Template.PageTop.helpers({
   curSelChan() { return Session.get('sel_channel'); }
 })
 
-Template.About.onCreated(function () {
+Template.LiveChannels.onCreated(function () {
   this.subscribe('EnabledChannels');
   this.subscribe('LiveChannels');
 });
 
-Template.About.helpers({
+Template.LiveChannels.helpers({
   enchan() {
     return BotChannels.find({ enabled: true }, { sort: { channel: 1 } });
   },
@@ -118,7 +118,7 @@ Template.About.helpers({
       } 
       return cres;
   }
-})
+});
 
 function rgba(r, g, b, a) {
   return 'rgba(' + Math.floor(r) + ',' + Math.floor(g) + ',' + Math.floor(b) + ',' + a + ')';
