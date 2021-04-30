@@ -62,6 +62,8 @@ a {
 }
 
 .pure-table {
+
+	min-width:80%;
 	max-width:100%;
 }
 
@@ -176,3 +178,5 @@ white-space: normal;
 .capcase {
 	text-transform: uppercase ;
 }
+
+
