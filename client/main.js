@@ -95,11 +95,28 @@ Template.PageTop.helpers({
 
 Template.About.onCreated(function () {
   this.subscribe('EnabledChannels');
+  this.subscribe('LiveChannels');
 });
 
 Template.About.helpers({
   enchan() {
     return BotChannels.find({ enabled: true }, { sort: { channel: 1 } });
+  },
+  livechan(numcol)  {
+      let res=BotChannels.find({ live: true }, { sort: { live_started_at: 1 } }).fetch();
+      // Limiter aux X premiers elements
+      // Reorganiser pour afficher en plusieurs colonnes
+      if (!numcol) numcol=1;
+      let sres=res.slice(0,100);
+      let cres=[];
+      for (let i=0; i<sres.length ; i+=numcol) {
+          let row=[];
+          for (j=0; j<numcol; j++) {
+              row.push(sres[i+j])
+          }
+          cres.push(row);
+      } 
+      return cres;
   }
 })
 
@@ -191,7 +208,7 @@ Template.Stats.helpers({
   getraids() {
     let sch = Session.get('sel_channel');
 //    console.error('getraids',sch);
-    return Raiders.find({channel:sch}, {sort: {count: -1}});
+    return Raiders.find({channel:sch}, {sort: {count: -1, viewers: -1}});
   },
   statsEnabled() {
     let chan = Session.get('sel_channel');

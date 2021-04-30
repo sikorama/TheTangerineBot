@@ -40,9 +40,14 @@ export function sendChannelDiscord(text, channel, discord_url) {
   sendDiscord(text, discord_url, [embed]);
 }
 
-export function sendLiveDiscord(doc, discord_url) {
-  let title = doc.user_name+ " is now live! @everyone " ;
+export function sendLiveDiscord(doc, discord_url,options) {
+  let title = doc.user_name+ " is now live!" ;
   title+='https://twitch.tv/'+doc.user_login;
+
+  if (options)
+    if (options.everyone) 
+      title= '@everyone, '+title; 
+
   sendDiscord(title, discord_url);
 
   //  let title = doc.user_name + " is now live! @everyone" ;
@@ -133,15 +138,15 @@ export function checkLiveChannels(client_id, client_private) {
               if (c.live !== true) {
                 console.error(chan, f);
                   if (c.discord===true) {
-                    if (c.discord_goinglive_url1)
-                    sendLiveDiscord(f, c.discord_goinglive_url1)
-                    if (c.discord_goinglive_url2)
-                    sendLiveDiscord(f, c.discord_goinglive_url2)
-                    
                     let glob_discord_goinglive = Settings.findOne({ param: 'discord_goinglive' });
                     if (glob_discord_goinglive )
                     if (glob_discord_goinglive.val )                
                     sendLiveDiscord(f, glob_discord_goinglive.val)
+
+                    if (c.discord_goinglive_url1)
+                      sendLiveDiscord(f, c.discord_goinglive_url1, {everyone:true})
+                    if (c.discord_goinglive_url2)
+                      sendLiveDiscord(f, c.discord_goinglive_url2, {everyone:true})
                   }
               }
 

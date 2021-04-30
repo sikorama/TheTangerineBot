@@ -17,18 +17,6 @@ Template.Settings.onCreated(function () {
 });
 
 Template.Settings.helpers({
-    getParamVal(param) {
-        let p = Settings.findOne({ param: param });
-        console.error(p);
-        if (p)
-            return p.val;
-    },
-    WEBSITE_URL() {
-        let p = Settings.findOne({ param: 'URL' });
-        console.error(p);
-        if (p)
-            return p.val;
-    },
     isCurEditChan(chan) {
         return Session.equals('curEditChan', chan);
     },
@@ -92,13 +80,6 @@ Template.Settings.events({
         if (v.length == 0) v = false;
         console.error(id, f, v);
         Meteor.call("setChanSettings", id, f, v);
-    },
-    "change .settings": function (event) {
-        let v = event.currentTarget.value;
-        let id = event.currentTarget.name;
-        console.info(id,'<-',v);
-        Meteor.call('parameter', event.currentTarget.id, v);
-        return false;
     },
     "change .profile": function (event) {
         let id = getParentId(event.target);
@@ -181,4 +162,29 @@ Template.UploadForm.events({
             });
         }
     } 
+});
+
+
+
+
+// ------------ Server Parameters
+
+Template.ServerConfig.helpers({
+    getParamVal(param) {
+        let p = Settings.findOne({ param: param });
+        console.error(p);
+        if (p)
+            return p.val;
+    }
+});
+
+
+Template.ServerConfig.events({
+    "change .settings": function (event) {
+      let v = event.currentTarget.value;
+      let id = event.currentTarget.name;
+      console.info(id,'<-',v);
+      Meteor.call('parameter', event.currentTarget.id, v);
+      return false;
+  },
 });

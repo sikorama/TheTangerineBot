@@ -343,60 +343,11 @@
     </tbody>
   </table>
 
-
-  <h2>Discord Hooks</h2>
-  <table>
-    <thead>
-      <tr>
-        <th>Identifiant</th>
-        <th>URL</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-
-        <td>
-        </td>
-
-        <td>
-        </td>
-
-      </tr>
-    </tbody>
-  </table>
+{{>DiscordHooksTable}}
+{{>ServerConfig}}
 
 
 
-  <h2>Configuration</h2>
-  <table>
-    <tbody>
-      <tr>
-        <td>
-          Website URL
-        </td>
-        <td>
-          <input id="URL" name="URL" value="{{getParamVal "URL"}}">
-        </td>
-      </tr>
-      <tr>
-        <td>
-          Global Going live Discord Hook
-        </td>
-        <td>
-          <textarea id="discord_goinglive" name="discord_goinglive"
-            value="{{getParamVal "discord_goinglive"}}"></textarea>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          Global Raid Discord Hook
-        </td>
-        <td>
-          <textarea id="discord_raid" name="discord_raid" value="{{getParamVal "discord_raid"}}"></textarea>
-        </td>
-      </tr>
-    </tbody>
-  </table>
   <!--
     <h2>Main Parameters</h2>
     Location Interval (in seconds)
@@ -421,4 +372,60 @@
   {{else}}
   <input id="fileInput" type="file">
   {{/with}}
+</template>
+
+<template name="DiscordHooksTable">
+  <h2>Discord Hooks</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Identifiant</th>
+        <th>URL</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+
+        <td>
+        </td>
+
+        <td>
+        </td>
+
+      </tr>
+    </tbody>
+  </table>  
+</template>
+
+<template name="ServerConfig">
+
+  <h2>Server Configuration</h2>
+  <table>
+    <tbody>
+      <tr>
+        <td>
+          Website URL
+        </td>
+        <td>
+          <input class="settings" name="URL" value="{{getParamVal "URL"}}">
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Global Going live Discord Hook
+        </td>
+        <td>
+          <textarea  class="settings" name="discord_goinglive" value="{{getParamVal "discord_goinglive"}}"></textarea>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Global Raid Discord Hook
+        </td>
+        <td>
+          <textarea  class="settings" name="discord_raid" value="{{getParamVal "discord_raid"}}"></textarea>
+        </td>
+      </tr>
+    </tbody>
+  </table>
 </template>
