@@ -29,7 +29,7 @@ function genChanEmbed(channel) {
     title: "https://twitch.tv/" + channel,
     url: "https://twitch.tv/" + channel,
     image: {
-      url: 'https://static-cdn.jtvnw.net/previews-ttv/live_user_' + channel + '.jpg'
+      url: 'https://static-cdn.jtvnw.net/previews-ttv/live_user_' + channel + '-640x400.jpg'
     }
   }
   return embed;

@@ -173,4 +173,19 @@ export function init_publications() {
       
     }
   });
+
+Meteor.methods({
+  getGroups: function() {
+    if (hasRole(this.userId, ['admin'])) {
+      let cur =BotChannels.find({}, { fields: { channel: 1 } , sort: {channel: 1}}); 
+      let a = cur.fetch();
+//      console.error(a)
+      let res = a.map((item)=>item.channel);
+//      console.error(res);
+      return res;
+    }
+    return getUserGroups(this.userId);
+  } 
+});
+
 }

@@ -278,21 +278,35 @@ Template.registerHelper('isAdmin', function () { return checkUserRole(['admin'])
 Template.registerHelper('isStreamer', function () { return checkUserRole(['streamer']); });
 
 Template.SelectChannel.onCreated(function () {
-  let g = Meteor.user().profile.groups;
-  if (!g) return;
 
-  let c = Session.get('sel_channel');
-  if (c) {
-    if (g.indexOf(c) < 0)
-      Session.set('sel_channel', g[0]);
-  }
+  Meteor.call('getGroups', function(err,g) {
+    if (err) console.error('err=', err);
+    else 
+    {
+      console.error('getgroup', g);
 
-  Session.setDefault('sel_channel', g[0]);
+      if (!g) return;
+
+      let c = Session.get('sel_channel');
+      if (c) {
+        if (g.indexOf(c) < 0)
+          Session.set('sel_channel', g[0]);
+      }
+    
+      Session.setDefault('sel_channel', g[0]);
+      Session.set('list_channel', g);
+    
+    }
+  });
+
 });
 
 Template.SelectChannel.helpers({
   groups() {
-    let g = Meteor.user().profile.groups;
+
+    let g = Session.get('list_channel');
+//    let g = Meteor.user().profile.groups;
+
     let cg = Session.get('sel_channel');
     if (g)
       if (g.length > 1)
