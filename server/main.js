@@ -31,7 +31,7 @@ import { init_greetings, getGreetMessages, replaceKeywords } from './greetings.j
 
 import { country_lang, patterns } from './const.js';
 
-import { sendRaidChannelDiscord, sendChannelDiscord, checkLiveChannels } from './notifications.js';
+import { sendDiscord,sendRaidChannelDiscord, sendLiveDiscord,sendChannelDiscord, checkLiveChannels } from './notifications.js';
 
 const tmi = require('tmi.js');
 const gtrans = require('googletrans').default;
@@ -59,7 +59,6 @@ if (bot_discord_live_url)
 
 if (bot_discord_raid_url)
   Settings.upsert({ param: 'discord_raid' }, { $set: { val: bot_discord_raid_url } })
-
 
 client_id = process.env.CLIENT_ID;
 client_secret = process.env.CLIENT_SECRET;
@@ -1476,20 +1475,33 @@ Meteor.startup(() => {
       let chan = channel.toLowerCase();
 //      if chan[0]==='#'
       chan = chan.substring(1);
+      let num = parseInt(vcount);
 
+      if (isNaN(num)) 
+      {
+        console.error('Num viewers is NAN! ', vcount);
+        num = 1;
+      }
+        
       let bc = BotChannels.findOne({ channel: chan });
+
       if(bc.discord!== true) 
         return;
 
-      console.log(`>>>> ${channel} ${chan} Raided by ${raider} with ${vcount} viewers, ${tags}`);
-      console.error(bot_discord_raid_url);
+      console.log(`>>>> ${channel} ${chan} Raided by ${raider} with ${num} viewers, ${tags}`);
+//      console.error(bot_discord_raid_url);
  
       try {
-        let title = raider + " is raiding " + chan + " with " + vcount + " viewers";
+        let title = raider + " is raiding " + chan + " with " + num + " viewers";
+        title += '\n';
+        title += 'https://twitch.tv/'+raider;
+        //sendDiscord(title, bot_discord_raid_url);
+
 
         // Global URL(s)
         if (bot_discord_raid_url)
-        sendChannelDiscord(title, chan, bot_discord_raid_url);
+        sendDiscord(title, bot_discord_raid_url);
+        //sendChannelDiscord(title, chan, bot_discord_raid_url);
         //sendRaidChannelDiscord(title, raider, chan, bot_discord_raid_url);
 
 
@@ -1497,8 +1509,8 @@ Meteor.startup(() => {
         // Check if there is a  target channel for raids
         if (bc && bc.discord_raid_url) {
           console.error('discord channel raid hook', discord_raid_url);
-//          sendChannelDiscord(title, raider, bc.discord_raid_url);
-          sendChannelDiscord(title, chan, bc.discord_raid_url);
+          sendDiscord(title, bc.discord_raid_url);
+          //sendChannelDiscord(title, chan, bc.discord_raid_url);
         }
       }
       catch (e) {
@@ -1512,7 +1524,7 @@ Meteor.startup(() => {
     }
   }
 
-//   onRaidedHandler('#fernandosouzaguitar','duobarao',10);
+   onRaidedHandler('#sikorama','duobarao',10);
 //   onRaidedHandler('#sikorama','duobarao',11);
 
 

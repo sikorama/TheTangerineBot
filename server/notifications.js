@@ -41,12 +41,17 @@ export function sendChannelDiscord(text, channel, discord_url) {
 }
 
 export function sendLiveDiscord(doc, discord_url) {
-  let title = doc.user_name + " is now live! @everyone";
-  let embed = genChanEmbed(doc.user_login);
+  let title = doc.user_name+ " is now live! @everyone " ;
+  title+='https://twitch.tv/'+doc.user_login;
+  sendDiscord(title, discord_url);
+
+  //  let title = doc.user_name + " is now live! @everyone" ;
+  /*let embed = genChanEmbed(doc.user_login);
   embed.footer = {
     text: doc.title
   }
-  sendDiscord(title, discord_url, [embed]);
+  //sendDiscord(title, discord_url, [embed]);
+  */
 }
 
 
