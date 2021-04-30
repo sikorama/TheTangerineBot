@@ -1524,8 +1524,7 @@ Meteor.startup(() => {
     }
   }
 
-   onRaidedHandler('#sikorama','duobarao',10);
-//   onRaidedHandler('#sikorama','duobarao',11);
+//   onRaidedHandler('#sikorama','duobarao',10);
 
 
   function onStateHandler(channel, state) {
