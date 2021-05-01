@@ -80,6 +80,11 @@ export const DiscordHooks = new Mongo.Collection('dhooks');
                 selector.streamer = true
             }
 
+            if (options.search.props.hasOwnProperty('team')) {
+                selector.team = options.search.props.team;
+            }
+
+
             return selector;
         },
         sort: function (searchObject, options) {

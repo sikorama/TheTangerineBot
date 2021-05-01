@@ -11,9 +11,29 @@ var L = require('leaflet');
 
 
 Template.WorldMap.onCreated(function () {
+
 });
 
 Template.WorldMap.onRendered(function () {
+
+  
+  let searchOptions = {
+    activeSince: true,
+    activeSinceHours: 24 * 30 * 3
+  };
+
+  if (FlowRouter.getQueryParam('show')) searchOptions.show = true;
+  if (FlowRouter.getQueryParam('msg')) searchOptions.msg = true;
+  if (FlowRouter.getQueryParam('active')) {
+    searchOptions.activeSince = true;
+    searchOptions.activeSinceHours = parseInt(FlowRouter.getQueryParam('active')) * 24;
+
+  }
+
+  Session.set("searchUsers", searchOptions);
+
+
+
   let sc = Session.get('sel_channel');
 
   //TODO: use handlers s1.ready
@@ -21,20 +41,6 @@ Template.WorldMap.onRendered(function () {
 
   this.subscribe('botChannels', { channel: sc }, function () {
 
-    let searchOptions = {
-      activeSince: true,
-      activeSinceHours: 24 * 30 * 3
-    };
-
-    if (FlowRouter.getQueryParam('show')) searchOptions.show = true;
-    if (FlowRouter.getQueryParam('msg')) searchOptions.msg = true;
-    if (FlowRouter.getQueryParam('active')) {
-      searchOptions.activeSince = true;
-      searchOptions.activeSinceHours = parseInt(FlowRouter.getQueryParam('active')) * 24;
-
-    }
-
-    Session.set("searchUsers", searchOptions);
 
     // Create Map
     var mymap = L.map('map').setView([51.505, -0.09], 2);
@@ -55,7 +61,7 @@ Template.WorldMap.onRendered(function () {
     if (p)
       ic = [p.map_icon_std, p.map_icon_name, p.map_icon_msg];
     else
-      ic = ["/default.png", "/default.png", "/default.png"];
+      ic = ["/tang1.png", "/tang1.png", "/tang1.png"];
 
     let icons = ic.map((item) => {
       if (item === null) return null;
@@ -73,6 +79,8 @@ Template.WorldMap.onRendered(function () {
         popupAnchor: [-3, -76],
       });
     });
+
+    console.info('icons',icons);
 
     const updateMap = ((chan) => {
       let newmarkers = {};
@@ -211,6 +219,11 @@ Template.WorldMap.onRendered(function () {
         if (searchData.lastreq === true) {
           prop.lastreq = chan;
         }
+
+        if (searchData.team === true) {
+          prop.team = "vamoo"; // 
+        }
+
 
         if (searchData.activeSince === true) {
           let ad = 8;

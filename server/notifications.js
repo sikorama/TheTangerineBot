@@ -46,7 +46,7 @@ export function sendLiveDiscord(doc, discord_url, options) {
     if (options.everyone)
       title = '@everyone, ' + title;
 
-  let embed = {}
+/*  let embed = {}
   embed.image = {
     url: 'https://static-cdn.jtvnw.net/jtv_user_pictures/' + doc.tag_ids[0] + '-profile-300x300.png'
   }
@@ -56,6 +56,7 @@ export function sendLiveDiscord(doc, discord_url, options) {
   }
 
   console.error(embed);
+*/
 
   /*      let embed = {
         title: "https://twitch.tv/" + channel,
@@ -177,7 +178,10 @@ export function checkLiveChannels(client_id, client_private) {
                     if (c.discord_goinglive_url1)
                       sendLiveDiscord(f, c.discord_goinglive_url1, { everyone: true })
                     if (c.discord_goinglive_url2)
-                      sendLiveDiscord(f, c.discord_goinglive_url2, { everyone: true })
+                      sendLiveDiscord(f, c.discord_goinglive_url2)
+                    if (c.discord_goinglive_url3)
+                      sendLiveDiscord(f, c.discord_goinglive_url3)
+
                   }
                 }
               }

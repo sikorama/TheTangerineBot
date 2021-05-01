@@ -16,30 +16,39 @@
         <tbody>
           <tr>
             <td colspan="2"><input style="width:100%;" type="text" name="text" class="search"></td>
-            <td colspan="1"><input type="checkbox" name="show" class="search">Showing Nicknames</td>
-            <td colspan="1"><input type="checkbox" name="msg" class="search">With Messages</td>
-            <td colspan="1"><input type="checkbox" name="streamer" class="search">Streamer</td>
-            <td colspan="1"> <td colspan="1">{{>SelectActive}}</td></td>
-            <td colspan="1"> <td colspan="1">{{>SelectChannel}}</td></td>
+            <td colspan="1">
+              <input type="checkbox" name="show" class="search">Showing Nicknames
+              <br>
+              <input type="checkbox" name="msg" class="search">With Messages
+            </td>
+            <td colspan="2">
+              <input type="checkbox" name="streamer" class="search">Streamer
+              <br>
+              {{>SelectActive}}
+            </td>
+<!--
+  <td colspan="1"> <td colspan="1">{{>SelectChannel}}</td></td>
+--> 
           </tr>
         </tbody>
 
         <thead>
           <tr>
             <th class="sort" name="name">User Name</th>
-            <th class="sort" name="channel">Registered</th>
+            <th class="sort" name="team">Team</th>
             <th class="sort" name=location>Location</th>
             <th class="sort" name=latitude>GPS</th>
             <th class="sort" name="country">Country</th>
             <th class="sort" name="allow">Allow</th>
             <th class="sort" name="msg">Message</th>
             <th class="sort" name="proximity">Last Request</th>
-            <th class="sort" name="timestamp">Timestamp</th>
           </tr>
         </thead>
         <tbody>
           {{#each ul in userloc}}
-            <tr id={{ul.__originalId}}>
+            <tr id={{ul.__originalId}} title="{{ul.dname}} {{ul.team}} {{#if ul.streamer}}Streamer{{/if}}
+{{ul.channels}}
+{{FormatDate ul.timestamp}}">
               <td>
                   {{#if edit_mode}}
                     {{#if ul.streamer}}
@@ -67,13 +76,20 @@
                 {{/if}}
                 {{/if}}
 
+  
+
 
               </td>
               <td>
-                {{#each c in ul.channels}}
-                  {{c}}
-                {{/each}}
-              </td>
+                {{#if edit_mode}}
+                <div>  
+                  Team
+                  <input class="edit" type="text" name="team" value="{{ul.team}}">
+                </div>
+                {{else}}
+                  {{ul.team}}
+                {{/if}}
+            </td>
               <td>
                 {{#if edit_mode}}
                 <div class="oneline">
@@ -133,10 +149,6 @@
                   {{getlastreq ul}}
                 {{/if}}
               </td>
-              <td>
-                {{FormatDate ul.timestamp}}
-              </td>
-
             </tr>
           {{/each}}
 

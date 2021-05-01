@@ -576,12 +576,12 @@ Meteor.startup(() => {
   }
 
   // Register our event handlers (defined below)
-  //bclient.on('message', Meteor.bindEnvironment(onMessageHandler));
+//  bclient.on('message', Meteor.bindEnvironment(onMessageHandler));
   bclient.on('chat', Meteor.bindEnvironment(onMessageHandler));
   bclient.on('connected', onConnectedHandler);
   bclient.on('raided', Meteor.bindEnvironment(onRaidedHandler));
   //  bclient.on('roomstate', Meteor.bindEnvironment(onStateHandler));
-  //  bclient.on('action', onActionHandler);
+  bclient.on('action', onActionHandler);
 
   // Connect to Twitch:
   bclient.connect();
@@ -1423,6 +1423,12 @@ Meteor.startup(() => {
       }
     }
 
+    // Test command to retrieve infos
+    if (cmd.indexOf('test') == 0) {
+      console.info(target, context);
+    }
+
+
     // Check if the message is not for the bot "@thetangerinebot"
     if ((lccn.indexOf('@' + botname) >= 0) || ((lccn.indexOf('@tangerinebot') >= 0))) {
       let txt;
@@ -1521,21 +1527,22 @@ Meteor.startup(() => {
   }
 
 //   onRaidedHandler('#sikorama','duobarao',10);
-
-
   function onStateHandler(channel, state) {
     try {
       console.log(`>>>>>> ${channel} State changed`, JSON.stringify(state));
     } catch (e) {
       console.error(e);
     }
-
   }
 
   function onActionHandler(channel, userstate, message, self) {
     try {
       if (self) return;
       console.log('>>>>', channel, 'Action', JSON.stringify(userstate), 'm=', message);
+      // check /raid commands
+      if (message.indexOf('/raid')===0) {
+        console.log('>>>>', channel, 'RAID COMMAND', message); 
+      }
     } catch (e) {
       console.error(e);
     }
