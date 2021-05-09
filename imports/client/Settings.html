@@ -1,260 +1,273 @@
 <template name="Settings">
-  <h2>Channels Management</h2>
-
-  <!-- TODO: use an image collection, and generate options -->
-  <datalist id="imagelist">
-    {{#each i in iconnames}}
-    <option value="{{i}}"></option>
-    {{/each}}
-    <option value="/default.png"></option>
-    <option value="/favicon-32.png"></option>
-  </datalist>
-  {{#each c in getChannels}}
-
-  {{#if c.live}}
-  LIVE - {{c.title}} - {{c.started_at}}
-  {{/if}}
+  <button class="selStat pure-button {{#if submenu 1}}pure-button-primary{{/if}}" name="1">Channel</button>
+  <button class="selStat pure-button {{#if submenu 6}}pure-button-primary{{/if}}" name="6">Accounts</button>
+  <button class="selStat pure-button {{#if submenu 2}}pure-button-primary{{/if}}" name="2">Translation</button>
+  <button class="selStat pure-button {{#if submenu 3}}pure-button-primary{{/if}}" name="3">Server</button>
+  <button class="selStat pure-button {{#if submenu 5}}pure-button-primary{{/if}}" name="5">Emotes</button>
+  <button class="selStat pure-button {{#if submenu 4}}pure-button-primary{{/if}}" name="4">Discord Hooks</button>
 
 
-  <table class="pure-table" id="{{c._id}}">
-    <thead>
-      <tr>
-        <th colspan="3"> {{>CheckMark b=c.enabled n="enabled" c=c}} Bot Active in Chat
-        </th>
-      </tr>
-    </thead>
+  {{#if submenu 1}}
+    <h2>Channels Management</h2>  
+    <!-- TODO: use an image collection, and generate options -->
+    <datalist id="imagelist">
+      {{#each i in iconnames}}
+      <option value="{{i}}"></option>
+      {{/each}}
+      <option value="/default.png"></option>
+      <option value="/favicon-32.png"></option>
+    </datalist>
+    {{#each c in getChannels}}
 
-    <thead>
-      <tr>
-        <th colspan="3">
-          {{>CheckMark b=c.tr n="tr"}}
-          Translation
-        </th>
-      </tr>
-    </thead>
-
-    <thead>
-      <tr>
-        <th colspan="3">
-          {{>CheckMark b=c.map n="map"}}
-          Map <a href="/c/{{c.channel}}">&#9732; </a>
-        </th>
-      </tr>
-    </thead>
-
-
-    <tbody>
-
-      {{#if c.map}}
-      <tr>
-        <td>
-          Standard icon:
-        </td>
-        <td>
-          <input class="chanSettings" value="{{c.map_icon_std}}" list="imagelist" name="map_icon_std">
-        </td>
-        <td>
-          <img src="{{getIcon c.map_icon_std}}">
-        </td>
-      </tr>
-      <tr>
-        <td>
-          Name icon:
-        </td>
-        <td>
-          <input class="chanSettings" value="{{c.map_icon_name}}" list="imagelist" name="map_icon_name">
-        </td>
-        <td>
-          <img src="{{getIcon c.map_icon_name}}">
-        </td>
-      </tr>
-      <tr>
-        <td>
-          Message icon:
-        </td>
-        <td>
-          <input class="chanSettings" value="{{c.map_icon_msg}}" list="imagelist" name="map_icon_msg">
-        </td>
-        <td>
-          <img src="{{getIcon c.map_icon_msg}}">
-        </td>
-      </tr>
-      {{/if}}
-    </tbody>
-
-    <thead>
-      <tr>
-        <th colspan="3">
-          {{>CheckMark b=c.greet n="greet"}}
-          Greetings
-        </th>
-      </tr>
-    </thead>
-
-    <tbody>
-      {{#if c.greet}}
-      <tr>
-        <td>/me prefix</td>
-        <td>{{>CheckMark b=c.me n="me"}}</td>
-      </tr>
-      <tr>
-        <td>Mute</td>
-        <td>{{>CheckMark b=c.muteGreet n="muteGreet"}}</td>
-      </tr>
-      <tr>
-        <td>
-          Catch !so Cmd:
-        </td>
-        <td>
-          {{>CheckMark b=c.so n="so"}}
-        </td>
-      </tr>
-      <tr>
-        <td>
-          Shoutout Cmd:
-        </td>
-        <td>
-          <input type="text" value="{{c.socmd}}" class="chanSettings" name="socmd">
-        </td>
-      </tr>
-      {{/if}}
-    </tbody>
-
-    <thead>
-      <tr>
-        <th colspan="3">
-          {{>CheckMark b=c.songrequest n="songrequest"}}
-          Song Requests Detection
-        </th>
-      </tr>
-    </thead>
-
-
-
-    <tbody>
-
-
-      {{#if c.songrequest}}
-      <tr>
-        <td> RegExp 1 </td>
-        <td> <input type="text" value="{{c.requestregex1}}" class="chanSettings" name="requestregex1"> </td>
-      </tr>
-      <tr>
-        <td> RegExp 2 </td>
-        <td> <input type="text" value="{{c.requestregex2}}" class="chanSettings" name="requestregex2"> </td>
-      </tr>
-      {{/if}}
-    </tbody>
-
-
-    <thead>
-      <tr>
-        <th colspan="3">
-          {{>CheckMark b=c.discord n="discord"}}
-          Discord Notifications
-        </th>
-      </tr>
-    </thead>
-
-    {{#if c.discord}}
-    <tbody>
-      <tr>
-        <td>
-          RAID Channel Hook URL
-        </td>
-        <td>
-          <input type="text" value="{{c.discord_raid_url}}" class="chanSettings" name="discord_raid_url">
-        </td>
-      </tr>
-
-      <tr>
-        <td>
-          Going LIVE Hook Channel URL (@everyone})
-        </td>
-        <td>
-          <input type="text" value="{{c.discord_goinglive_url1}}" class="chanSettings" name="discord_goinglive_url1">
-        </td>
-      </tr>
-
-      <tr>
-        <td>
-          Going LIVE Hook Team URL
-        </td>
-        <td>
-          <input type="text" value="{{c.discord_goinglive_url2}}" class="chanSettings" name="discord_goinglive_url2">
-        </td>
-      </tr>
-
-      <tr>
-        <td>
-          Going LIVE Hook SO URL
-        </td>
-        <td>
-          <input type="text" value="{{c.discord_goinglive_url3}}" class="chanSettings" name="discord_goinglive_url3">
-        </td>
-      </tr>
-
-
-    </tbody>
+    {{#if c.live}}
+    LIVE - {{c.title}} - {{c.started_at}}
     {{/if}}
 
 
-    <thead>
-      <tr>
-        <th colspan="3">
-          {{>CheckMark b=c.quizz n="quizz"}}
-          Quizz
-        </th>
-      </tr>
-    </thead>
+    <table class="pure-table" id="{{c._id}}">
+      <thead>
+        <tr>
+          <th colspan="3"> {{>CheckMark b=c.enabled n="enabled" c=c}} Bot Active in Chat
+          </th>
+        </tr>
+      </thead>
+
+      <thead>
+        <tr>
+          <th colspan="3">
+            {{>CheckMark b=c.tr n="tr"}}
+            Translation
+          </th>
+        </tr>
+      </thead>
+
+      <thead>
+        <tr>
+          <th colspan="3">
+            {{>CheckMark b=c.map n="map"}}
+            Map <a href="/c/{{c.channel}}">&#9732; </a>
+          </th>
+        </tr>
+      </thead>
 
 
-    <thead>
-      <tr>
-        <th colspan="3">
-          {{>CheckMark b=c.active_users n="active_users"}}
-          Active users
-        </th>
-      </tr>
-    </thead>
+      <tbody>
 
-    <thead>
-      <tr>
-        <th colspan="3">
-          Misc
-        </th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr>
-        <td>
-          Main Team
-        </td>
-        <td>
-        <td>
-          <input type="text" value="{{c.team}}" class="chanSettings" name="team">
-        </td>
-        </td>
-      </tr>
-    </tbody>
-  </table>
+        {{#if c.map}}
+        <tr>
+          <td>
+            Standard icon:
+          </td>
+          <td>
+            <input class="chanSettings" value="{{c.map_icon_std}}" list="imagelist" name="map_icon_std">
+          </td>
+          <td>
+            <img src="{{getIcon c.map_icon_std}}">
+          </td>
+        </tr>
+        <tr>
+          <td>
+            Name icon:
+          </td>
+          <td>
+            <input class="chanSettings" value="{{c.map_icon_name}}" list="imagelist" name="map_icon_name">
+          </td>
+          <td>
+            <img src="{{getIcon c.map_icon_name}}">
+          </td>
+        </tr>
+        <tr>
+          <td>
+            Message icon:
+          </td>
+          <td>
+            <input class="chanSettings" value="{{c.map_icon_msg}}" list="imagelist" name="map_icon_msg">
+          </td>
+          <td>
+            <img src="{{getIcon c.map_icon_msg}}">
+          </td>
+        </tr>
+        {{/if}}
+      </tbody>
 
-  <h4>Remove Channel</h4>
-  <button id="{{c._id}}" class="delete">Remove Channel</button>
-  {{/each}}
+      <thead>
+        <tr>
+          <th colspan="3">
+            {{>CheckMark b=c.greet n="greet"}}
+            Greetings
+          </th>
+        </tr>
+      </thead>
 
-  {{#if isUserRole "admin greet"}}
+      <tbody>
+        {{#if c.greet}}
+        <tr>
+          <td>/me prefix</td>
+          <td>{{>CheckMark b=c.me n="me"}}</td>
+        </tr>
+        <tr>
+          <td>Mute</td>
+          <td>{{>CheckMark b=c.muteGreet n="muteGreet"}}</td>
+        </tr>
+        <tr>
+          <td>
+            Catch !so Cmd:
+          </td>
+          <td>
+            {{>CheckMark b=c.so n="so"}}
+          </td>
+        </tr>
+        <tr>
+          <td>
+            Shoutout Cmd:
+          </td>
+          <td>
+            <input type="text" value="{{c.socmd}}" class="chanSettings" name="socmd">
+          </td>
+        </tr>
+        {{/if}}
+      </tbody>
 
-  <h4>Add Channel (need to restart)</h4>
-  <table>
-    <tbody>
-      <tr>
-        <td> <input id="newChannel"> </td>
-        <td> <button class="addChannel">Add Channel </button> </td>
-      </tr>
-    </tbody>
-  </table>
+      <thead>
+        <tr>
+          <th colspan="3">
+            {{>CheckMark b=c.songrequest n="songrequest"}}
+            Song Requests Detection
+          </th>
+        </tr>
+      </thead>
 
+
+
+      <tbody>
+
+
+        {{#if c.songrequest}}
+        <tr>
+          <td> RegExp 1 </td>
+          <td> <input type="text" value="{{c.requestregex1}}" class="chanSettings" name="requestregex1"> </td>
+        </tr>
+        <tr>
+          <td> RegExp 2 </td>
+          <td> <input type="text" value="{{c.requestregex2}}" class="chanSettings" name="requestregex2"> </td>
+        </tr>
+        {{/if}}
+      </tbody>
+
+
+      <thead>
+        <tr>
+          <th colspan="3">
+            {{>CheckMark b=c.discord n="discord"}}
+            Discord Notifications
+          </th>
+        </tr>
+      </thead>
+
+      {{#if c.discord}}
+      <tbody>
+        <tr>
+          <td>
+            RAID Channel Hook URL
+          </td>
+          <td>
+            <input type="text" value="{{c.discord_raid_url}}" class="chanSettings" name="discord_raid_url">
+          </td>
+        </tr>
+
+        <tr>
+          <td>
+            Going LIVE Hook Channel URL (@everyone})
+          </td>
+          <td>
+            <input type="text" value="{{c.discord_goinglive_url1}}" class="chanSettings" name="discord_goinglive_url1">
+          </td>
+        </tr>
+
+        <tr>
+          <td>
+            Going LIVE Hook Team URL
+          </td>
+          <td>
+            <input type="text" value="{{c.discord_goinglive_url2}}" class="chanSettings" name="discord_goinglive_url2">
+          </td>
+        </tr>
+
+        <tr>
+          <td>
+            Going LIVE Hook SO URL
+          </td>
+          <td>
+            <input type="text" value="{{c.discord_goinglive_url3}}" class="chanSettings" name="discord_goinglive_url3">
+          </td>
+        </tr>
+
+
+      </tbody>
+      {{/if}}
+
+
+      <thead>
+        <tr>
+          <th colspan="3">
+            {{>CheckMark b=c.quizz n="quizz"}}
+            Quizz
+          </th>
+        </tr>
+      </thead>
+
+
+      <thead>
+        <tr>
+          <th colspan="3">
+            {{>CheckMark b=c.active_users n="active_users"}}
+            Active users
+          </th>
+        </tr>
+      </thead>
+
+      <thead>
+        <tr>
+          <th colspan="3">
+            Misc
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>
+            Main Team
+          </td>
+          <td>
+          <td>
+            <input type="text" value="{{c.team}}" class="chanSettings" name="team">
+          </td>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h4>Remove Channel</h4>
+    <button id="{{c._id}}" class="delete">Remove Channel</button>
+    {{/each}}
+
+<!---    {{#if isUserRole "admin greet"}}
+-->
+    <h4>Add Channel</h4>
+    <table>
+      <tbody>
+        <tr>
+          <td> <input id="newChannel"> </td>
+          <td> <button class="addChannel">Add Channel </button> </td>
+        </tr>
+      </tbody>
+    </table>
+    
+  {{/if}}
+
+
+  {{#if submenu 2}}
+  
   <h2>Translation stats</h2>
   <!-- todo: format correctly year/months-->
   <table class="pure-table">
@@ -277,6 +290,10 @@
     </tbody>
   </table>
 
+  {{/if}}
+
+  {{#if submenu 6}}
+  
   <h2>Accounts</h2>
   <table class="pure-table">
     <thead>
@@ -326,6 +343,9 @@
     </tbody>
   </table>
 
+  {{/if}}
+
+  {{#if submenu 5}}
   <h2>Map Badges Files</h2>
   <div>
     Add a picture: {{>UploadForm}}
@@ -352,11 +372,16 @@
       {{/each}}
     </tbody>
   </table>
+  {{/if}}
 
+
+{{#if submenu 4}}  
 {{>DiscordHooksTable}}
+{{/if}}
+
+{{#if submenu 3}}
 {{>ServerConfig}}
-
-
+{{/if}}
 
   <!--
     <h2>Main Parameters</h2>
@@ -364,7 +389,6 @@
     <input id="location_interval" type="number" value="5">
   -->
 
-  {{/if}}
 
   <br>
   <img src="/bot.png">
@@ -438,4 +462,7 @@
       </tr>
     </tbody>
   </table>
+
+<button class='exportDot'>Export Raid Graph (dot) </button> <a id="dotlink">...</a>
+
 </template>

@@ -74,15 +74,34 @@ Template.registerHelper(
   }
 )
 
+
 Template.PageTop.onRendered(function () {
   this.subscribe('botChannels', { enabled: true });
 });
 
+// Login event
+Tracker.autorun(function() {
+  if (Meteor.userId()) {
+    let u = Meteor.user();
+    if (u) {
+      console.error('login:', u.username);
+      if (u.profile && u.profile.groups && u.profile.groups.length>0) {
+        let chan = u.profile.groups[0];
+        console.error('Switching to',chan);
+        Meteor.subscribe('botChannels', {channel: chan});
+        Session.set('sel_channel',chan);
+      }
+    }
+  }
+})
+
 Template.registerHelper('rh_featureEnabled', function (feature) {
   let sc = Session.get('sel_channel');
   if (!sc) return false;
+  //console.error(sc);
   let bc = BotChannels.findOne({ channel: sc });
   if (!bc) return false;
+  //console.error(bc);
   return (bc[feature] === true);
 });
 
@@ -96,6 +115,7 @@ Template.PageTop.helpers({
 Template.LiveChannels.onCreated(function () {
   this.subscribe('EnabledChannels');
   this.subscribe('LiveChannels');
+
 });
 
 Template.LiveChannels.helpers({
@@ -132,6 +152,16 @@ function genColors(c1, a, n) {
   return colors;
 }
 
+Template.registerHelper('rh_getchaninfo',function(chan) {
+  //console.error(chan);
+  let c = BotChannels.findOne({channel:new RegExp(chan,'i')});
+  if (c) {
+    //console.error(c);
+    return c;
+  }
+});
+
+
 Template.Stats.events({
   'click button.selStat': function (ev) {
     Session.set('statPage', parseInt(ev.currentTarget.name))
@@ -139,7 +169,8 @@ Template.Stats.events({
 });
 
 Template.Stats.onRendered(function () {
-  this.subscribe('botChannels', { enabled: true });
+  this.subscribe('botChannels');
+
 
   Session.setDefault('statPage', 1);
   Session.setDefault('numPeopleLoc', 0);
@@ -147,8 +178,6 @@ Template.Stats.onRendered(function () {
   var ctx = null;
 
   this.autorun(() => {
-    console.info('autorun');
-
     let sch = Session.get('sel_channel');
     if (!sch) {
       console.error("no channel selected!");
@@ -174,7 +203,7 @@ Template.Stats.onRendered(function () {
             console.error(err);
 
           res.sort((a, b) => b.t - a.t);
-          console.error(res);
+          //console.error(res);
           Session.set('CountPerSong', res);
 
         });
@@ -186,7 +215,10 @@ Template.Stats.onRendered(function () {
         });
         break;
       case 4: 
-        this.subscribe('raiders', { channel: sch });
+        this.subscribe('raiders', { channel: new RegExp(sch,'i') });
+        break;
+      case 5: 
+        this.subscribe('raiders', { raider: new RegExp(sch,'i') } );
         break;
     }
   });
@@ -205,10 +237,13 @@ Template.Stats.helpers({
   getActiveUsers() {
     return Session.get('activeUsers');
   },
-  getraids() {
+  getraiders() {
     let sch = Session.get('sel_channel');
-//    console.error('getraids',sch);
-    return Raiders.find({channel:sch}, {sort: {count: -1, viewers: -1}});
+    return Raiders.find({channel:new RegExp(sch,'i')}, {sort: { viewers: -1,count: -1}});
+  },
+  getraided() {
+    let sch = Session.get('sel_channel');
+    return Raiders.find({raider:new RegExp(sch,'i')}, {sort: {count: -1, viewers: -1}});
   },
   statsEnabled() {
     let chan = Session.get('sel_channel');
@@ -300,7 +335,7 @@ Template.SelectChannel.onCreated(function () {
     if (err) console.error('err=', err);
     else 
     {
-      console.error('getgroup', g);
+      //console.error('getgroup', g);
 
       if (!g) return;
 
@@ -355,7 +390,7 @@ Template.DirectMap.onCreated(function () {
   // Check if chan exists, and has map enabled
   this.subscribe('botChannels', { channel: chan }, function () {
     let bc = BotChannels.findOne({ channel: chan, map: { $exists: 1 } });
-    console.error(bc);
+    console.error('Displaying', bc.channel);
     if (!bc)
       FlowRouter.go('/');
   });

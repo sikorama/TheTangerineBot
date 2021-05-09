@@ -24,6 +24,7 @@ import { noteArray, genChord, genProgression } from './chords.js';
 import { AccountsTemplates } from 'meteor/useraccounts:core';
 
 import { randElement } from './tools.js';
+import { initRaidManagement } from './raids.js';
 
 import { hasRole } from './user_management.js';
 import { addChannel } from './channels.js';
@@ -263,7 +264,10 @@ Meteor.startup(() => {
   init_quizz();
   init_greetings();
   init_publications();
+  initRaidManagement();
 
+
+  
   Meteor.methods({
     // Admins can add channels from client
     addChannel: function (chan) {
@@ -581,7 +585,7 @@ Meteor.startup(() => {
   bclient.on('connected', onConnectedHandler);
   bclient.on('raided', Meteor.bindEnvironment(onRaidedHandler));
   //  bclient.on('roomstate', Meteor.bindEnvironment(onStateHandler));
-  bclient.on('action', onActionHandler);
+  //bclient.on('action', onActionHandler);
 
   // Connect to Twitch:
   bclient.connect();

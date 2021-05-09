@@ -27,14 +27,12 @@ Template.WorldMap.onRendered(function () {
   if (FlowRouter.getQueryParam('active')) {
     searchOptions.activeSince = true;
     searchOptions.activeSinceHours = parseInt(FlowRouter.getQueryParam('active')) * 24;
-
   }
 
   Session.set("searchUsers", searchOptions);
 
-
-
   let sc = Session.get('sel_channel');
+  console.info('Map Channel = ', sc);
 
   //TODO: use handlers s1.ready
   this.s1 = this.subscribe('images');
@@ -193,7 +191,7 @@ Template.WorldMap.onRendered(function () {
     Tracker.autorun(() => {
 
       try {
-
+        //console.info('autorun - update map');
 
         // check there is a user (for non public maps only)
         // if (!Meteor.userId()) return;
@@ -262,6 +260,7 @@ Template.WorldMap.onRendered(function () {
     resize();
 
   });
+
 
 
 });

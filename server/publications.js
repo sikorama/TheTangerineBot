@@ -17,33 +17,37 @@ export function init_publications() {
   //
   Meteor.publish('botChannels', function (sel) {
     if (!sel) sel = {}
+    let opt={sort: {channel:1}};
+
     let uid = this.userId;
     if (uid) {
       // If non admin, only publish enabled channels corresponding to groups associated to the user
+      
       if (!hasRole(uid, ['admin'])) {
-        sel.channel = { $in: getUserGroups(uid) };
-        sel.enabled = true;
+        //sel.channel = { $in: getUserGroups(uid) };
+      } 
+      else
+      {
+        //opt.fields = { channel:1, live:1, 
+        //}
       }
-      //console.info('Publication BotChannels, sel=', sel,BotChannels.findOne(sel));
-      return BotChannels.find(sel);
     }
     else {
       // Limited access for non logged users 
       // Only required fields
-      return BotChannels.find(sel
-        // FIXME!
-        //, 
-        //{fields: {map:1,enabled:1}}
-      );
+      //);
     }
-    this.ready();
+  
+    return BotChannels.find(sel,opt);
+  
+ //   this.ready();
   });
 
   //Publish the list of all channels where the bot is enabled
   Meteor.publish('EnabledChannels', function (sel) {
     if (!sel) sel = {};
     sel.enabled = true;
-    return BotChannels.find(sel, { fields: { enabled: 1, channel: 1 } })
+    return BotChannels.find(sel, { fields: { enabled: 1, channel: 1 , live:1} })
   });
 
   //Publish the list of all channels where the bot is enabled

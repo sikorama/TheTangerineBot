@@ -5,7 +5,8 @@
   {{#if statsEnabled}}
     <button class="selStat pure-button {{#if showStat 3}}pure-button-primary{{/if}}" name="3">Active Users</button>
   {{/if}}
-  <button class="selStat pure-button {{#if showStat 4}}pure-button-primary{{/if}}" name="4">Raids</button>
+  <button class="selStat pure-button {{#if showStat 4}}pure-button-primary{{/if}}" name="4">Raiders</button>
+  <button class="selStat pure-button {{#if showStat 5}}pure-button-primary{{/if}}" name="5">Raids</button>
   
   {{#if showStat 1}}
   <h2>Number of people per country</h2>
@@ -126,7 +127,7 @@
   {{#if showStat 4}}
 
   <h2>Channels raiding you</h2>
-  {{#let raiders=getraids}}
+  {{#let raiders=getraiders}}
   <table class="pure-table">
     <thead>
       <tr>
@@ -139,7 +140,79 @@
       {{#each c in raiders}}
       <tr>
         <td>
-          {{c.raider}}
+          {{#let chinfo=(rh_getchaninfo c.raider)}}
+          {{#if chinfo}}
+
+          {{#if chinfo.live}}
+          <span class="ok">
+            &#8718;
+          </span>
+          {{else}}
+          <span class="ko">
+            &#8718;
+          </span>
+          {{/if}}
+
+          {{/if}}
+          {{/let}}
+
+
+          <a href="https://twitch.tv/{{c.raider}}">
+            {{c.raider}}
+          </a>
+        </td>
+        <td>
+          {{c.count}}
+        </td>
+        <td>
+          {{c.viewers}}
+        </td>
+      </tr>
+      {{/each}}
+
+    </tbody>
+  </table>
+
+  {{/let}}
+  {{/if}}
+
+
+  {{#if showStat 5}}
+
+  <h2>Channels you've raided</h2>
+  <p>Only channels managed with TTC bot are displayed here</p>
+  {{#let raids=getraided}}
+  <table class="pure-table">
+    <thead>
+      <tr>
+        <th>Channel</th>
+        <th>Number of raids</th>
+        <th>Total viewers</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each c in raids}}
+      <tr>
+        <td>
+          {{#let chinfo=(rh_getchaninfo c.channel)}}
+          {{#if chinfo}}
+
+          {{#if chinfo.live}}
+          <span class="ok">
+            &#8718;
+          </span>
+          {{else}}
+          <span class="ko">
+            &#8718;
+          </span>
+          {{/if}}
+
+          {{/if}}
+          {{/let}}
+        
+          <a href="https://twitch.tv/{{c.channel}}">
+            {{c.channel}}
+          </a> 
         </td>
         <td>
           {{c.count}}

@@ -14,6 +14,9 @@ Template.Settings.onCreated(function () {
     this.subscribe('settings');
     this.subscribe('images');
     Session.set('curEditChan', '');
+
+    Session.setDefault('settingsPage', 1);
+
 });
 
 Template.Settings.helpers({
@@ -51,10 +54,36 @@ Template.Settings.helpers({
     iconnames() {
         return Images.find().fetch().map((item)=>item.name);
 
+    },
+    submenu(v) {
+        return (Session.equals('settingsPage',v));
     }
 });
 
+function genDotBlob(data, elementId) {
+
+    let d = document.getElementById(elementId);
+    if (!d) {
+        console.error('No Element with ID', elementId);
+        return;
+    }
+    let blob = new Blob([data], { type: 'text/dot' });
+    let csvUrl = URL.createObjectURL(blob);
+    let dte = new Date()
+    let cur_month = dte.getMonth() + 1;
+    let cur_year = dte.getFullYear();
+    if (cur_month < 10) cur_month = "0" + cur_month;
+    let cur_day = dte.getDay();
+    d.download = 'export' + cur_year + '-' + cur_month + '-' + cur_day + '.' + 'dot';
+    d.href = csvUrl;
+    d.innerHTML = 'Télécharger ' + d.download;
+}
+
+
 Template.Settings.events({
+    'click button.selStat': function (ev) {
+        Session.set('settingsPage', parseInt(ev.currentTarget.name))
+    },
     'click button.addChannel': function (event) {
         n = document.getElementById('newChannel').value.trim();
         if (n.length > 0) {
@@ -66,6 +95,16 @@ Template.Settings.events({
         let id = getParentId(event.currentTarget);
         console.error('delete', id);
         Meteor.call('removeChannel', id);
+    },
+    'click button.exportDot': function(event) {
+        Meteor.call('export_raid_graph', function(err,res) {
+            if (err)
+                 console.error(err);
+            // To blob
+
+            genDotBlob(res,'dotlink')
+//            console.error(res);
+        });        
     },
     'click .toggleCheck': function (event) {
         let id = getParentId(event.currentTarget);
@@ -172,7 +211,7 @@ Template.UploadForm.events({
 Template.ServerConfig.helpers({
     getParamVal(param) {
         let p = Settings.findOne({ param: param });
-        console.error(p);
+        //console.error(p);
         if (p)
             return p.val;
     }
