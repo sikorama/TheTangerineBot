@@ -1,5 +1,5 @@
 
-const country_names = {
+export const country_names = {
     'AD': 'Andorra',
     'AE': 'United Arab Emirates',
     'AM': 'Armenia',

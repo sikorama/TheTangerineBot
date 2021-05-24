@@ -123,7 +123,7 @@ Template.LatestLocations.events({
   
   
       if (event.target.name == 'location') {
-        UserLocations.update(id, { $unset: { latitude: "", longitude: "", cuntry: "" } })
+        UserLocations.update(id, { $unset: { latitude: "", longitude: "", country: "" } })
       }
       if (event.target.name == 'latitude' || event.target.name == 'longitude') {
         v = parseFloat(v);
