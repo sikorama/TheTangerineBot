@@ -949,7 +949,7 @@ Meteor.startup(() => {
             UserLocations.update(pdoc._id, { $set: { allow: true } });
             say(target, "Ok, your nickname will be displayed on the map! " + answername +  'Use !msg to add a personalized message on the map');
             return;
-          })
+          }
         }
 
         if (cmd.indexOf('mask') == 0) {
