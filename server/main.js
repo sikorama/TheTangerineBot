@@ -947,9 +947,9 @@ Meteor.startup(() => {
           }
           else {
             UserLocations.update(pdoc._id, { $set: { allow: true } });
-            say(target, "Ok your nickname will be displayed on the map! " + answername);
+            say(target, "Ok, your nickname will be displayed on the map! " + answername +  'Use !msg to add a personalized message on the map');
             return;
-          }
+          })
         }
 
         if (cmd.indexOf('mask') == 0) {
@@ -1069,12 +1069,12 @@ Meteor.startup(() => {
             UserLocations.insert(doc);
 
             if (delta > 60 * 1000) {
-              addmess = [
+/*              addmess = [
                 'Use !forget if you want me to forget your location!',
                 'Use !show to allow me to display your nickname on the map',
                 'Use !msg to add a personalized message on the map',
-              ];
-              txt = randElement(addmess); //.[Math.floor(Math.random() * (addmess.length - 1))];
+              ]*/;
+              txt = 'Use !show to allow me to display your nickname on the map'; //,randElement(addmess); //.[Math.floor(Math.random() * (addmess.length - 1))];
               say(target, answername + " Ok, thanks! " + txt, username);
               return;
             }
@@ -1496,7 +1496,7 @@ Meteor.startup(() => {
       console.log(`>>>> ${channel} ${chan} Raided by ${raider} with ${num} viewers, ${tags}`);
 
       try {
-        Raiders.upsert({ raider: raider, channel: chan }, { $inc: { count: 1, viewers: parseInt(vcount) } });
+        Raiders.upsert({ raider: raider, channel: chan }, { $inc: { count: 1, viewers:num} });
       }
       catch (e) {
         console.error(e);
