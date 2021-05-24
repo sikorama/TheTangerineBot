@@ -51,7 +51,7 @@ export const country_names = {
     'LT': 'Lithuania',
     'LV': 'Latvia',
     'MN': 'Mongolia',
-    'MO': 'Morocco',
+    'MA': 'Morocco',
     'NE': 'Niger',
     'NL': 'Netherlands',
     'NO': 'Norway',
@@ -72,6 +72,7 @@ export const country_names = {
     'SK': 'Slovakia',
     'SS': 'Wakanda', //South Soudan
     'SV': 'Salvador',
+    'SA': 'Saudi Arabia',
     'TR': 'Turkey',
     'TW': 'Taiwan',
     'UA': 'Ukraine',

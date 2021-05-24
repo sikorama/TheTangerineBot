@@ -115,10 +115,12 @@ Template.LatestLocations.events({
       // Clear
       if (event.target.name == 'country') {
         // Verification du code
-        n = event.target.value.toUpperCase();
-        if (!(n in country_names)) {
+        v = event.target.value.toUpperCase();
+        if (!(v in country_names)) {
           v = '';
+          console.error('Unknown Country Code')
         }
+//        console.error(n,'<-',v);
       }
   
   
@@ -140,6 +142,7 @@ Template.LatestLocations.events({
       //    console.error(event.target.id, n, v, typeof v);
       // Set value
       setObj[n] = v;
+  //    console.error(id,setObj);
       UserLocations.update(id, { $set: setObj })
     }
   });
