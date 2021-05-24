@@ -40,10 +40,10 @@ export const country_lang = {
     'ja': 'ja', // Japan
     'jp': 'ja',
     'lu': 'fr', // Luxembourg
+    'mx': 'es', // Mexico
     'nl': 'nl',
     'pl': 'pl',
     'pt': 'pt',
-    'mx': 'es', // Mexico
     'ru': 'ru',
     'tr': 'tr', // Turkey
     'uy': 'es',

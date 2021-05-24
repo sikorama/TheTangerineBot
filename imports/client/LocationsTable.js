@@ -2,6 +2,7 @@ import './LocationsTable.html';
 import { Template } from 'meteor/templating';
 import { Session } from 'meteor/session';
 import { UserLocations } from '../api/collections.js';
+import { country_names } from '../api/countrycodes.js';
 import { checkUserRole } from '../api/roles.js';
 import { manageSortEvent,getParentId, manageSearchEvents } from './tools.js';
 
