@@ -536,8 +536,11 @@ Meteor.startup(() => {
     }
   });
 
-  bot_channels = BotChannels.find({ enabled: true }).fetch().map(i => i.channel);
+  let bot_channels = BotChannels.find({ enabled: true }).fetch().map(i => i.channel);
   console.info('Connecting to channels:', bot_channels);
+
+  let raid_bot_channels = BotChannels.find({ enabled: false }).fetch().map(i => i.channel);  
+  console.info('Connecting to channels for raid monotiring only:', raid_bot_channels);
 
   // Connection to TWITCH CHAT
   // Define configuration options
@@ -551,6 +554,17 @@ Meteor.startup(() => {
   };
   // Create a client with our options
   const bclient = new tmi.client(opts);
+
+  const opts_raid = {
+    identity: {
+      username: botname,
+      password: botpassword,
+    },
+    channels: raid_bot_channels,
+    connection: { reconnect: true }
+  };
+//  opts.channels = raid_bot_channels;
+  const raid_bclient = new tmi.client(opts_raid);
 
   //
   function say(target, txt, store_user) {
@@ -584,17 +598,17 @@ Meteor.startup(() => {
   bclient.on('chat', Meteor.bindEnvironment(onMessageHandler));
   bclient.on('connected', onConnectedHandler);
   bclient.on('raided', Meteor.bindEnvironment(onRaidedHandler));
-  //  bclient.on('roomstate', Meteor.bindEnvironment(onStateHandler));
-  //bclient.on('action', onActionHandler);
+
+  raid_bclient.on('connected', onConnectedHandler);
+  raid_bclient.on('raided', Meteor.bindEnvironment(onRaidedHandler));
 
   // Connect to Twitch:
   bclient.connect();
+  raid_bclient.connect();
 
   // Default regex for parsing requests
   const default_regsonglistreq1 = /(.*) \brequested\s(.*)\s\bat position/
   const default_regsonglistreq2 = /@(.*), (.*)added to queue/
-
-
 
   // Called every time a message comes in
   function onMessageHandler(target, context, msg, self) {
@@ -947,7 +961,7 @@ Meteor.startup(() => {
           }
           else {
             UserLocations.update(pdoc._id, { $set: { allow: true } });
-            say(target, "Ok, your nickname will be displayed on the map! " + answername +  'Use !msg to add a personalized message on the map');
+            say(target, "Ok, your nickname will be displayed on the map! " + answername +  ' Use !msg to add a personalized message on the map');
             return;
           }
         }
