@@ -774,19 +774,26 @@ Meteor.startup(() => {
 
 
     // -------------HUG -----------------
-    if (botchan.hug === true) {
-
+    if (botchan.hug === true) {      
       if (cmd === 'hug' || cmd === 'hugs') {
         let hugsentence='';
-        
+        // By default, a random adjective is used to qulify the hug.
+        let adjective = '{{an_adjective}}';
+        // But we can use a comma separated keyword list (if we only want nice hugs for example)
+        if (botchan.hug_adjectives) {
+          let a = botchan.hug_adjectives.split(',');
+          if (a.length>1) {
+            adjective = randElement(a).trim();
+          }
+        }
         if (cmdarray.length > 1) {
           let hugname = cmdarray[1];
           if (hugname[0] != '@') hugname = '@' + hugname;
-          hugsentence = answername + ' gives ' + hugname + ' {{an_adjective}} hug !!';
+          hugsentence = answername + ' gives ' + hugname + ' '+adjective+' hug !!';
         }
         else 
         {
-          hugsentence = 'I give ' + answername + ' {{an_adjective}} bot hug !!';
+          hugsentence = 'I give ' + answername + ' '+adjective+' bot hug !!';
         }
         say(target, hugsentence);
       }

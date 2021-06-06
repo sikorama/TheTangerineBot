@@ -115,7 +115,7 @@ Template.Settings.events({
     'change .chanSettings': function (event) {
         let id = getParentId(event.currentTarget);
         let f = event.target.name;
-        let v = event.target.value.trim();
+        let v = event.currentTarget.value.trim();
         if (v.length == 0) v = false;
         console.error(id, f, v);
         Meteor.call("setChanSettings", id, f, v);
