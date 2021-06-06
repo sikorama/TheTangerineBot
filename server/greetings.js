@@ -183,12 +183,14 @@ const regexi  = /@icon/gi;
 const regexf  = /@follow/gi; // Various expressions for following
 
 export function replaceKeywords(txt, dispname) {
-  let answername='@'+dispname;
-
   txt = txt.replace(regexi, randElement(emoticones));
-  txt = txt.replace(regexn, answername);
-  txt = txt.replace(regexan, answername);
-  txt = txt.replace(regexnn, dispname);
+
+  if (dispname) {
+    let answername='@'+dispname;
+    txt = txt.replace(regexn, answername);
+    txt = txt.replace(regexan, answername);
+    txt = txt.replace(regexnn, dispname);
+  }
 
   if (txt.indexOf('@follow') >= 0) {
     let followtxt = randElement(followtxts)

@@ -573,9 +573,11 @@ Meteor.startup(() => {
   const raid_bclient = new tmi.client(opts_raid);
 
   //
-  function say(target, txt, store_user) {
+  function say(target, txt) {
 
     try {
+      txt = replaceKeywords(txt);
+
       // Check if there is a {{ }} for Phrase it
       if (txt.indexOf('{{') >= 0) {
         txt = PhraseIt.make(txt);
@@ -727,45 +729,64 @@ Meteor.startup(() => {
 
 
     if (botchan.active_users === true) {
-      const exceptnames = ['streamelements', 'songlistbot', 'nightbot'];
-      if (exceptnames.indexOf(username) < 0) {
 
-        // Keep track os last active users 
-        if (!last_active_users[chan]) {
-          last_active_users[chan] = [];
+      // Add user to active user list.
+      // Ignore broadcaster
+      if (context.badges.broadcaster != 1) {
+
+        const exceptnames = ['streamelements', 'songlistbot', 'nightbot'];
+        if (exceptnames.indexOf(username) < 0) {
+
+          // Keep track os last active users 
+          if (!last_active_users[chan]) {
+            last_active_users[chan] = [];
+          }
+
+          let ar = last_active_users[chan];
+          let index = ar.findIndex(val => val.name === dispname);
+
+          //console.error('find', dispname, index)
+          if (index >= 0) {
+            // Remove last occurence with this user
+            ar.splice(index, 1);
+          }
+          ar.push({ name: dispname, ts: dnow, msg: msg });
+
+          // Keep only 40 names in the list
+          let maxnames = 32;
+          //        if (botchan.active_max) maxnames = botchan.active_max;
+          if (ar.length > maxnames) {
+            ar.shift();
+          }
+          last_active_users[chan] = ar;
+          //console.error(last_active_users[chan]);
         }
-
-        let ar = last_active_users[chan];
-        let index = ar.findIndex(val => val.name === dispname);
-
-        //console.error('find', dispname, index)
-        if (index >= 0) {
-          // Remove last occurence with this user
-          ar.splice(index, 1);
-        }
-        ar.push({ name: dispname, ts: dnow, msg: msg });
-
-        // Keep only 40 names in the list
-        if (ar.length > 40) {
-          ar.shift();
-        }
-        last_active_users[chan] = ar;
-        //console.error(last_active_users[chan]);
       }
 
 
       //console.error(last_active_users);
       if (cmd === "exception" || cmd === "exceptions" || cmd == 'lastactive') {
         if (isModerator) {
-          console.error('last active=', last_active_users);
+          //        console.error('last active=', last_active_users);
+          //            let active_max = 40;
+          let active_since = 1000 * 60 * 60; // default 1 hour?
+          try {
+            if (botchan.active_since && botchan.active_since > 0)
+              active_since = 1000 * 60 * botchan.active_since;
+            //              if (botchan.active_max) active_max = botchan.active_max;
+          }
+          catch (e) { console.error(e); }
 
-          let res = last_active_users[chan].filter((item) => { return (dnow - item.ts < 1000 * 60 * 60 * 2); });
-          //console.error(res);
+          if (last_active_users[chan]) {
 
-          if (res.length >= 0) {
-            let extxt = res.map((item) => item.name).join(', ');
-            //console.error(extxt);
-            say(target, extxt);
+            let res = last_active_users[chan].filter((item) => { return (dnow - item.ts < active_since); });
+            //console.error(res);
+
+            if (res.length >= 0) {
+              let extxt = res.map((item) => item.name).join(', ');
+              //console.error(extxt);
+              say(target, extxt);
+            }
           }
         }
         return;
@@ -774,26 +795,25 @@ Meteor.startup(() => {
 
 
     // -------------HUG -----------------
-    if (botchan.hug === true) {      
+    if (botchan.hug === true) {
       if (cmd === 'hug' || cmd === 'hugs') {
-        let hugsentence='';
+        let hugsentence = '';
         // By default, a random adjective is used to qulify the hug.
         let adjective = '{{an_adjective}}';
         // But we can use a comma separated keyword list (if we only want nice hugs for example)
         if (botchan.hug_adjectives) {
           let a = botchan.hug_adjectives.split(',');
-          if (a.length>1) {
+          if (a.length > 1) {
             adjective = randElement(a).trim();
           }
         }
         if (cmdarray.length > 1) {
           let hugname = cmdarray[1];
           if (hugname[0] != '@') hugname = '@' + hugname;
-          hugsentence = answername + ' gives ' + hugname + ' '+adjective+' hug !!';
+          hugsentence = answername + ' gives ' + hugname + ' ' + adjective + ' hug @icon';
         }
-        else 
-        {
-          hugsentence = 'I give ' + answername + ' '+adjective+' bot hug !!';
+        else {
+          hugsentence = 'I give ' + answername + ' ' + adjective + ' bot hug @icon';
         }
         say(target, hugsentence);
       }
@@ -1053,7 +1073,7 @@ Meteor.startup(() => {
         }
 
         if (me.latitude === undefined) {
-          say(target, answername + ",sorry i need to process some data... please try again in a few minutes...");
+          say(target, answername + ",sorry i still need to process some data... please try again in a few minutes...");
           return;
         }
 

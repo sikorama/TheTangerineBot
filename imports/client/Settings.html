@@ -141,7 +141,7 @@
         <td>
           Shoutout Cmd:
         </td>
-        <td>
+        <td colspan="2">
           <input type="text" value="{{c.socmd}}" class="chanSettings" name="socmd">
         </td>
       </tr>
@@ -165,11 +165,11 @@
       {{#if c.songrequest}}
       <tr>
         <td> RegExp 1 </td>
-        <td> <input type="text" value="{{c.requestregex1}}" class="chanSettings" name="requestregex1"> </td>
+        <td colspan="2"> <input type="text" value="{{c.requestregex1}}" class="chanSettings" name="requestregex1"> </td>
       </tr>
       <tr>
         <td> RegExp 2 </td>
-        <td> <input type="text" value="{{c.requestregex2}}" class="chanSettings" name="requestregex2"> </td>
+        <td colspan="2"> <input type="text" value="{{c.requestregex2}}" class="chanSettings" name="requestregex2"> </td>
       </tr>
       {{/if}}
     </tbody>
@@ -190,8 +190,8 @@
         <td>
           RAID Channel Hook URL
         </td>
-        <td>
-          <input type="text" value="{{c.discord_raid_url}}" class="chanSettings" name="discord_raid_url">
+        <td colspan="2">
+          <textarea rows="4" class="chanSettings" name="discord_raid_url">{{c.discord_raid_url}}</textarea>
         </td>
       </tr>
 
@@ -199,8 +199,8 @@
         <td>
           Going LIVE Hook Channel URL (@everyone})
         </td>
-        <td>
-          <input type="text" value="{{c.discord_goinglive_url1}}" class="chanSettings" name="discord_goinglive_url1">
+        <td colspan="2">
+          <textarea rows="4" class="chanSettings" name="discord_goinglive_url1">{{c.discord_goinglive_url1}}</textarea>
         </td>
       </tr>
 
@@ -208,8 +208,8 @@
         <td>
           Going LIVE Hook Team URL
         </td>
-        <td>
-          <input type="text" value="{{c.discord_goinglive_url2}}" class="chanSettings" name="discord_goinglive_url2">
+        <td colspan="2">
+          <textarea rows="4" class="chanSettings" name="discord_goinglive_url2">{{c.discord_goinglive_url2}}</textarea>
         </td>
       </tr>
 
@@ -217,8 +217,8 @@
         <td>
           Going LIVE Hook SO URL
         </td>
-        <td>
-          <input type="text" value="{{c.discord_goinglive_url3}}" class="chanSettings" name="discord_goinglive_url3">
+        <td colspan="2">
+          <textarea rows="4" class="chanSettings" name="discord_goinglive_url3">{{c.discord_goinglive_url3}}</textarea>
         </td>
       </tr>
 
@@ -245,6 +245,26 @@
         </th>
       </tr>
     </thead>
+    {{#if c.active_users}}
+    <tbody>
+      <tr>
+        <td>
+          Active since (minutes)
+        </td>
+        <td colspan="2">
+          <input class="chanSettings" type="number" value="{{c.active_since}}" name="active_since">
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Max number of people displayed
+        </td>
+        <td colspan="2">
+          <input class="chanSettings" type="number" value="{{c.active_max}}" name="active_max">
+        </td>
+      </tr>
+    </tbody>
+    {{/if}}
 
     <thead>
       <tr>
@@ -259,7 +279,7 @@
           Main Team
         </td>
         <td>
-        <td>
+        <td colspan="2">
           <input type="text" value="{{c.team}}" class="chanSettings" name="team">
         </td>
         </td>
