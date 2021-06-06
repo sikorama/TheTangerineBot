@@ -777,20 +777,18 @@ Meteor.startup(() => {
     if (botchan.hug === true) {
 
       if (cmd === 'hug' || cmd === 'hugs') {
+        let hugsentence='';
+        
         if (cmdarray.length > 1) {
-          /*cmdarray.shift();
-          let atnames = cmdarray.map((item)=> { 
-            if (item[0]!='@') return '@'+item;
-            return item;
-          });
-          */
           let hugname = cmdarray[1];
           if (hugname[0] != '@') hugname = '@' + hugname;
-
-          //        let hugsentence = answername + ' gives '+atnames.join(', ') + ' {{an_adjective}} hug' ;
-          let hugsentence = answername + ' gives ' + hugname + ' {{an_adjective}} hug';
-          say(target, hugsentence);
+          hugsentence = answername + ' gives ' + hugname + ' {{an_adjective}} hug !!';
         }
+        else 
+        {
+          hugsentence = 'I give ' + answername + ' {{an_adjective}} bot hug !!';
+        }
+        say(target, hugsentence);
       }
     }
 
