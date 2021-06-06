@@ -32,7 +32,8 @@ import { init_greetings, getGreetMessages, replaceKeywords } from './greetings.j
 
 import { country_lang, patterns } from './const.js';
 
-import { sendDiscord,sendRaidChannelDiscord, sendLiveDiscord,sendChannelDiscord, checkLiveChannels } from './notifications.js';
+import { sendDiscord, sendRaidChannelDiscord, sendLiveDiscord, sendChannelDiscord, checkLiveChannels } from './notifications.js';
+import { init_radio } from './radio.js';
 
 const tmi = require('tmi.js');
 const gtrans = require('googletrans').default;
@@ -265,9 +266,9 @@ Meteor.startup(() => {
   init_greetings();
   init_publications();
   initRaidManagement();
+  init_radio();
 
 
-  
   Meteor.methods({
     // Admins can add channels from client
     addChannel: function (chan) {
@@ -438,6 +439,11 @@ Meteor.startup(() => {
     Settings.insert({ param: 'quizz_enabled_topics', val: [] });
   }
 
+  Settings.insert({ param: 'ffmpeg_server_url', val: '127.0.0.1' });
+  Settings.insert({ param: 'ffmpeg_server_port', val: 8126 });
+
+
+
   Settings.allow({
     update(userid, doc) {
       if (hasRole(userid, 'admin')) return true;
@@ -539,7 +545,7 @@ Meteor.startup(() => {
   let bot_channels = BotChannels.find({ enabled: true }).fetch().map(i => i.channel);
   console.info('Connecting to channels:', bot_channels);
 
-  let raid_bot_channels = BotChannels.find({ enabled: false }).fetch().map(i => i.channel);  
+  let raid_bot_channels = BotChannels.find({ enabled: false }).fetch().map(i => i.channel);
   console.info('Connecting to channels for raid monotiring only:', raid_bot_channels);
 
   // Connection to TWITCH CHAT
@@ -563,13 +569,22 @@ Meteor.startup(() => {
     channels: raid_bot_channels,
     connection: { reconnect: true }
   };
-//  opts.channels = raid_bot_channels;
+  //  opts.channels = raid_bot_channels;
   const raid_bclient = new tmi.client(opts_raid);
 
   //
   function say(target, txt, store_user) {
-    bclient.say(target, txt);
-    console.info(target, '>', txt);
+
+    try {
+      // Check if there is a {{ }} for Phrase it
+      if (txt.indexOf('{{') >= 0) {
+        txt = PhraseIt.make(txt);
+      }
+      bclient.say(target, txt);
+      console.info(target, '>', txt);
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   // Updates user interaction timestamp for users who are on the map
@@ -594,7 +609,7 @@ Meteor.startup(() => {
   }
 
   // Register our event handlers (defined below)
-//  bclient.on('message', Meteor.bindEnvironment(onMessageHandler));
+  //  bclient.on('message', Meteor.bindEnvironment(onMessageHandler));
   bclient.on('chat', Meteor.bindEnvironment(onMessageHandler));
   bclient.on('connected', onConnectedHandler);
   bclient.on('raided', Meteor.bindEnvironment(onRaidedHandler));
@@ -710,8 +725,8 @@ Meteor.startup(() => {
       cmd = cmdarray[0].substring(1).toLowerCase();
     }
 
-    
-    if (botchan.active_users===true) {
+
+    if (botchan.active_users === true) {
       const exceptnames = ['streamelements', 'songlistbot', 'nightbot'];
       if (exceptnames.indexOf(username) < 0) {
 
@@ -757,7 +772,28 @@ Meteor.startup(() => {
       }
     }
 
-    
+
+    // -------------HUG -----------------
+    if (botchan.hug === true) {
+
+      if (cmd === 'hug' || cmd === 'hugs') {
+        if (cmdarray.length > 1) {
+          /*cmdarray.shift();
+          let atnames = cmdarray.map((item)=> { 
+            if (item[0]!='@') return '@'+item;
+            return item;
+          });
+          */
+          let hugname = cmdarray[1];
+          if (hugname[0] != '@') hugname = '@' + hugname;
+
+          //        let hugsentence = answername + ' gives '+atnames.join(', ') + ' {{an_adjective}} hug' ;
+          let hugsentence = answername + ' gives ' + hugname + ' {{an_adjective}} hug';
+          say(target, hugsentence);
+        }
+      }
+    }
+
     // Remove whitespace from chat message
     if (cmd === "statement") {
       say(target, randSentence());
@@ -829,7 +865,7 @@ Meteor.startup(() => {
     }
 
 
-    
+
     const langExpl = ['For example !en will translate your sentence in english. Or !pt to translate into portuguese.',
       'Available translation commands: !cn !de !en !es !fi !fr !it !jp !kr !pl !pt !ro !ru !tu ...'
     ];
@@ -923,198 +959,199 @@ Meteor.startup(() => {
     }
 
 
-      // ------------------- MAP -------------------------
-      if (botchan.map === true) {
-        //  Depending on the channel, guest account differs.
-        if (cmd.indexOf('map') == 0) {
-          let url = Settings.findOne({ param: 'URL' });
-          console.error(url);
 
-          if (url) {
-            say(target, "You can access our EarthDay map here: " + url.val + "/c/" + chan);
-          }
+    // ------------------- MAP -------------------------
+    if (botchan.map === true) {
+      //  Depending on the channel, guest account differs.
+      if (cmd.indexOf('map') == 0) {
+        let url = Settings.findOne({ param: 'URL' });
+        console.error(url);
+
+        if (url) {
+          say(target, "You can access our EarthDay map here: " + url.val + "/c/" + chan);
+        }
+        return;
+      }
+
+      if (cmd.indexOf('forget') == 0) {
+        UserLocations.remove({ name: username });
+        say(target, "it's done " + answername + " !");
+      }
+
+      if (cmd.indexOf('where') == 0) {
+        pdoc = UserLocations.findOne({ name: username });
+        if (pdoc) {
+          say(target, answername + " You've told me you were from " + pdoc.location + '. If you want me to forget your location, use !forget');
+          return;
+        }
+        else {
+          say(target, "Sorry " + answername + " I don't know where you're from. Please use !from command to tell me!");
+          return;
+        }
+      }
+
+      if (cmd.indexOf('show') == 0) {
+        pdoc = UserLocations.findOne({ name: username });
+        if (pdoc === undefined) {
+          say(target, "Sorry " + answername + " I don't have you location in my database. Please use '!from city,country' command first.");
+          return;
+        }
+        else {
+          UserLocations.update(pdoc._id, { $set: { allow: true } });
+          say(target, "Ok, your nickname will be displayed on the map! " + answername + ' Use !msg to add a personalized message on the map');
+          return;
+        }
+      }
+
+      if (cmd.indexOf('mask') == 0) {
+        pdoc = UserLocations.findOne({ name: username });
+        if (pdoc === undefined) {
+          say(target, "Sorry " + answername + " I don't have your location in my database. Please use '!from city,country' command first.");
+          return;
+        }
+        else {
+          UserLocations.update(pdoc._id, { $set: { allow: false } });
+          say(target, "Ok! " + answername);
           return;
         }
 
-        if (cmd.indexOf('forget') == 0) {
-          UserLocations.remove({ name: username });
-          say(target, "it's done " + answername + " !");
-        }
+      }
 
-        if (cmd.indexOf('where') == 0) {
-          pdoc = UserLocations.findOne({ name: username });
-          if (pdoc) {
-            say(target, answername + " You've told me you were from " + pdoc.location + '. If you want me to forget your location, use !forget');
-            return;
+      if ((cmd.indexOf('msg') == 0) || (cmd.indexOf('message') == 0)) {
+        pdoc = UserLocations.findOne({ name: username });
+        if (pdoc === undefined) {
+          say(target, "Sorry " + answername + " I don't have you location in my database. Please use '!from city,country' command first.");
+          return;
+        }
+        else {
+          msg = commandName.substring(cmd.length + 1).trim();
+          if (msg.length == 0) {
+            say(target, "use '!msg +message' for adding a personalized message on the map");
           }
           else {
-            say(target, "Sorry " + answername + " I don't know where you're from. Please use !from command to tell me!");
-            return;
-          }
-        }
-
-        if (cmd.indexOf('show') == 0) {
-          pdoc = UserLocations.findOne({ name: username });
-          if (pdoc === undefined) {
-            say(target, "Sorry " + answername + " I don't have you location in my database. Please use '!from city,country' command first.");
-            return;
-          }
-          else {
-            UserLocations.update(pdoc._id, { $set: { allow: true } });
-            say(target, "Ok, your nickname will be displayed on the map! " + answername +  ' Use !msg to add a personalized message on the map');
-            return;
-          }
-        }
-
-        if (cmd.indexOf('mask') == 0) {
-          pdoc = UserLocations.findOne({ name: username });
-          if (pdoc === undefined) {
-            say(target, "Sorry " + answername + " I don't have your location in my database. Please use '!from city,country' command first.");
-            return;
-          }
-          else {
-            UserLocations.update(pdoc._id, { $set: { allow: false } });
+            msgobj = {};
+            msgobj[chan + '-msg'] = msg;
+            UserLocations.update(pdoc._id, { $set: msgobj });
             say(target, "Ok! " + answername);
-            return;
-          }
-
-        }
-
-        if ((cmd.indexOf('msg') == 0) || (cmd.indexOf('message') == 0)) {
-          pdoc = UserLocations.findOne({ name: username });
-          if (pdoc === undefined) {
-            say(target, "Sorry " + answername + " I don't have you location in my database. Please use '!from city,country' command first.");
-            return;
-          }
-          else {
-            msg = commandName.substring(cmd.length + 1).trim();
-            if (msg.length == 0) {
-              say(target, "use '!msg +message' for adding a personalized message on the map");
-            }
-            else {
-              msgobj = {};
-              msgobj[chan + '-msg'] = msg;
-              UserLocations.update(pdoc._id, { $set: msgobj });
-              say(target, "Ok! " + answername);
-            }
-            return;
-          }
-        }
-
-        // Close
-        if (cmd.indexOf('closest') == 0 || cmd.indexOf('neighbour') == 0 || cmd.indexOf('neighbor') == 0) {
-          let me = UserLocations.findOne({ name: username });
-
-          if (me === undefined) {
-            say(target, answername + ", i couldn't find you on my map... Use !from command to tell me your location");
-            return;
-          }
-
-          if (me.latitude === undefined) {
-            say(target, answername + ",sorry i need to process some data... please try again in a few minutes...");
-            return;
-          }
-
-          let ares = findClosest(me._id, chan, 5);
-          if (ares.length === 0) {
-            say(target, answername + ",sorry i couldn't find someone close to your place...");
-            return;
-          }
-          else {
-            let arestr = ares[0];
-            for (let i = 1; i < ares.length; i += 1)
-              arestr += ', ' + ares[i];
-            if (ares.length > 1)
-              say(target, answername + ',your closest neighbours are ' + arestr);
-            else
-              say(target, answername + ',your closest neighbour is ' + arestr);
           }
           return;
         }
+      }
 
-        if (cmd === 'from') {
-          geoloc = commandName.substring(5).trim();
-          if (geoloc.length < 2) {
-            say(target, answername + " Please tell me the country/state/city where you're from, for example: !from Paris,France or !from Japan.");
-            return;
-          }
-          else {
-            // Check if there is a @ and if the user is a mod
-            let words = geoloc.split(' ');
-            words.forEach(function (w) {
-              if (w.indexOf('@') == 0) {
-                // Mods or broadcaster can change the location for someone
-                //if ((context.mod === true) || (context.badges.broadcaster == 1)) {
-                // ...only siko can do it currently.
-                if (isModerator === true) {
-                  username = w.substring(1).toLowerCase();
-                  dispname = w.substring(1);
-                  context['display-name'] = w.substring(1);
-                  geoloc = geoloc.replace(w, '');
-                }
-                else {
-                  say(target, "Please tell me the country/state/city where you're from, for example: !from Paris,France or !from Japan. Although please do not provide too much information");
-                  return;
-                  //                say(target, answername + " Sorry you're not allowed to change the city of another viewer");
-                  //                return;
-                }
+      // Close
+      if (cmd.indexOf('closest') == 0 || cmd.indexOf('neighbour') == 0 || cmd.indexOf('neighbor') == 0) {
+        let me = UserLocations.findOne({ name: username });
+
+        if (me === undefined) {
+          say(target, answername + ", i couldn't find you on my map... Use !from command to tell me your location");
+          return;
+        }
+
+        if (me.latitude === undefined) {
+          say(target, answername + ",sorry i need to process some data... please try again in a few minutes...");
+          return;
+        }
+
+        let ares = findClosest(me._id, chan, 5);
+        if (ares.length === 0) {
+          say(target, answername + ",sorry i couldn't find someone close to your place...");
+          return;
+        }
+        else {
+          let arestr = ares[0];
+          for (let i = 1; i < ares.length; i += 1)
+            arestr += ', ' + ares[i];
+          if (ares.length > 1)
+            say(target, answername + ',your closest neighbours are ' + arestr);
+          else
+            say(target, answername + ',your closest neighbour is ' + arestr);
+        }
+        return;
+      }
+
+      if (cmd === 'from') {
+        geoloc = commandName.substring(5).trim();
+        if (geoloc.length < 2) {
+          say(target, answername + " Please tell me the country/state/city where you're from, for example: !from Paris,France or !from Japan.");
+          return;
+        }
+        else {
+          // Check if there is a @ and if the user is a mod
+          let words = geoloc.split(' ');
+          words.forEach(function (w) {
+            if (w.indexOf('@') == 0) {
+              // Mods or broadcaster can change the location for someone
+              //if ((context.mod === true) || (context.badges.broadcaster == 1)) {
+              // ...only siko can do it currently.
+              if (isModerator === true) {
+                username = w.substring(1).toLowerCase();
+                dispname = w.substring(1);
+                context['display-name'] = w.substring(1);
+                geoloc = geoloc.replace(w, '');
               }
-            });
-          }
-          //console.log('*FROM* user ' + context.username + ' ' + context['display-name'] + ' is from: ', geoloc);
-          let now = Date.now();
-          let delta = 2 * 60 * 1000;
+              else {
+                say(target, "Please tell me the country/state/city where you're from, for example: !from Paris,France or !from Japan. Although please do not provide too much information");
+                return;
+                //                say(target, answername + " Sorry you're not allowed to change the city of another viewer");
+                //                return;
+              }
+            }
+          });
+        }
+        //console.log('*FROM* user ' + context.username + ' ' + context['display-name'] + ' is from: ', geoloc);
+        let now = Date.now();
+        let delta = 2 * 60 * 1000;
 
-          doc = {
-            name: username,
-            dname: dispname,
-            location: geoloc.toLowerCase(),
-            timestamp: now,
-            channels: [target],
-            allow: false,
-          }
-          // Interaction stamp
-          doc[chan] = now;
+        doc = {
+          name: username,
+          dname: dispname,
+          location: geoloc.toLowerCase(),
+          timestamp: now,
+          channels: [target],
+          allow: false,
+        }
+        // Interaction stamp
+        doc[chan] = now;
 
-          // Check if user has already given its location
-          pdoc = UserLocations.findOne({ name: username });
-          if (pdoc === undefined) {
-            //Nouvel utilisateur
-            UserLocations.insert(doc);
+        // Check if user has already given its location
+        pdoc = UserLocations.findOne({ name: username });
+        if (pdoc === undefined) {
+          //Nouvel utilisateur
+          UserLocations.insert(doc);
 
-            if (delta > 60 * 1000) {
+          if (delta > 60 * 1000) {
 /*              addmess = [
                 'Use !forget if you want me to forget your location!',
                 'Use !show to allow me to display your nickname on the map',
                 'Use !msg to add a personalized message on the map',
               ]*/;
-              txt = 'Use !show to allow me to display your nickname on the map'; //,randElement(addmess); //.[Math.floor(Math.random() * (addmess.length - 1))];
-              say(target, answername + " Ok, thanks! " + txt, username);
-              return;
-            }
-            else
-              say(target, answername + " Ok, got it! ", username);
+            txt = 'Use !show to allow me to display your nickname on the map'; //,randElement(addmess); //.[Math.floor(Math.random() * (addmess.length - 1))];
+            say(target, answername + " Ok, thanks! " + txt, username);
             return;
           }
-          else {
-            // User's location already exists, in case a use gives location again,
-            // geo coordinates and country will be recomputed.
-            // Also dname could have changed (case)
-            // And user can register on another channel
+          else
+            say(target, answername + " Ok, got it! ", username);
+          return;
+        }
+        else {
+          // User's location already exists, in case a use gives location again,
+          // geo coordinates and country will be recomputed.
+          // Also dname could have changed (case)
+          // And user can register on another channel
 
-            // Channels where user has registered. (deprecated?)
-            if (pdoc.channels.indexOf(target) < 0)
-              pdoc.channels.push(target);
+          // Channels where user has registered. (deprecated?)
+          if (pdoc.channels.indexOf(target) < 0)
+            pdoc.channels.push(target);
 
-            let updateObj = { location: doc.location, channels: pdoc.channels, dname: doc.dname };
-            // Timestamp for getting active on channel's map
-            updateObj[chan] = now;
-            UserLocations.update(pdoc._id, { $set: updateObj, $unset: { country: 1, latitude: 1, longitude: 1 } });
-            say(target, answername + " Ok, i've updated my database!");
-            return;
-          }
+          let updateObj = { location: doc.location, channels: pdoc.channels, dname: doc.dname };
+          // Timestamp for getting active on channel's map
+          updateObj[chan] = now;
+          UserLocations.update(pdoc._id, { $set: updateObj, $unset: { country: 1, latitude: 1, longitude: 1 } });
+          say(target, answername + " Ok, i've updated my database!");
+          return;
         }
       }
+    }
 
 
     if (botchan.quizz === true) {
@@ -1274,7 +1311,7 @@ Meteor.startup(() => {
       }
     }
 
-    
+
 
     // ---------- catch !so command
     // Extract the 2nd parameter, removes @ symbols (sonitize?)
@@ -1315,7 +1352,7 @@ Meteor.startup(() => {
       }
     }
 
-    
+
     // ------------------- GREET ----------------------
     if (botchan.greet === true) {
       // dnow?
@@ -1453,7 +1490,8 @@ Meteor.startup(() => {
       let txts = [
         "I'm only a bot, you know! MrDestructoid",
         "I'm a nice bot, you know! MrDestructoid",
-        "I'm practicing for my Turing Exam! MrDestructoid",
+        "I'm {{an_adjective}} bot, you know! MrDestructoid",
+        "I'm very shy for a bot! MrDestructoid",
         '^^ ',
         '<3 <3 <3 ',
         ':) ',
@@ -1471,6 +1509,8 @@ Meteor.startup(() => {
           txts = ["For Sure!", "Of course!"];
 
         txt = randElement(txts); //[Math.floor(Math.random() * (txts.length - 1))];
+
+
         say(target, txt + ' ' + answername);
       }
       else {
@@ -1499,30 +1539,29 @@ Meteor.startup(() => {
       chan = chan.substring(1);
       let num = parseInt(vcount);
 
-      if (isNaN(num)) 
-      {
+      if (isNaN(num)) {
         console.error('Num viewers is NAN! ', vcount);
         num = 1;
       }
-        
+
       let bc = BotChannels.findOne({ channel: chan });
 
       console.log(`>>>> ${channel} ${chan} Raided by ${raider} with ${num} viewers, ${tags}`);
 
       try {
-        Raiders.upsert({ raider: raider, channel: chan }, { $inc: { count: 1, viewers:num} });
+        Raiders.upsert({ raider: raider, channel: chan }, { $inc: { count: 1, viewers: num } });
       }
       catch (e) {
         console.error(e);
       }
 
-      if(bc.discord!== true) 
+      if (bc.discord !== true)
         return;
- 
+
       try {
         let title = raider + " is raiding " + chan + " with " + num + " viewers";
         title += '\n';
-        title += 'https://twitch.tv/'+raider;
+        title += 'https://twitch.tv/' + raider;
 
         // Global URL(s)
         if (bot_discord_raid_url)
@@ -1530,7 +1569,7 @@ Meteor.startup(() => {
 
         // Per channel URL(s)
         // Check if there is a  target channel for raids
-        if (bc.discord_raid_url && bc.discord_raid_url.length>1) {
+        if (bc.discord_raid_url && bc.discord_raid_url.length > 1) {
           console.error('discord channel raid hook', bc.discord_raid_url);
           sendDiscord(title, bc.discord_raid_url);
         }
@@ -1544,7 +1583,7 @@ Meteor.startup(() => {
     }
   }
 
-//   onRaidedHandler('#sikorama','duobarao',10);
+  //   onRaidedHandler('#sikorama','duobarao',10);
   function onStateHandler(channel, state) {
     try {
       console.log(`>>>>>> ${channel} State changed`, JSON.stringify(state));
@@ -1558,8 +1597,8 @@ Meteor.startup(() => {
       if (self) return;
       console.log('>>>>', channel, 'Action', JSON.stringify(userstate), 'm=', message);
       // check /raid commands
-      if (message.indexOf('/raid')===0) {
-        console.log('>>>>', channel, 'RAID COMMAND', message); 
+      if (message.indexOf('/raid') === 0) {
+        console.log('>>>>', channel, 'RAID COMMAND', message);
       }
     } catch (e) {
       console.error(e);

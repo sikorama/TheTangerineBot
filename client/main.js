@@ -15,7 +15,7 @@ import '../imports/client/LocationsTable.js';
 import '../imports/client/about.html';
 import '../imports/client/WorldMap.js';
 import '../imports/client/WorldMap.html';
-
+import '../imports/client/RadioControl.js';
 
 import { Accounts } from 'meteor/accounts-base';
 

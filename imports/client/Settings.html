@@ -44,6 +44,16 @@
       <thead>
         <tr>
           <th colspan="3">
+            {{>CheckMark b=c.hug n="hug"}}
+            Hugs
+          </th>
+        </tr>
+      </thead>
+
+
+      <thead>
+        <tr>
+          <th colspan="3">
             {{>CheckMark b=c.map n="map"}}
             Map <a href="/c/{{c.channel}}">&#9732; </a>
           </th>
@@ -460,6 +470,24 @@
           <textarea  class="settings" name="discord_raid" value="{{getParamVal "discord_raid"}}"></textarea>
         </td>
       </tr>
+
+      <tr>
+        <td>
+          FFMPEG Stream Server URL
+        </td>
+        <td>
+          <textarea  class="settings" name="ffmpeg_server_url" value="{{getParamVal "ffmpeg_server_url"}}"></textarea>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          FFMPEG Stream Server Port
+        </td>
+        <td>
+          <textarea  class="settings" name="ffmpeg_server_port" value="{{getParamVal "ffmpeg_server_port"}}"></textarea>
+        </td>
+      </tr>
+
     </tbody>
   </table>
 

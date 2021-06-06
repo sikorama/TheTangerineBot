@@ -67,6 +67,12 @@
       </li>
       {{/if}}
 
+      {{#if isUserRole "stream_control"}}
+      <li class="pure-menu-item {{active "radio"}}">
+        <a href="/radio" class="pure-menu-link ">Radio</a>
+      </li>
+      {{/if}}
+
       <li class="pure-menu-item {{active "about"}}">
         <a href="/about" class="pure-menu-link ">About</a>
       </li>

@@ -55,6 +55,15 @@ FlowRouter.route('/live', {
 });
 
 
+FlowRouter.route('/radio', {
+  name: 'radio',
+  action: function (params, queryParams) {
+    BlazeLayout.render('MainPage', {
+      main: 'RadioControl',
+    });
+  }
+});
+
 
 FlowRouter.route('/from', {
   name: 'from',
