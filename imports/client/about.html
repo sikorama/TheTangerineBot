@@ -2,8 +2,11 @@
 
   <h1>About</h1>
   The Tangerine Bot is a friendly little bot i (sikorama) have developped for The Tangerine Club, a fantastic band you
-  can find on twitch, bandcamp, instagram, and many other social networks.
-  This is an open source project. Code is available on <a href="https://github.com/sikorama/TheTangerineBot"> github </a>!
+  can find on twitch, bandcamp, instagram, and many other social networks. It is now used by a few music channels on
+  twitch.
+
+  This is an open source project. Code is available on <a href="https://github.com/sikorama/TheTangerineBot"> github
+  </a>!
   You'll also find there a minimalistic bot, easy to deply, that performs translation only.
 
   <h4> Collected data</h4>
@@ -13,7 +16,7 @@
   Geolocation is not accurate, and is even a bit randomized (for example the icon on the map will move every time you
   refresh the map).
 
-  You can remove all informations associated with yout nickname with !forget command in chat.
+  You can remove all informations associated with your nickname by using !forget command in chat.
 
   <h4>Credits</h4>
   <ul>
@@ -37,20 +40,29 @@
   (source code available <a href="https://github.com/tangerine-bot/tangerine">here</a>).
 
   {{#if currentUser}}
-    <h4>Session</h4>
-    Logged as {{currentUser.username}} <a href="/" id="logout" class="pure-link">(Disconnect)</a>
+  <h4>Session</h4>
+  Logged as {{currentUser.username}} <a href="/" id="logout" class="pure-link">(Disconnect)</a>
   {{/if}}
 
+  {{>ActiveChan}}
 </template>
 
 
-<template name="LiveChannels">
+<template name="ChanAbout">
+  {{>LiveChannels}}
 
-  <h1>Currently Live</h1>
+  {{>About}}
+
+</template>
+
+<template name="LiveChannels">
+{{#let livearr = (livechan 3)}}
+  {{#if livearr.length}}
+<h1>Now Live!</h1>
   <div>
     <table class="table table-striped table-hover ">
       <tbody>
-        {{#each r in livechan 3}}
+        {{#each r in livearr}}
         <tr>
           {{#each w in r }}
           {{#if w}}
@@ -72,20 +84,23 @@
           {{/if}}
           {{/each}}
         </tr>
-
-
         {{/each}}
       </tbody>
     </table>
   </div>
+  {{/if}}
+{{/let}}
+</template>
 
+
+<template name="ActiveChan">
   <h3>Chats where the bot is active</h3>
-  <div>  
+  <div>
     This instance is currently active in the chat of these channels:
-    
+
     {{#each c in enchan}}
     <a href="http://twich.tv/{{c.channel}}">{{c.channel}} &bull; </a>
-    {{/each}}    
+    {{/each}}
   </div>
-  
+
 </template>

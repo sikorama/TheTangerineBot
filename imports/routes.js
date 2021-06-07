@@ -193,6 +193,8 @@ FlowRouter.route('/c/:chan', {
     BlazeLayout.render('ChannelPage', {
       main: 'DirectMap'
     });
+//    BlazeLayout.render('DirectMap', {
+//    });
   }
 });
 
@@ -219,7 +221,7 @@ FlowRouter.route('/c/:chan/live', {
   name: 'channel',
   action: function (params, queryParams) {
     BlazeLayout.render('ChannelPage', {
-      main: 'LiveChannels'
+      main: 'ChanAbout'
     });
   }
 });

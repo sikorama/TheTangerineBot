@@ -1519,7 +1519,6 @@ Meteor.startup(() => {
       let txts = [
         "I'm only a bot, you know! MrDestructoid",
         "I'm a nice bot, you know! MrDestructoid",
-        "I'm {{an_adjective}} bot, you know! MrDestructoid",
         "I'm very shy for a bot! MrDestructoid",
         '^^ ',
         '<3 <3 <3 ',

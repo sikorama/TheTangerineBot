@@ -127,10 +127,16 @@ Template.LiveChannels.onCreated(function () {
 
 });
 
-Template.LiveChannels.helpers({
+Template.ActiveChan.helpers({
   enchan() {
     return BotChannels.find({ enabled: true }, { sort: { channel: 1 } });
-  },
+  }
+});
+
+Template.LiveChannels.helpers({
+//  enchan() {
+//    return BotChannels.find({ enabled: true }, { sort: { channel: 1 } });
+//  },
   livechan(numcol)  {
       let res=BotChannels.find({ live: true }, { sort: { live_started_at: 1 } }).fetch();
       // Limiter aux X premiers elements
@@ -393,12 +399,28 @@ Template.SelectChannel.events({
   }
 });
 
+
 // Direct access to a map, without needing to be logged
-Template.DirectMap.onCreated(function () {
-  let chan = FlowRouter.getParam('chan');
+Template.ChannelPage.onCreated(function () {
+  const chan = FlowRouter.getParam('chan');
   // Check if chan exists, and has map enabled
   this.subscribe('botChannels', { channel: chan }, function () {
-    let bc = BotChannels.findOne({ channel: chan, map: { $exists: 1 } });
+    const bc = BotChannels.findOne({ channel: chan, map: { $exists: 1 } });
+    if (!bc)
+      FlowRouter.go('/');
+  });
+
+  Session.set('sel_channel', chan);
+  //  console.error(chan);
+});
+
+
+// Direct access to a map, without needing to be logged
+Template.DirectMap.onCreated(function () {
+  const chan = FlowRouter.getParam('chan');
+  // Check if chan exists, and has map enabled
+  this.subscribe('botChannels', { channel: chan }, function () {
+    const bc = BotChannels.findOne({ channel: chan, map: { $exists: 1 } });
     console.error('Displaying', bc.channel);
     if (!bc)
       FlowRouter.go('/');
