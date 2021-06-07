@@ -112,6 +112,15 @@ Template.PageTop.helpers({
   curSelChan() { return Session.get('sel_channel'); }
 })
 
+
+Template.ChannelPage.helpers({
+  active(s) {
+    return ((FlowRouter.getRouteName() === s) ? 'pure-menu-active active' : '');
+  },
+  curSelChan() { return Session.get('sel_channel'); }
+})
+
+
 Template.LiveChannels.onCreated(function () {
   this.subscribe('EnabledChannels');
   this.subscribe('LiveChannels');

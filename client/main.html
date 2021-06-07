@@ -104,6 +104,42 @@
   {{/if}}
 </template>
 
+
+<template name="ChannelPage">
+  <div id="layout" class="content pure-g main-menu">
+    <div id="main" class="pure-u-1">
+      <div class="pure-g">
+        <div class="pure-u-1-2">
+          <a class="main-title" href="https://twitch.tv/{{chan_name}}">twitch.tv/{{curSelChan}}</a>
+          </div>
+        <div class="pure-u-1-2">
+          <nav class="pure-menu pure-menu-horizontal main-channel-menu">
+            <ul class="pure-menu-list main-menu-list">
+      
+            {{#if rh_featureEnabled "map"}}
+
+            <li class="pure-menu-item {{active "map"}}">
+              <a href="/c/{{curSelChan}}/map" class="pure-menu-link ">Map</a>
+            </li>
+            {{/if}}
+      
+            <li class="pure-menu-item {{active "commands"}}">
+              <a href="/c/{{curSelChan}}/commands" class="pure-menu-link ">Commands</a>
+            </li>
+      
+            <li class="pure-menu-item {{active "live"}}">
+              <a href="/c/{{curSelChan}}/live" class="pure-menu-link ">Live</a>
+            </li>
+            </ul>                
+          </nav>
+        </div>
+      </div>
+    </div> 
+  </div>
+
+  {{> Template.dynamic template=main}}
+</template>
+
 <template name="CheckMark">
   <button class="{{#if b}} ok {{else}} ko {{/if}} toggleCheck" name="{{n}}">
     {{#if b}}

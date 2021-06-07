@@ -98,6 +98,10 @@ textarea {
 	background-color:darkorange;
 }
 
+.main-channel-menu {
+ text-align: right;
+ background-color: darkorange;
+}
 
 .pure-menu-heading.pure-menu-active>.pure-menu-link,
 .pure-menu-heading.pure-menu-link:hover,

@@ -647,9 +647,12 @@ Meteor.startup(() => {
     if (botchan === undefined) return;
 
     let isModerator = (context.mod === true);
+    let isBroadcaster = false;
     if (context.badges)
-      if (context.badges.broadcaster)
+      if (context.badges.broadcaster) {
+        isBroadcaster = true;
         isModerator = true;
+      }
     //    console.error(context, isModerator);
 
     let dnow = new Date();
@@ -727,13 +730,12 @@ Meteor.startup(() => {
       cmd = cmdarray[0].substring(1).toLowerCase();
     }
 
-
     if (botchan.active_users === true) {
-
       // Add user to active user list.
+      
       // Ignore broadcaster
-      if (context.badges.broadcaster != 1) {
-
+      if (!isBroadcaster) 
+      {
         const exceptnames = ['streamelements', 'songlistbot', 'nightbot'];
         if (exceptnames.indexOf(username) < 0) {
 
@@ -763,19 +765,21 @@ Meteor.startup(() => {
         }
       }
 
-
       //console.error(last_active_users);
       if (cmd === "exception" || cmd === "exceptions" || cmd == 'lastactive') {
         if (isModerator) {
           //        console.error('last active=', last_active_users);
           //            let active_max = 40;
-          let active_since = 1000 * 60 * 60; // default 1 hour?
+          let active_since = 1000 * 60 * 60 *2; // default 1 hour?
+
           try {
             if (botchan.active_since && botchan.active_since > 0)
               active_since = 1000 * 60 * botchan.active_since;
             //              if (botchan.active_max) active_max = botchan.active_max;
           }
           catch (e) { console.error(e); }
+
+          console.error(active_since);
 
           if (last_active_users[chan]) {
 
@@ -1272,7 +1276,7 @@ Meteor.startup(() => {
       }
 
       if (cmd.indexOf('answer') === 0) {
-        if ((context.mod === true) || (context.badges.broadcaster == 1)) {
+        if (isModerator) {
           if (curQuestion !== undefined) {
             say(target, "The answer was '" + curQuestion.expAnswers[0]);
             curQuestion = undefined;

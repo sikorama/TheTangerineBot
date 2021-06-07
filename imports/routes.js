@@ -190,16 +190,45 @@ FlowRouter.route('/disconnect', {
 FlowRouter.route('/c/:chan', {
   name: 'channel',
   action: function (params, queryParams) {
-    BlazeLayout.render('DirectMap', {
+    BlazeLayout.render('ChannelPage', {
+      main: 'DirectMap'
     });
-
   }
 });
+
+FlowRouter.route('/c/:chan/map', {
+  name: 'channel',
+  action: function (params, queryParams) {
+    BlazeLayout.render('ChannelPage', {
+      main: 'DirectMap'
+    });
+  }
+});
+
 
 FlowRouter.route('/c/:chan/commands', {
   name: 'channel',
   action: function (params, queryParams) {
-    BlazeLayout.render('DirectCommands', {
+    BlazeLayout.render('ChannelPage', {
+      main: 'CommandsTable'
+    });
+  }
+});
+
+FlowRouter.route('/c/:chan/live', {
+  name: 'channel',
+  action: function (params, queryParams) {
+    BlazeLayout.render('ChannelPage', {
+      main: 'LiveChannels'
+    });
+  }
+});
+
+FlowRouter.route('/c/:chan/about', {
+  name: 'channel',
+  action: function (params, queryParams) {
+    BlazeLayout.render('ChannelPage', {
+      main: 'About'
     });
   }
 });
