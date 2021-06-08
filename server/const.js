@@ -10,7 +10,7 @@ export const followtxts=[
   'be sure to follow',
   "it's super important to follow",
   'you must follow',
-  'what are you waiting? follow',
+  'what are you waiting for? follow',
   //'check'
   // 'still not following?',
   // still wondering if you'll push this follow button? really?
@@ -23,13 +23,14 @@ export const followtxts=[
 // By default english is used, except for these countries:
 export const country_lang = {
     'ar': 'es', // argentina
-    'at': 'de', //
+  'at': 'de',   // Austria
     'au': 'en', // Australia
-    'bo': 'es',
+    'be': 'fr', // Belgium
+    'bo': 'es', // Bolivia
     'br': 'pt',
     'ch': 'en',
-    'cl': 'es',
-    'co': 'es',
+    'cl': 'es', // Chile
+    'co': 'es', // Colombia
     'cr': 'es',
     'de': 'de',
     'ec': 'es', // Ecuador

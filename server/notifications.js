@@ -210,7 +210,7 @@ export function checkLiveChannels(client_id, client_private) {
 /*
 
 function sendRocket: function (title, text, icon, title_link, channel, additional_attachments) {
-    var payload = {};
+    let payload = {};
     payload.text = title;
     if (!text) text = title;
 
@@ -224,7 +224,7 @@ function sendRocket: function (title, text, icon, title_link, channel, additiona
       payload.icon_emoji = icon;
     }
 
-    var sender = getParam('Name');
+    let sender = getParam('Name');
     if (sender !== undefined) {
       payload.username = sender;
     }
@@ -236,10 +236,10 @@ function sendRocket: function (title, text, icon, title_link, channel, additiona
       payload.channel = '#portail';
 
     try {
-      var url = getParam('rocketIP');
-      var token = getParam('rocketToken');
+      const url = getParam('rocketIP');
+      const token = getParam('rocketToken');
 
-      var urlWebHook_rocket = url + '/hooks/' + token;
+      const urlWebHook_rocket = url + '/hooks/' + token;
       //        console.error('sendRocket', payload, 'to', urlWebHook_rocket);
 
       httpreq.post(urlWebHook_rocket, {

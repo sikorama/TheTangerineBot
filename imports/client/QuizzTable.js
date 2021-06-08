@@ -96,17 +96,17 @@ const topics = [
       manageSearchEvents(event, 'searchQuizz');
     },
     'change .questionline': function (event) {
-      var id = event.currentTarget.parentElement.parentElement.id;
-      var name = event.currentTarget.name;
-      var sd = {};
+      const id = event.currentTarget.parentElement.parentElement.id;
+      const name = event.currentTarget.name;
+      let sd = {};
       sd[name] = event.currentTarget.value
       Meteor.call('updateQuestion', id, sd);
     },
     'click button.toggleCheck': function (event) {
-      var id = getParentId(event.currentTarget);
+      const id = getParentId(event.currentTarget);
       //    var name = event.currentTarget.name;
-      var cl = event.currentTarget.className;
-      var b = (cl.indexOf('ok') < 0)
+      const cl = event.currentTarget.className;
+      const  b = (cl.indexOf('ok') < 0)
       Meteor.call('updateQuestion', id, { enabled: b });
     },
     'click button.remove': function (event) {

@@ -1,10 +1,11 @@
 <template name="LatestLocations">
-    <h2>User's Locations<a href="/from/{{#unless edit_mode}}edit{{/unless}}" >&#9998;</a></h2>
-
+    <h2>User's Locations<a href="/from/{{#unless edit_mode}}edit{{/unless}}" >&#9998;</a>       
+    </h2>
+    
     {{#let userloc=getUserLocs}}
-  <p>
-    {{userloc.count}}/{{numLocations}} Users,
-    {{>ShowMore v="locations"}}
+    <p>
+      {{userloc.count}}/{{numLocations}} Users,
+      {{>ShowMore v="locations"}}
   </p>
 
     <table class="pure-table" style="width:100%;">
@@ -157,6 +158,7 @@
 
       <br>
       {{userloc.count}} / {{numPeopleLoc}} users found
+
       {{#if isUserRole "admin"}}
       {{#if edit_mode}}
           <a href="/from/edit">Mode Normal</a>
@@ -165,11 +167,13 @@
       {{/if}}
       {{/if}}
 
+    
       <p class="centered">
         {{>SkipResult v="locations" t=numLocations}}
       </p>
 
 
       {{/let}}
+
 
   </template>

@@ -25,7 +25,7 @@ Accounts.ui.config({
 })
 
 
-var Chart = require('chart.js');
+const Chart = require('chart.js');
 
 Session.setDefault('searchUsers', {});
 Session.setDefault('searchQuizz', {});
@@ -62,12 +62,12 @@ Template.registerHelper(
 Template.registerHelper(
   "FormatGeoloc", function (lat, long) {
     if (isNaN(long) || isNaN(lat)) return 'N/A';
-    var l0 = Math.round(lat * 100) / 100;
-    var l1 = Math.round(long * 100) / 100;
+    let l0 = Math.round(lat * 100) / 100;
+    let l1 = Math.round(long * 100) / 100;
 
-    var h0 = "N";
+    let h0 = "N";
     if (l0 < 0) { l0 = -l0; h0 = 'S' }
-    var h1 = "E";
+    let h1 = "E";
     if (l1 < 0) { l1 = -l1; h1 = 'W' }
 
     return '' + l0 + '°' + h0 + ' ' + l1 + '°' + h1
@@ -160,8 +160,8 @@ function rgba(r, g, b, a) {
 }
 
 function genColors(c1, a, n) {
-  var colors = [];
-  for (var i = n - 1; i >= 0; i--) {
+  let colors = [];
+  for (let i = n - 1; i >= 0; i--) {
     colors.push(rgba(i * 255.0 / n, i * 127.0 / n, 180 - i * 127.0 / n, a));
   }
   return colors;
@@ -185,12 +185,8 @@ Template.Stats.events({
 
 Template.Stats.onRendered(function () {
   this.subscribe('botChannels');
-
-
   Session.setDefault('statPage', 1);
   Session.setDefault('numPeopleLoc', 0);
-
-  var ctx = null;
 
   this.autorun(() => {
     let sch = Session.get('sel_channel');
@@ -300,8 +296,8 @@ Template.ShowMore.events({
 
 Template.SkipResult.helpers({
   pages() {
-    let npp = parseInt(Session.get(this.v + "_limit"));
-    let nbp = Math.ceil(parseInt(this.t) / npp);
+    const npp = parseInt(Session.get(this.v + "_limit"));
+    const nbp = Math.ceil(parseInt(this.t) / npp);
     Session.set(this.v + '_numpages', nbp);
     if (nbp <= 1) return [];
     //    console.error(this.t, npp,nbp,_.range(1,nbp));
@@ -315,7 +311,7 @@ Template.SkipResult.helpers({
   },
   first() { return (Session.equals(this.v + '_page', 1)) },
   last() {
-    let nbp = Session.get(this.v + '_numpages');
+    const nbp = Session.get(this.v + '_numpages');
     return (Session.equals(this.v + '_page', nbp))
   },
 
@@ -323,18 +319,18 @@ Template.SkipResult.helpers({
 
 Template.SkipResult.events({
   'click .prevpage': function (event) {
-    let sv = this.v + '_page';
-    let v = parseInt(Session.get(sv)) - 1;
+    const sv = this.v + '_page';
+    const v = parseInt(Session.get(sv)) - 1;
     Session.set(sv, v);
   },
   'click .nextpage': function (event) {
-    let sv = this.v + '_page';
-    let v = parseInt(Session.get(sv)) + 1;
+    const sv = this.v + '_page';
+    const v = parseInt(Session.get(sv)) + 1;
     Session.set(sv, v);
   },
   'click .setpage': function (event) {
-    let sv = this.v + '_page';
-    v = parseInt(event.currentTarget.textContent);
+    const sv = this.v + '_page';
+    const v = parseInt(event.currentTarget.textContent);
     console.error('set', sv, v);
     Session.set(sv, v);
   }
@@ -370,11 +366,8 @@ Template.SelectChannel.onCreated(function () {
 
 Template.SelectChannel.helpers({
   groups() {
-
-    let g = Session.get('list_channel');
-//    let g = Meteor.user().profile.groups;
-
-    let cg = Session.get('sel_channel');
+    const g = Session.get('list_channel');
+    const cg = Session.get('sel_channel');
     if (g)
       if (g.length > 1)
         return g.map((item) => {
@@ -398,7 +391,6 @@ Template.SelectChannel.events({
     Session.set('sel_channel', v);
   }
 });
-
 
 // Direct access to a map, without needing to be logged
 Template.ChannelPage.onCreated(function () {

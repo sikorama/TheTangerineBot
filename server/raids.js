@@ -2,7 +2,7 @@
  *
  */
 
-import { Raiders, BotChannels } from "../imports/api/collections"
+import { Raiders, BotChannels, UserLocations } from "../imports/api/collections"
 
 // Poids/Labels:count viewer
 function export_raid_graph(weightMode) {
@@ -60,3 +60,6 @@ export function initRaidManagement() {
         }
     })
 }
+
+
+

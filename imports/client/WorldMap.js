@@ -4,7 +4,7 @@ import { checkUserRole } from '../api/roles.js';
 import { BotChannels, Images } from '../api/collections.js';
 import { getParentId, manageSearchEvents } from './tools.js';
 
-var L = require('leaflet');
+const L = require('leaflet');
 
 
 // ---------------------------
@@ -41,14 +41,14 @@ Template.WorldMap.onRendered(function () {
 
 
     // Create Map
-    var mymap = L.map('map').setView([51.505, -0.09], 2);
+    let mymap = L.map('map').setView([51.505, -0.09], 2);
 
-    var layer = undefined;
-    var markers = {};
+    let layer = undefined;
+    let markers = {};
     let cursor;
 
     // Get icons
-    let chan = Session.get('sel_channel');
+    const chan = Session.get('sel_channel');
     let p = BotChannels.findOne({ channel: chan });
 
     //        return ul[chan+'-lastreq'];
@@ -156,7 +156,7 @@ Template.WorldMap.onRendered(function () {
                 opt.icon = icons[icon];
               }
 
-              var m = L.marker([parseFloat(item.latitude) + r0, parseFloat(item.longitude) + r1], opt).addTo(mymap);
+              let m = L.marker([parseFloat(item.latitude) + r0, parseFloat(item.longitude) + r1], opt).addTo(mymap);
               //cache
               newmarkers[item._id] = m;
               if (txt.length > 0)
@@ -211,11 +211,11 @@ Template.WorldMap.onRendered(function () {
           prop.streamer = true;
         }
         
-        let chan = Session.get('sel_channel');
-        prop.channel = chan;
+        let curchan = Session.get('sel_channel');
+        prop.channel = curchan;
         
         if (searchData.lastreq === true) {
-          prop.lastreq = chan;
+          prop.lastreq = curchan;
         }
 
         if (searchData.team === true) {
@@ -240,7 +240,7 @@ Template.WorldMap.onRendered(function () {
 
         prop.map = true;
         cursor = UserLocIndex.search(curSearch, { limit: 2000, props: prop }).mongoCursor;
-        updateMap(chan);
+        updateMap(curchan);
 
       }
       catch (e) {
@@ -251,8 +251,8 @@ Template.WorldMap.onRendered(function () {
 
     window.addEventListener('resize', () => resize());
     const resize = _.debounce(() => {
-      var windowHeight = (window.innerHeight - 48) * 0.9;
-      var container = document.querySelector('#map');
+      const windowHeight = (window.innerHeight - 48) * 0.9;
+      const container = document.querySelector('#map');
       $("#map").height(windowHeight);
       setTimeout(function () { mymap.invalidateSize() }, 200);
     }, 100);

@@ -1,5 +1,5 @@
 import { Images, BotChannels, Settings, Stats } from '../api/collections.js';
-import { getParentId } from './tools.js';
+import { getParentId, genDataBlob } from './tools.js';
 import { checkUserRole } from '../api/roles.js';
 import { Session } from 'meteor/session';
 import { ReactiveVar } from 'meteor/reactive-var';
@@ -60,25 +60,6 @@ Template.Settings.helpers({
     }
 });
 
-function genDotBlob(data, elementId) {
-
-    let d = document.getElementById(elementId);
-    if (!d) {
-        console.error('No Element with ID', elementId);
-        return;
-    }
-    let blob = new Blob([data], { type: 'text/dot' });
-    let csvUrl = URL.createObjectURL(blob);
-    let dte = new Date()
-    let cur_month = dte.getMonth() + 1;
-    let cur_year = dte.getFullYear();
-    if (cur_month < 10) cur_month = "0" + cur_month;
-    let cur_day = dte.getDay();
-    d.download = 'export' + cur_year + '-' + cur_month + '-' + cur_day + '.' + 'dot';
-    d.href = csvUrl;
-    d.innerHTML = 'Télécharger ' + d.download;
-}
-
 
 Template.Settings.events({
     'click button.selStat': function (ev) {
@@ -101,11 +82,18 @@ Template.Settings.events({
             if (err)
                  console.error(err);
             // To blob
-
-            genDotBlob(res,'dotlink')
-//            console.error(res);
+            genDataBlob(res,'dotlink','dot')
         });        
     },
+    'click button.exportCSV': function(event) {
+        let channel = Session.get('sel_channel');
+        Meteor.call('export_userloc', channel,function(err,res) {
+            if (err)
+                console.error(err);
+            // To blob
+            genDataBlob(res,'csvlink','csv')
+        });        
+    },  
     'click .toggleCheck': function (event) {
         let id = getParentId(event.currentTarget);
         let f = event.currentTarget.name;
@@ -161,7 +149,6 @@ Template.Settings.events({
         
     }
 });
-
 
 
 

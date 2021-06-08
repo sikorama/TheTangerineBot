@@ -130,6 +130,12 @@
             <li class="pure-menu-item {{active "live"}}">
               <a href="/c/{{curSelChan}}/live" class="pure-menu-link ">Live</a>
             </li>
+
+            {{#if currentUser}}
+            <li class="pure-menu-item">
+              <a href="/" class="pure-menu-link">Home</a>
+            </li>
+            {{/if}}
             </ul>                
           </nav>
         </div>

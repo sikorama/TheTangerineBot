@@ -51,7 +51,7 @@ if ((botname == undefined) || (botpassword == undefined)) {
   process.exit(-1);
 }
 
-// Hooks globaux
+// global Hooks 
 var bot_discord_raid_url = process.env.BOT_DISCORD_RAID_HOOK;
 
 var bot_discord_live_url = process.env.BOT_DISCORD_LIVE_HOOK;
@@ -65,7 +65,6 @@ if (bot_discord_raid_url)
 client_id = process.env.CLIENT_ID;
 client_secret = process.env.CLIENT_SECRET;
 
-console.error('client_id=', client_id);
 if (client_id != undefined) {
   Meteor.setInterval(function () { checkLiveChannels(client_id, client_secret) }, 1000 * 60)
 }
@@ -159,7 +158,7 @@ function findClosest(uid, chan, nb) {
   let rl = res.length;
   if (rl > 5) rl = 5;
   for (let i = 0; i < rl; i++) {
-    var cc = res[i];
+    let cc = res[i];
     if ((cc.dist < 20) && (uid != cc._id)) {
       let u = UserLocations.findOne(cc._id);
       if (u != undefined)
@@ -238,7 +237,7 @@ const selectQuestion = function () {
     QuizzQuestions.update(q._id, { $set: { enabled: false } });
   }
   else {
-    console.warn("Reinit des questions!");
+    console.warn("Quizz : Questions reset!");
 
     // On réactive toutes les questions et on en reprend une au pif
     QuizzQuestions.update({}, { $set: { enabled: true } }, { multi: true });
@@ -375,7 +374,6 @@ Meteor.startup(() => {
 
     // Is there a location not converted to geo positions?
     if (item != undefined) {
-      //console.error(item);
 
       // Check if there is already someone with the same location
       let sameLoc = UserLocations.findOne({ location: item.location, latitude: { $exists: 1 } });
@@ -531,6 +529,18 @@ Meteor.startup(() => {
       //      console.error(res);
       return res;
     },
+    export_userloc: function (channame) {
+      if (this.userId) {
+        console.error('export',channame)
+        let sel = {}
+        sel[channame] = {$exists:1}
+        let res = UserLocations.find(sel, {sort: {dname:1}}).fetch().map((item)=> {
+            return ([item.dname,item.location,item.latitude,item.longitude,item.country,item.msg].join(';'))
+        });
+        res.unshift('Name;Location;Latitude;Longitude;Country;Message')
+        return res.join('\n');
+      }
+    }  
   });
 
   UserLocations.allow({
@@ -546,7 +556,7 @@ Meteor.startup(() => {
   console.info('Connecting to channels:', bot_channels);
 
   let raid_bot_channels = BotChannels.find({ enabled: false }).fetch().map(i => i.channel);
-  console.info('Connecting to channels for raid monotiring only:', raid_bot_channels);
+  console.info('Connecting to channels for raid monitoring only:', raid_bot_channels);
 
   // Connection to TWITCH CHAT
   // Define configuration options
@@ -1348,7 +1358,7 @@ Meteor.startup(() => {
       // Extract parameter
       if (cmd === 'so') {
         //let cmdsplit= cmd.split(' ');
-        console.error('so', cmdarray)
+        //console.error('so', cmdarray)
         if (cmdarray.length > 1) {
           let soname = cmdarray[1];
           // Remove @
@@ -1365,7 +1375,7 @@ Meteor.startup(() => {
           else {
             gmline = randElement(gmlist).txt;
           }
-          console.error('so', gmline);
+          //console.error('so', gmline);
 
           if (gmline.length > 0) {
             gmline = replaceKeywords(gmline, soname);
@@ -1536,13 +1546,11 @@ Meteor.startup(() => {
         if ((lccn.indexOf('explain') >= 0) || (lccn.indexOf('can') >= 0))
           txts = ["For Sure!", "Of course!"];
 
-        txt = randElement(txts); //[Math.floor(Math.random() * (txts.length - 1))];
-
-
+        txt = randElement(txts); 
         say(target, txt + ' ' + answername);
       }
       else {
-        txt = randElement(txts); //[Math.floor(Math.random() * (txts.length - 1))];
+        txt = randElement(txts); 
         say(target, answername + ' ' + txt);
       }
       return;
@@ -1574,7 +1582,7 @@ Meteor.startup(() => {
 
       let bc = BotChannels.findOne({ channel: chan });
 
-      console.log(`>>>> ${channel} ${chan} Raided by ${raider} with ${num} viewers, ${tags}`);
+      //console.log(`>>>> ${channel} ${chan} Raided by ${raider} with ${num} viewers, ${tags}`);
 
       try {
         Raiders.upsert({ raider: raider, channel: chan }, { $inc: { count: 1, viewers: num } });
@@ -1598,7 +1606,7 @@ Meteor.startup(() => {
         // Per channel URL(s)
         // Check if there is a  target channel for raids
         if (bc.discord_raid_url && bc.discord_raid_url.length > 1) {
-          console.error('discord channel raid hook', bc.discord_raid_url);
+          //console.error('discord channel raid hook', bc.discord_raid_url);
           sendDiscord(title, bc.discord_raid_url);
         }
       }

@@ -8,7 +8,7 @@ import { BotChannels } from '../imports/api/collections';
 //Renvoie vrai si l'utilisateur a un role donné
 //Par défaut les superadmins on tous les roles
 // roles: tableau ou string (séparé par des espaces)
-var hasRole = function (userId, roles, nobypass) {
+export function hasRole(userId, roles, nobypass) {
     if (userId === undefined) return false;
     if (roles === undefined) return false;
 
@@ -25,13 +25,12 @@ var hasRole = function (userId, roles, nobypass) {
     }
     return false;
 }
-exports.hasRole = hasRole;
 
 // Raccourci pour tester si on est admin
-function isAdmin(userId) {
-    return hasRole(userId, ['admin']);
+export function isAdmin(userId) {
+    return (Roles.userIsInRole(userId, 'admin'));
+//    return hasRole(userId, ['admin']);
 }
-exports.isAdmin = isAdmin;
 
 // Recuper les groupes associés a un userId
 export function getUserGroups(userId) {
@@ -44,7 +43,7 @@ export function getUserGroups(userId) {
     return userg;
 }
 
-var setUserGroups = function (userid, groups) {
+export function setUserGroups(userid, groups) {
     console.warn('Set User Group', userid, groups);
     // Ajouter groups ici?
     if (groups != undefined)
@@ -54,14 +53,12 @@ var setUserGroups = function (userid, groups) {
             }
         });
 };
-exports.setUserGroups = setUserGroups;
 
-var setUserRoles = function (userid, roles) {
+export function setUserRoles(userid, roles) {
     console.warn("set User Roles", userid, roles)
     if (roles != undefined)
         Roles.setUserRoles(userid, roles);
 };
-exports.setUserRoles = setUserRoles;
 
 //doc: username, mail, password, roles, groups
 export function addUser(doc) {
@@ -91,11 +88,8 @@ export function addUser(doc) {
             });
             // Need _id of existing user record so this call must come after `Accounts.createUser`.
             Roles.addUsersToRoles(id, doc.roles);
-
         }
         return id;
-        //        setUserGroups(id, doc.groups);
-        //        setUserRoles(user._id, doc.roles);
     }
     return null;
 }
@@ -166,7 +160,7 @@ export function init_users() {
         },
         updateUser: function (doc) {
             if (isAdmin(this.userId)) {
-                var user = Meteor.users.findOne(doc._id);
+                const user = Meteor.users.findOne(doc._id);
                 if (user != undefined) {
                     // Cas particulier du superadmin: on ne peut pas lui retirer!
                     if (hasRole(doc._id, ['superadmin'])) {
@@ -205,8 +199,7 @@ export function init_users() {
         forcePassword: function (doc) {
             if (isAdmin(this.userId)) {
                 try {
-                    var newPassword = doc.modifier['$set'].password;
-                    console.error(doc, newPassword);
+                    const newPassword = doc.modifier['$set'].password;
                     Accounts.setPassword(doc._id, newPassword);
                 }
                 catch (e) {
@@ -216,7 +209,7 @@ export function init_users() {
         },
         setUserRoles: function (name, roles) {
             if (isAdmin(this.userId)) {
-                var user = Meteor.users.findOne({
+                const user = Meteor.users.findOne({
                     'username': name
                 });
                 console.warn("SetUserRoles", name, roles)
@@ -226,7 +219,7 @@ export function init_users() {
         },
         setUserGroups: function (name, groups) {
             if (isAdmin(this.userId)) {
-                var user = Meteor.users.findOne({
+                const user = Meteor.users.findOne({
                     'username': name
                 });
                 if (user != undefined)

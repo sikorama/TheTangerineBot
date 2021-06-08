@@ -1,7 +1,7 @@
 
 // Verification des roles. Coté client uniquement (coté serveur le code est dans le repertoire server)
 // On peut envoyer un tableau ou une chaine séparée par des espace pour les roles
-var checkUserRole = function(roles,uid) {
+export function checkUserRole(roles,uid) {
     if (uid===undefined)
       uid = Meteor.userId();
 
@@ -24,4 +24,3 @@ var checkUserRole = function(roles,uid) {
     return false;
   }
 
-exports.checkUserRole = checkUserRole;

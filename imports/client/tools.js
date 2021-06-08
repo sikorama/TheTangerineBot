@@ -41,3 +41,23 @@ export function getParentId(el) {
     }
   };
   
+
+  export function genDataBlob(data, elementId,ext) {  
+    ext = ext || 'dot';
+    let d = document.getElementById(elementId);
+      if (!d) {
+          console.error('No Element with ID', elementId);
+          return;
+      }
+      let blob = new Blob([data], { type: 'text/dot' });
+      let csvUrl = URL.createObjectURL(blob);
+      let dte = new Date()
+      let cur_month = dte.getMonth() + 1;
+      let cur_year = dte.getFullYear();
+      if (cur_month < 10) cur_month = "0" + cur_month;
+      let cur_day = dte.getDay();
+      d.download = 'export' + cur_year + '-' + cur_month + '-' + cur_day + '.' + ext;
+      d.href = csvUrl;
+      d.innerHTML = 'Download ' + d.download;
+  }
+  

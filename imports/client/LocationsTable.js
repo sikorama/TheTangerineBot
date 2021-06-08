@@ -144,7 +144,7 @@ Template.LatestLocations.events({
       setObj[n] = v;
   //    console.error(id,setObj);
       UserLocations.update(id, { $set: setObj })
-    }
+    },
   });
   
   
