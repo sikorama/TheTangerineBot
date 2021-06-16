@@ -118,9 +118,8 @@ function createStreamerAccount(uname, chan, pw,pwguest) {
     // update botchannel collection?
 }
 
-// Ajout des comptes utilisateurs par defaut
+// Add defalt user accounts
 function createDefaultAccounts() {
-    // Destroy all accounts
     createSuperAdmin('admin', 'admin');
     createStreamerAccount('myname', 'mychannel', 'mypass');
 };

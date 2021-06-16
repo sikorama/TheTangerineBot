@@ -103,10 +103,9 @@ let geoCoder = gc(gcoptions);
 const regext = /@twitch /gi;
 
 AccountsTemplates.configure({
-  // Pour interdire la creation d'un compte par l'interface
   forbidClientAccountCreation: true,
-  // pas d'autorisation de changer de pw pour un user
   enablePasswordChange: false,
+  showForgotPasswordLink: false,
 });
 
 
@@ -289,6 +288,77 @@ Meteor.startup(() => {
         return last_active_users[chan];
 
       return [];
+    }
+  })
+
+
+  Meteor.methods({
+    // Search a twitch name inevery colections, and replace by the new name;
+    rename: function(before, after, apply) {
+      let desc = [];
+      desc.push("Replacing " + before + " by " + after + ' ' + (apply ? '' : '(dry run)'));
+      let lowcb = before.toLowerCase();
+      let lowca = after.toLowerCase();
+      
+      let c, n;
+      // Bot Channem
+      c = BotChannels.findOne({ channel: lowcb });
+      if (c) {
+        desc.push('BotChannel: Found 1 occurence');
+        console.info(c);
+        if (apply) {
+          BotChannels.update({ channel: lowcb }, { $set: { channel: lowca } });
+        }
+      }
+
+      // Locations
+      c = UserLocations.findOne({ name: lowcb });
+      if (c) {
+        desc.push('UserLocations: Found 1 occurence');
+        console.info(c);
+        if (apply) {
+          let sobj = { name: lowca, dname: after };
+          if (c.mapname) 
+            sobj.mapname= after;
+          UserLocations.update({ name: lowcb }, { $set: sobj });
+
+        }
+      }
+      // Raids
+      c = Raiders.find({ raider: before });
+      if (c.count()>0) {
+        desc.push('Raiders: Found '+c.count()+ ' occurence');
+        console.info(c);
+        if (apply) {
+          c.forEach((r) => {
+            Raiders.upsert({ raider: after, channel: r.channel }, { $inc: { count: r.count, viewers: r.viewers } });
+          })
+          Raiders.remove({ raider: before });
+        }
+      }
+      c = Raiders.find({ channel: lowcb });
+      if (c.count()>0) {
+        desc.push('Raids: Found '+ c.count()+ ' occurence');
+        console.info(c);
+
+        if (apply) {
+          c.forEach((r) => {
+            Raiders.upsert({ raider: r.raider, channel: lowca }, { $inc: { count: r.count, viewers: r.viewers } });
+          })
+          Raiders.remove({ channel: lowcb });
+        }
+      }
+
+      c = GreetMessages.findOne({username: lowcb});
+      if (c) {
+        desc.push('GreetMessage: Found 1 occurence');
+        console.info(c);
+        if (apply) {
+          GreetMessages.update({ username: lowcb }, { $set: { username: lowca } });
+        }
+      }
+
+      return desc.join('\n');
     }
   })
 
@@ -531,16 +601,16 @@ Meteor.startup(() => {
     },
     export_userloc: function (channame) {
       if (this.userId) {
-        console.error('export',channame)
+        console.error('export', channame)
         let sel = {}
-        sel[channame] = {$exists:1}
-        let res = UserLocations.find(sel, {sort: {dname:1}}).fetch().map((item)=> {
-            return ([item.dname,item.location,item.latitude,item.longitude,item.country,item.msg].join(';'))
+        sel[channame] = { $exists: 1 }
+        let res = UserLocations.find(sel, { sort: { dname: 1 } }).fetch().map((item) => {
+          return ([item.dname, item.location, item.latitude, item.longitude, item.country, item.msg].join(';'))
         });
         res.unshift('Name;Location;Latitude;Longitude;Country;Message')
         return res.join('\n');
       }
-    }  
+    }
   });
 
   UserLocations.allow({
@@ -742,10 +812,9 @@ Meteor.startup(() => {
 
     if (botchan.active_users === true) {
       // Add user to active user list.
-      
+
       // Ignore broadcaster
-      if (!isBroadcaster) 
-      {
+      if (!isBroadcaster) {
         const exceptnames = ['streamelements', 'songlistbot', 'nightbot'];
         if (exceptnames.indexOf(username) < 0) {
 
@@ -780,7 +849,7 @@ Meteor.startup(() => {
         if (isModerator) {
           //        console.error('last active=', last_active_users);
           //            let active_max = 40;
-          let active_since = 1000 * 60 * 60 *2; // default 1 hour?
+          let active_since = 1000 * 60 * 60 * 2; // default 1 hour?
 
           try {
             if (botchan.active_since && botchan.active_since > 0)
@@ -911,8 +980,38 @@ Meteor.startup(() => {
 
     // -------------- Traduction -----------------------
     if (botchan.tr === true) {
+      // Command for enabling translation for a user during a few minutes
+      // Only mods can use it
 
-      if (cmd === "lang" || cmd === "translate") {
+      if (isModerator && cmd === "translate") {
+        if (cmdarray.length >= 1) {
+          let u = cmdarray[1].toLowerCase()
+          /// Remove @
+          if (u[0] === '@') u.substring(1);
+
+          // 5 minutes by default
+          let atdt = 5;
+
+          if (cmdarray.length >= 2) {
+            if (cmdarray[2] === 'off') {
+              atdt = 0;
+            }
+            else {
+              atdt = parseInt(cmdarray[2]);
+            }
+          }
+          if (atdt > 0) {
+            autotranslate[cmdarray[1]] = Date.now() + atdt * 60 * 1000;
+          }
+          else {
+            autotranslate[cmdarray[1]]
+            delete autotranslate[cmdarray[1]];
+          }
+          return;
+        }
+      }
+
+      if (cmd === "lang") {
         say(target, 'I can (approximately) translate your messages. ' + randElement(langExpl));
         return;
       }
@@ -929,15 +1028,24 @@ Meteor.startup(() => {
         return;
       }
 
-      // Traduction?
-      if (cmd in tr_lang) {
-        let ll = tr_lang[cmd];
+      // Autmatic translation?
+      let autotr = false;
+
+      if (autotranslate[username] && autotranslate[username] < now) {
+        autotr = true;
+      }
+
+      if (cmd in tr_lang || autotr) {
+
+        let ll = 'en';
+        if (!autotr)
+          ll = tr_lang[cmd];
+
         //console.error(ll);
         // Remove some words (emotes for example)
         let txt = commandName.replace(/ LUL/g, '');
 
         // TODO: remove Urls too
-
 
         // Remove command
         txt = txt.substring(1 + cmd.length);
@@ -956,7 +1064,6 @@ Meteor.startup(() => {
             say(target, context['display-name'] + ', ' + txt);
             return;
           }
-
 
           // Translate text
           gtrans(txt, { to: ll[0] }).then(res => {
@@ -1546,11 +1653,11 @@ Meteor.startup(() => {
         if ((lccn.indexOf('explain') >= 0) || (lccn.indexOf('can') >= 0))
           txts = ["For Sure!", "Of course!"];
 
-        txt = randElement(txts); 
+        txt = randElement(txts);
         say(target, txt + ' ' + answername);
       }
       else {
-        txt = randElement(txts); 
+        txt = randElement(txts);
         say(target, answername + ' ' + txt);
       }
       return;

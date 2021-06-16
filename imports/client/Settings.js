@@ -213,4 +213,21 @@ Template.ServerConfig.events({
       Meteor.call('parameter', event.currentTarget.id, v);
       return false;
   },
+
+  "click .renamebtn": function(event) {
+    let id = event.currentTarget.name;
+    let before = document.getElementById('before').value.trim();
+    let after = document.getElementById('after').value.trim();
+    console.error(id,before, after);
+    if ((before.length>0) && (after.length>0))
+    Meteor.call('rename', before, after, id==='btapply', function(err,res) {
+        
+        if (err) console.error(err)
+        else 
+        alert(res);
+
+    });
+
+  }
+
 });
