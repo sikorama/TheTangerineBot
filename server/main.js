@@ -89,6 +89,9 @@ if (wurl) WEBSITE_URL = wurl;
 // Only one stack for all greetings (not per channel)
 let greetingsStack = [];
 
+// Autotranslate feature
+let autotranslate={};
+
 // Current Question (contains full object)
 var curQuestion = undefined;
 var numQuestions = 0;
@@ -984,15 +987,16 @@ Meteor.startup(() => {
       // Only mods can use it
 
       if (isModerator && cmd === "translate") {
-        if (cmdarray.length >= 1) {
+        if (cmdarray.length > 1) {
           let u = cmdarray[1].toLowerCase()
           /// Remove @
-          if (u[0] === '@') u.substring(1);
+          if (u[0] === '@') u=u.substring(1);
+          console.error(u);
 
           // 5 minutes by default
           let atdt = 5;
 
-          if (cmdarray.length >= 2) {
+          if (cmdarray.length > 2) {
             if (cmdarray[2] === 'off') {
               atdt = 0;
             }
@@ -1001,12 +1005,14 @@ Meteor.startup(() => {
             }
           }
           if (atdt > 0) {
-            autotranslate[cmdarray[1]] = Date.now() + atdt * 60 * 1000;
+            console.info('Autotranslate enabled for ',u)
+            autotranslate[u] = Date.now() + atdt * 60 * 1000;
           }
           else {
-            autotranslate[cmdarray[1]]
-            delete autotranslate[cmdarray[1]];
+            console.info('Autotranslate disabled for',u)
+            delete autotranslate[u];
           }
+          console.info(autotranslate);
           return;
         }
       }
@@ -1031,24 +1037,28 @@ Meteor.startup(() => {
       // Autmatic translation?
       let autotr = false;
 
-      if (autotranslate[username] && autotranslate[username] < now) {
+      if (autotranslate[username] && (autotranslate[username] > Date.now())) {
         autotr = true;
       }
 
+      console.error(username ,autotr);
+
       if (cmd in tr_lang || autotr) {
 
-        let ll = 'en';
-        if (!autotr)
-          ll = tr_lang[cmd];
-
-        //console.error(ll);
+        let ll = tr_lang.en;
         // Remove some words (emotes for example)
         let txt = commandName.replace(/ LUL/g, '');
 
+        if (!autotr) {
+          ll = tr_lang[cmd];
+          // Remove command
+          txt = txt.substring(1 + cmd.length);
+        }
+
+        //console.error(ll);
+
         // TODO: remove Urls too
 
-        // Remove command
-        txt = txt.substring(1 + cmd.length);
         // Min/Max length of text to translate
         let lazy = false;
         if (txt.length > 2) {
