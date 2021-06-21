@@ -5,35 +5,19 @@
  */
 
 import { Meteor } from 'meteor/meteor';
-import {
-  UserLocations,
-  BotChannels,
-  GreetMessages,
-  Settings,
-  QuizzQuestions,
-  QuizzScores,
-  Stats,
-  GreetDate,
-  Raiders
-} from '../imports/api/collections.js';
-import { init_users } from './user_management.js';
+import { AccountsTemplates } from 'meteor/useraccounts:core';
+import { BotChannels, GreetDate, GreetMessages, QuizzQuestions, QuizzScores, Raiders, Settings, Stats, UserLocations } from '../imports/api/collections.js';
+import { addChannel } from './channels.js';
+import { genChord, genProgression, noteArray } from './chords.js';
+import { country_lang, patterns } from './const.js';
+import { getGreetMessages, init_greetings, replaceKeywords } from './greetings.js';
+import { checkLiveChannels, sendDiscord } from './notifications.js';
 import { init_publications } from './publications.js';
 import { init_quizz } from './quizz.js';
-import { noteArray, genChord, genProgression } from './chords.js';
-
-import { AccountsTemplates } from 'meteor/useraccounts:core';
-
-import { randElement } from './tools.js';
-import { initRaidManagement } from './raids.js';
-
-import { hasRole } from './user_management.js';
-import { addChannel } from './channels.js';
-import { init_greetings, getGreetMessages, replaceKeywords } from './greetings.js';
-
-import { country_lang, patterns } from './const.js';
-
-import { sendDiscord, sendRaidChannelDiscord, sendLiveDiscord, sendChannelDiscord, checkLiveChannels } from './notifications.js';
 import { init_radio } from './radio.js';
+import { initRaidManagement } from './raids.js';
+import { randElement } from './tools.js';
+import { hasRole, init_users } from './user_management.js';
 
 const tmi = require('tmi.js');
 const gtrans = require('googletrans').default;
@@ -628,7 +612,7 @@ Meteor.startup(() => {
   let bot_channels = BotChannels.find({ enabled: true }).fetch().map(i => i.channel);
   console.info('Connecting to channels:', bot_channels);
 
-  let raid_bot_channels = BotChannels.find({ enabled: false }).fetch().map(i => i.channel);
+  let raid_bot_channels = BotChannels.find({ enabled: false , raids: true}).fetch().map(i => i.channel);
   console.info('Connecting to channels for raid monitoring only:', raid_bot_channels);
 
   // Connection to TWITCH CHAT
