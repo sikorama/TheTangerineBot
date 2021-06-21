@@ -6,7 +6,7 @@
 
 import { Meteor } from 'meteor/meteor';
 import { AccountsTemplates } from 'meteor/useraccounts:core';
-import { BotChannels, GreetDate, GreetMessages, QuizzQuestions, QuizzScores, Raiders, Settings, Stats, UserLocations } from '../imports/api/collections.js';
+import { BotChannels, GreetDate, GreetMessages, QuizzQuestions, QuizzScores, Raiders, Settings, ShoutOuts,Stats, UserLocations } from '../imports/api/collections.js';
 import { addChannel } from './channels.js';
 import { genChord, genProgression, noteArray } from './chords.js';
 import { country_lang, patterns } from './const.js';
@@ -1455,7 +1455,8 @@ Meteor.startup(() => {
 
     // ---------- catch !so command
     // Extract the 2nd parameter, removes @ symbols (sonitize?)
-    if (isModerator === true && botchan.so === true) {
+    if (isModerator === true && (botchat.detectso===true || botchan.so === true)) {
+
       // Extract parameter
       if (cmd === 'so') {
         //let cmdsplit= cmd.split(' ');
@@ -1466,6 +1467,21 @@ Meteor.startup(() => {
           if (soname[0] === '@')
             soname = soname.substring(1);
 
+          // SO detection, for sending a notification
+          // and storing in database
+          if (botchat.detectso===true) {
+
+            if (botchat.discord_so_url) {
+                const title = 'https://twitch.tv/' + soname;
+                sendDiscord(title, botchat.discord_so_url);  
+                // Also store in database
+                ShoutOuts.insert({chan: target, so: soname, timestamp: Date.now(), username: username})
+            }
+    
+          }
+
+
+          // SO hook, for greetings
           // Check if this user exists in Greetings Collection
           let gmlist = getGreetMessages(soname, chan);
           let gmline = '';

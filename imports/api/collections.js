@@ -3,23 +3,27 @@ import { Index, MongoDBEngine } from 'meteor/easy:search'
 import { FilesCollection } from 'meteor/ostrio:files';
 import { checkUserRole } from './roles.js';
 
-// Channels 
+// Channels settings
 export const BotChannels = new Mongo.Collection('botchannels');
-// USers regitered on the map
+// Users regitered on the map
 export const UserLocations = new Mongo.Collection('userloc');
 // Auto greet messages
 export const GreetMessages = new Mongo.Collection('greetmessages');
+// Auto greet messages timestamp (to greet only once)
 export const GreetDate = new Mongo.Collection('greetdate');
-
+// Server settings
 export const Settings = new Mongo.Collection('settings');
-
+// Quizz question database
 export const QuizzQuestions = new Mongo.Collection('quizzquestions');
+// Quizz scoring
 export const QuizzScores = new Mongo.Collection('quizzscores');
-
+// Raid, song, user statistics
 export const Stats = new Mongo.Collection('statistics');
-
+// Raid data
 export const Raiders = new Mongo.Collection('raiders');
-
+// Collection for storing shoutouts commands (by moderators, not the bot)
+export const ShoutOuts = new Mongo.Collection('shoutout');
+// Collection for storing discord hooks in a handy way
 export const DiscordHooks = new Mongo.Collection('dhooks');
 
 
