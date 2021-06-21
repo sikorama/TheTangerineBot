@@ -129,22 +129,6 @@
         <td>Mute</td>
         <td>{{>CheckMark b=c.muteGreet n="muteGreet"}}</td>
       </tr>
-      <tr>
-        <td>
-          Catch !so Cmd:
-        </td>
-        <td>
-          {{>CheckMark b=c.so n="so"}}
-        </td>
-      </tr>
-      <tr>
-        <td>
-          Shoutout Cmd:
-        </td>
-        <td colspan="2">
-          <input type="text" value="{{c.socmd}}" class="chanSettings" name="socmd">
-        </td>
-      </tr>
       {{/if}}
     </tbody>
 
@@ -255,6 +239,33 @@
           <textarea rows="4" class="chanSettings" name="discord_so_url">{{c.discord_so_url}}</textarea>
         </td>
       </tr>  
+      <tr>
+        <td>
+          Store !so Commands:
+        </td>
+        <td>
+          {{>CheckMark b=c.storeso n="storeso"}}
+        </td>
+      </tr>
+
+
+      <tr>
+        <td>
+          Catch !so Cmd:
+        </td>
+        <td>
+          {{>CheckMark b=c.so n="so"}}
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Send Shoutout Cmd:
+        </td>
+        <td colspan="2">
+          <input type="text" value="{{c.socmd}}" class="chanSettings" name="socmd">
+        </td>
+      </tr>
+
     </tbody>
     {{/if}}
 

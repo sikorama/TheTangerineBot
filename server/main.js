@@ -6,7 +6,7 @@
 
 import { Meteor } from 'meteor/meteor';
 import { AccountsTemplates } from 'meteor/useraccounts:core';
-import { BotChannels, GreetDate, GreetMessages, QuizzQuestions, QuizzScores, Raiders, Settings, ShoutOuts,Stats, UserLocations } from '../imports/api/collections.js';
+import { BotChannels, GreetDate, GreetMessages, QuizzQuestions, QuizzScores, Raiders, Settings, ShoutOuts, Stats, UserLocations } from '../imports/api/collections.js';
 import { addChannel } from './channels.js';
 import { genChord, genProgression, noteArray } from './chords.js';
 import { country_lang, patterns } from './const.js';
@@ -74,7 +74,7 @@ if (wurl) WEBSITE_URL = wurl;
 let greetingsStack = [];
 
 // Autotranslate feature
-let autotranslate={};
+let autotranslate = {};
 
 // Current Question (contains full object)
 var curQuestion = undefined;
@@ -281,12 +281,12 @@ Meteor.startup(() => {
 
   Meteor.methods({
     // Search a twitch name inevery colections, and replace by the new name;
-    rename: function(before, after, apply) {
+    rename: function (before, after, apply) {
       let desc = [];
       desc.push("Replacing " + before + " by " + after + ' ' + (apply ? '' : '(dry run)'));
       let lowcb = before.toLowerCase();
       let lowca = after.toLowerCase();
-      
+
       let c, n;
       // Bot Channem
       c = BotChannels.findOne({ channel: lowcb });
@@ -305,16 +305,16 @@ Meteor.startup(() => {
         console.info(c);
         if (apply) {
           let sobj = { name: lowca, dname: after };
-          if (c.mapname) 
-            sobj.mapname= after;
+          if (c.mapname)
+            sobj.mapname = after;
           UserLocations.update({ name: lowcb }, { $set: sobj });
 
         }
       }
       // Raids
       c = Raiders.find({ raider: before });
-      if (c.count()>0) {
-        desc.push('Raiders: Found '+c.count()+ ' occurence');
+      if (c.count() > 0) {
+        desc.push('Raiders: Found ' + c.count() + ' occurence');
         console.info(c);
         if (apply) {
           c.forEach((r) => {
@@ -324,8 +324,8 @@ Meteor.startup(() => {
         }
       }
       c = Raiders.find({ channel: lowcb });
-      if (c.count()>0) {
-        desc.push('Raids: Found '+ c.count()+ ' occurence');
+      if (c.count() > 0) {
+        desc.push('Raids: Found ' + c.count() + ' occurence');
         console.info(c);
 
         if (apply) {
@@ -336,7 +336,7 @@ Meteor.startup(() => {
         }
       }
 
-      c = GreetMessages.findOne({username: lowcb});
+      c = GreetMessages.findOne({ username: lowcb });
       if (c) {
         desc.push('GreetMessage: Found 1 occurence');
         console.info(c);
@@ -612,7 +612,7 @@ Meteor.startup(() => {
   let bot_channels = BotChannels.find({ enabled: true }).fetch().map(i => i.channel);
   console.info('Connecting to channels:', bot_channels);
 
-  let raid_bot_channels = BotChannels.find({ enabled: false , raids: true}).fetch().map(i => i.channel);
+  let raid_bot_channels = BotChannels.find({ enabled: false, raids: true }).fetch().map(i => i.channel);
   console.info('Connecting to channels for raid monitoring only:', raid_bot_channels);
 
   // Connection to TWITCH CHAT
@@ -974,7 +974,7 @@ Meteor.startup(() => {
         if (cmdarray.length > 1) {
           let u = cmdarray[1].toLowerCase()
           /// Remove @
-          if (u[0] === '@') u=u.substring(1);
+          if (u[0] === '@') u = u.substring(1);
           console.error(u);
 
           // 5 minutes by default
@@ -989,11 +989,11 @@ Meteor.startup(() => {
             }
           }
           if (atdt > 0) {
-            console.info('Autotranslate enabled for ',u)
+            console.info('Autotranslate enabled for ', u)
             autotranslate[u] = Date.now() + atdt * 60 * 1000;
           }
           else {
-            console.info('Autotranslate disabled for',u)
+            console.info('Autotranslate disabled for', u)
             delete autotranslate[u];
           }
           console.info(autotranslate);
@@ -1025,7 +1025,7 @@ Meteor.startup(() => {
         autotr = true;
       }
 
-      console.error(username ,autotr);
+      console.error(username, autotr);
 
       if (cmd in tr_lang || autotr) {
 
@@ -1453,58 +1453,55 @@ Meteor.startup(() => {
 
 
 
-    // ---------- catch !so command
-    // Extract the 2nd parameter, removes @ symbols (sonitize?)
-    if (isModerator === true && (botchat.detectso===true || botchan.so === true)) {
+    // ---------- catch !so command by moderators
+    // For sending a discord notification, and storing in database or simply greet
+    if (isModerator === true && (botchan.detectso === true)) {
 
       // Extract parameter
       if (cmd === 'so') {
-        //let cmdsplit= cmd.split(' ');
-        //console.error('so', cmdarray)
+        // Extract the 2nd parameter, removes @ symbols
         if (cmdarray.length > 1) {
           let soname = cmdarray[1];
           // Remove @
           if (soname[0] === '@')
             soname = soname.substring(1);
 
-          // SO detection, for sending a notification
-          // and storing in database
-          if (botchat.detectso===true) {
+          if (botchan.storeso === true) {
+            // Also store in database
+            ShoutOuts.insert({ chan: target, so: soname, timestamp: Date.now(), username: username })
+          }
 
-            if (botchat.discord_so_url) {
-                const title = 'https://twitch.tv/' + soname;
-                sendDiscord(title, botchat.discord_so_url);  
-                // Also store in database
-                ShoutOuts.insert({chan: target, so: soname, timestamp: Date.now(), username: username})
+          if (botchan.discord_so_url) {
+            const title = 'https://twitch.tv/' + soname;
+            sendDiscord(title, botchan.discord_so_url);
+          }
+
+          if (botchan.so === true) {
+            // SO hook, for greetings
+            // Check if this user exists in Greetings Collection
+            let gmlist = getGreetMessages(soname, chan);
+            let gmline = '';
+            if (gmlist.length === 0) {
+              gmlist = ["@follow @twitch @icon"];
+              gmline = randElement(gmlist);
             }
-    
-          }
-
-
-          // SO hook, for greetings
-          // Check if this user exists in Greetings Collection
-          let gmlist = getGreetMessages(soname, chan);
-          let gmline = '';
-          if (gmlist.length === 0) {
-            gmlist = ["@follow @twitch @icon"];
-            gmline = randElement(gmlist);
-          }
-          else {
-            gmline = randElement(gmlist).txt;
-          }
-          //console.error('so', gmline);
-
-          if (gmline.length > 0) {
-            gmline = replaceKeywords(gmline, soname);
-            gmline = gmline.replace(regext, "https://twitch.tv/" + soname + ' ');
-
-            if (botchan.me === true) {
-              gmline = '/me ' + gmline;
+            else {
+              gmline = randElement(gmlist).txt;
             }
-            say(target, gmline);
+            //console.error('so', gmline);
+
+            if (gmline.length > 0) {
+              gmline = replaceKeywords(gmline, soname);
+              gmline = gmline.replace(regext, "https://twitch.tv/" + soname + ' ');
+
+              if (botchan.me === true) {
+                gmline = '/me ' + gmline;
+              }
+              say(target, gmline);
+            }
           }
+          return;
         }
-        return;
       }
     }
 
@@ -1708,8 +1705,8 @@ Meteor.startup(() => {
         console.error(e);
       }
 
-      if (bc.discord !== true)
-        return;
+//      if (bc.raids !== true)
+//        return;
 
       try {
         let title = raider + " is raiding " + chan + " with " + num + " viewers";
