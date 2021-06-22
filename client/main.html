@@ -48,6 +48,13 @@
       {{/if}}
       {{/if}}
 
+      {{#if rh_featureEnabled "storeso"}}
+      <li class="pure-menu-item {{active "so"}}">
+        <a href="/shoutouts" class="pure-menu-link ">SO</a>
+      </li>
+      {{/if}}
+
+
       {{#if rh_featureEnabled "quizz"}}
       <li class="pure-menu-item {{active "quizz"}}">
         <a href="/quizz/scores" class="pure-menu-link ">Quizz</a>

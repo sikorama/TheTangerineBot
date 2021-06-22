@@ -105,6 +105,16 @@ FlowRouter.route('/greetings/edit', {
   }
 });
 
+FlowRouter.route('/shoutouts', {
+  name: 'greetings',
+  action: function (params, queryParams) {
+    BlazeLayout.render('MainPage', {
+      main: 'Shoutouts',
+    });
+  }
+});
+
+
 FlowRouter.route('/', {
   name: 'map',
   action: function (params, queryParams) {

@@ -11,6 +11,7 @@ import './main.html';
 import '../imports/client/CommandsTable.html';
 import '../imports/client/CountriesTable.html';
 import '../imports/client/GreetingsTable.js';
+import '../imports/client/Shoutout.js';
 import '../imports/client/LocationsTable.js';
 import '../imports/client/about.html';
 import '../imports/client/WorldMap.js';

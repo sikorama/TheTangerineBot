@@ -7,7 +7,8 @@ import {
   QuizzScores,
   Stats,
   Raiders,
-  Images
+  Images,
+  ShoutOuts
 } from '../imports/api/collections.js';
 
 import { hasRole, getUserGroups } from './user_management.js';
@@ -78,6 +79,14 @@ export function init_publications() {
   });
 
 
+  // ----------------- SHOUTOUTS ------------------
+  Meteor.publish('shoutouts', function (sel) {
+//    if (hasRole(this.userId, ['admin', 'quizz'])) {
+      if (!sel) sel = {}
+      return ShoutOuts.find(sel);
+ //   }
+  //  this.ready();
+  });
 
 
   //
