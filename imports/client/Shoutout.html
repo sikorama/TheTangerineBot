@@ -1,0 +1,31 @@
+<template name="Shoutouts">
+
+    <h2> Shoutouts
+        <button class="toggle-edit">
+            &#9998;
+        </button>
+    </h2>
+    
+    <button class="exportCSV">CSV</button><a id="csvlink"></a>
+    
+    <table class="pure-table">
+        <thead>
+            <tr style="width:100%;">
+                <th>Channel</th>
+                <th>Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each c in shoutouts}}
+            <tr title="{{c.username}}" id="{{c._id}}">
+                <td>
+                    {{c.so}}
+                </td>
+                <td>
+                    {{FormatDate c.timestamp}}
+                </td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+</template>
