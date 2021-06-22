@@ -1025,7 +1025,7 @@ Meteor.startup(() => {
         autotr = true;
       }
 
-      console.error(username, autotr);
+      //console.error(username, autotr);
 
       if (cmd in tr_lang || autotr) {
 
@@ -1451,11 +1451,29 @@ Meteor.startup(() => {
       }
     }
 
-
-
     // ---------- catch !so command by moderators
     // For sending a discord notification, and storing in database or simply greet
     if (isModerator === true && (botchan.detectso === true)) {
+
+      // SO storage can be enabled/disabled
+      if (cmd === 'store-so' || cmd==='twitchfinds' || cmd==='twitch-finds') { 
+        // Enable/disable so store, defines a label
+        let label = new Date().toUTCString();
+        if (cmdarray.length > 1) {
+          cmdarray.shift();
+          label = cmdarray.join(' ').trim();
+        }
+        BotChannels.update( botchan._id, {$set : { storeso_label:  label }} );
+
+        if (label.toLowerCase()==='off') {
+          say(target,'Shoutout monitoring is now off')
+        }
+        else 
+        {
+          say(target,'Shoutout monitoring is now enabled, using label '+label+ '. Use "!'+cmd+' off" to disable it.' );
+        }
+        return;
+      }
 
       // Extract parameter
       if (cmd === 'so') {
@@ -1468,12 +1486,22 @@ Meteor.startup(() => {
 
           if (botchan.storeso === true) {
             // Also store in database
-            ShoutOuts.insert({ chan: target, so: soname, timestamp: Date.now(), username: username })
+            let label = botchan.storeso_label;
+            if (!label) {
+              label='off'        
+            }
+            ShoutOuts.insert({ chan: target, so: soname, timestamp: Date.now(), username: username, label: label })
           }
 
           if (botchan.discord_so_url) {
-            const title = 'https://twitch.tv/' + soname;
-            sendDiscord(title, botchan.discord_so_url);
+            let label = botchan.storeso_label;
+            if (!label) {
+              label='off'        
+            }
+            if (label.toLowerCase()!='off')  {
+              const title = 'https://twitch.tv/' + soname;
+              sendDiscord(title, botchan.discord_so_url);
+            }
           }
 
           if (botchan.so === true) {

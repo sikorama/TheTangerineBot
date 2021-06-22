@@ -1,18 +1,20 @@
 <template name="Shoutouts">
-
     <h2> Shoutouts
-        <button class="toggle-edit">
-            &#9998;
-        </button>
+        <!--
+    <button class="toggle-edit">
+        &#9998;
+    </button>
+-->
+        <button class="exportCSV">CSV</button><a id="csvlink"></a>
     </h2>
-    
-    <button class="exportCSV">CSV</button><a id="csvlink"></a>
-    
+
+
     <table class="pure-table">
         <thead>
             <tr style="width:100%;">
                 <th>Channel</th>
                 <th>Date</th>
+                <th>Label</th>
             </tr>
         </thead>
         <tbody>
@@ -23,6 +25,9 @@
                 </td>
                 <td>
                     {{FormatDate c.timestamp}}
+                </td>
+                <td>
+                    {{c.label}}
                 </td>
             </tr>
             {{/each}}
