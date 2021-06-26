@@ -54,6 +54,15 @@ FlowRouter.route('/live', {
   }
 });
 
+FlowRouter.route('/live-embed', {
+  name: 'channel',
+  action: function (params, queryParams) {
+    BlazeLayout.render('LiveChannels', {
+    });
+  }
+});
+
+
 
 FlowRouter.route('/radio', {
   name: 'radio',

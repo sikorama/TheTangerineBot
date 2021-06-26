@@ -138,11 +138,17 @@ Template.LiveChannels.helpers({
 //  enchan() {
 //    return BotChannels.find({ enabled: true }, { sort: { channel: 1 } });
 //  },
-  livechan(numcol)  {
-      let res=BotChannels.find({ live: true }, { sort: { live_started_at: 1 } }).fetch();
+  livechan()  {
+      let numcol = FlowRouter.getQueryParam('numcol');
+      if (!numcol) {
+        const d = Template.currentData();
+        numcol = d.numcol
+      }
+      if (!numcol) numcol=3;
+
+      let res=BotChannels.find({ live:true }, { sort: { live_started_at: 1 } }).fetch();
       // Limiter aux X premiers elements
       // Reorganiser pour afficher en plusieurs colonnes
-      if (!numcol) numcol=1;
       let sres=res.slice(0,100);
       let cres=[];
       for (let i=0; i<sres.length ; i+=numcol) {
