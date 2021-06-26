@@ -140,9 +140,11 @@ Template.LiveChannels.helpers({
 //  },
   livechan()  {
       let numcol = FlowRouter.getQueryParam('numcol');
+      if (numcol) numcol=parseInt(numcol);
       if (!numcol) {
         const d = Template.currentData();
-        numcol = d.numcol
+         if (d.numcol)
+           numcol = parseInt(d.numcol)
       }
       if (!numcol) numcol=3;
 

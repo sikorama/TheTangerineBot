@@ -1665,13 +1665,20 @@ Meteor.startup(() => {
     }
 
 
-    // Check if the message is not for the bot "@thetangerinebot"
+    // Check if the message is not for the bot 
     if ((lccn.indexOf('@' + botname) >= 0) || ((lccn.indexOf('@tangerinebot') >= 0))) {
+
+      if (lccn.indexOf('ban')>=0) {
+        say(target, 'Do you want me to ban you, ' + answername +'? :P');
+        return;
+      }
+
       let txt;
       let txts = [
         "I'm only a bot, you know! MrDestructoid",
         "I'm a nice bot, you know! MrDestructoid",
-        "I'm very shy for a bot! MrDestructoid",
+        "Do you want to be my friend?",
+        "I'm very shy! MrDestructoid",
         '^^ ',
         '<3 <3 <3 ',
         ':) ',
