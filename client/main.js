@@ -139,28 +139,8 @@ Template.LiveChannels.helpers({
 //    return BotChannels.find({ enabled: true }, { sort: { channel: 1 } });
 //  },
   livechan()  {
-      let numcol = FlowRouter.getQueryParam('numcol');
-      if (numcol) numcol=parseInt(numcol);
-      if (!numcol) {
-        const d = Template.currentData();
-         if (d.numcol)
-           numcol = parseInt(d.numcol)
-      }
-      if (!numcol) numcol=3;
-
       let res=BotChannels.find({ live:true }, { sort: { live_started_at: 1 } }).fetch();
-      // Limiter aux X premiers elements
-      // Reorganiser pour afficher en plusieurs colonnes
-      let sres=res.slice(0,100);
-      let cres=[];
-      for (let i=0; i<sres.length ; i+=numcol) {
-          let row=[];
-          for (j=0; j<numcol; j++) {
-              row.push(sres[i+j])
-          }
-          cres.push(row);
-      } 
-      return cres;
+      return sres=res.slice(0,100);
   }
 });
 

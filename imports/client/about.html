@@ -56,42 +56,28 @@
 </template>
 
 <template name="LiveChannels">
-{{#let livearr = livechan}}
+  {{#let livearr = livechan}}
   {{#if livearr.length}}
-<h1>Now Live!</h1>
-  <div>
-    <table class="table table-striped table-hover ">
-      <tbody>
-        {{#each r in livearr}}
-        <tr>
-          {{#each w in r }}
-          {{#if w}}
-          <td class="live-table">
-            <a href="https://twitch.tv/{{w.channel}}">
-            <img src="https://static-cdn.jtvnw.net/previews-ttv/live_user_{{w.channel}}-320x200.jpg"
-              title="https://twitch.tv/{{w.channel}}">
-              </a>
-          </td>
-          {{/if}}
-          {{/each}}
-        </tr>
-        <tr>
-          {{#each w in r }}
-          {{#if w}}
-          <td>
-            <a href="https://twitch.tv/{{w.channel}}">
-              {{w.channel}}
-            </a>
-          </td>
-          {{/if}}
-          {{/each}}
-        </tr>
-        {{/each}}
-      </tbody>
-    </table>
+  <h1>Now Live!</h1>
+  <div class="pure-g">
+    {{#each w in livearr}}
+    {{#if w}}
+    <div class="pure-u-1 pure-u-sm-1-2 pure-u-md-1-3 pure-u-xd-1-4">
+        <div height="200">
+          <a href="https://twitch.tv/{{w.channel}}">
+            <img class="pure-img" src="https://static-cdn.jtvnw.net/previews-ttv/live_user_{{w.channel}}-320x200.jpg"
+            title="https://twitch.tv/{{w.channel}}">
+          </a>
+          <a href="https://twitch.tv/{{w.channel}}">
+            {{w.channel}}
+          </a>
+        </div>
+      </div>
+      {{/if}}
+    {{/each}}
   </div>
   {{/if}}
-{{/let}}
+  {{/let}}
 </template>
 
 
