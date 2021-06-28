@@ -13,18 +13,37 @@ Template.Shoutouts.onRendered(function () {
 Template.Shoutouts.helpers({
     shoutouts() {
         let sc = Session.get('sel_channel');
-        return ShoutOuts.find({ chan: '#' + sc }, { sort: { date: -1 } })
+        return ShoutOuts.find({ chan: '#' + sc }, { sort: { date: 1 } })
     },
+    label() {
+        return Session.get('label');
+    },
+    solabel() {
+        let sc = Session.get('sel_channel');
+        let label = Session.get('label');
+        if (label)
+        {
+            return ShoutOuts.find({ chan: '#' + sc , label:label}, { sort: { date: -1 } })
+        }
+    },
+    numrows(n) {return n+3;}
+
+
 });
 
 Template.Shoutouts.events({
+    'click .label' : function(event) {
+        let v = event.currentTarget.innerText;
+        console.error(v);
+        Session.set('label', v);
+    },
     'click button.exportCSV': function (event) {
         let sc = Session.get('sel_channel');
         console.error(sc);
-        let res = ShoutOuts.find({ chan: '#' + sc }, { sort: { date: -1 } }).fetch().map((item) => {
-            return ([item.so, new Date(item.timestamp).toLocaleString()].join(';'));
+        let res = ShoutOuts.find({ chan: '#' + sc }, { sort: { date: 1 } }).fetch().map((item) => {
+            return ([item.so, new Date(item.timestamp).toLocaleString(), item.label].join(';'));
         });
-        console.error(res);
+        //console.error(res);
         genDataBlob(res.join('\n'), 'csvlink', 'csv');
     }
 })

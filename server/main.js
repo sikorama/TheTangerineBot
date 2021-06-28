@@ -55,7 +55,6 @@ if (client_id != undefined) {
 
 botpassword = 'oauth:' + botpassword;
 
-
 //  UserLocations.update(u._id, {$unset: {msg:1}});
 
 // Array to keep track of last active users (per channel)

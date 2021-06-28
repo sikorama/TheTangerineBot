@@ -63,17 +63,15 @@
     {{#each w in livearr}}
     {{#if w}}
     <div class="pure-u-1 pure-u-sm-1-2 pure-u-md-1-3 pure-u-lg-1-3 pure-u-xl-1-4">
+      <a href="https://twitch.tv/{{w.channel}}" target="_blank" rel="noopener noreferrer">
         <div height="200px">
-          <a href="https://twitch.tv/{{w.channel}}">
             <img class="pure-img" src="https://static-cdn.jtvnw.net/previews-ttv/live_user_{{w.channel}}-320x200.jpg"
             title="https://twitch.tv/{{w.channel}}">
-          </a>
-        </div>
-        <div>
-          <a href="https://twitch.tv/{{w.channel}}">
-            {{w.channel}}
-          </a>
-        </div>
+          </div>
+          <div>
+              {{w.channel}}
+          </div>
+        </a>
       </div>
       {{/if}}
     {{/each}}
