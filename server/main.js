@@ -67,6 +67,7 @@ let wurl = process.env.WEBSITE_URL;
 if (wurl) WEBSITE_URL = wurl;
 
 
+
 // Stack for answering to greetings.
 // Greetings are not immediate in order to add a delay between multiple greetings
 // Feels more natural, and also ueful in case of on screen notification, to avoid
@@ -1533,6 +1534,20 @@ Meteor.startup(() => {
       }
     }
 
+    let t =botchan.team;
+    if (t) {
+      if ((cmd===t+'live') || (cmd==='live'+t) || (cmd === t+'-live')|| (cmd === 'live-'+t)) {
+        // Live channels, from the same team (but not the current channel)
+        const res = BotChannels.find({ live:true , team: t, channel: {$ne: chan}}, { sort: { live_started_at: 1 } });
+        if (res.count()===0)
+          say(target, 'No one from team '+t +'is currently live.');
+        else {
+          let tm = res.fetch().map((c) => c.channel).join(', ');
+          say(target, 'Currently live from team '+t +' : ' + tm);
+        }
+      }
+    }
+
 
     // ------------------- GREET ----------------------
     if (botchan.greet === true) {
@@ -1659,8 +1674,10 @@ Meteor.startup(() => {
       }
     }
 
+
+
     // Test command to retrieve infos
-    if (cmd.indexOf('test') == 0) {
+    if (cmd === 'test') {
       console.info(target, context);
     }
 

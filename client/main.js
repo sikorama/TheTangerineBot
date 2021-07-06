@@ -139,8 +139,17 @@ Template.LiveChannels.helpers({
 //    return BotChannels.find({ enabled: true }, { sort: { channel: 1 } });
 //  },
   livechan()  {
-      let res=BotChannels.find({ live:true }, { sort: { live_started_at: 1 } }).fetch();
-      return sres=res.slice(0,100);
+    let team = FlowRouter.getQueryParam('team');
+    let sobj = { live:true };
+    if (team) {
+      if (team==='none') {
+        sobj.team={$exists: 0}
+      }
+      else
+        sobj.team=team;
+    }
+    let res=BotChannels.find(sobj, { sort: { live_started_at: 1 } }).fetch();
+    return sres=res.slice(0,100);
   }
 });
 
