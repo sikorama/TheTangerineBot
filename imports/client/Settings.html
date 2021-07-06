@@ -386,7 +386,7 @@
         <th>User</th>
         <th>Groups</th>
         <th>Admin</th>
-        <th>Streamer</th>
+        <th>Editor</th>
       </tr>
     </thead>
     <tbody>
@@ -394,15 +394,16 @@
       <tr id="{{u._id}}">
         <td>
           {{u.username}}
+          {{#if (userHasRole u._id "superadmin")}}&#9752;{{/if}}
         </td>
         <td>
           <input class="profile" value="{{u.profile.groups}}" name="groups">
         </td>
         <td>
-          {{>CheckMark n="uadmin" b=(userHasRole u._id "admin")}}
+          {{>CheckMark class="setrole" n="admin" b=(userHasRole u._id "admin")}}
         </td>
         <td>
-          {{>CheckMark n="ustreamer" b=(userHasRole u._id "streamer")}}
+          {{>CheckMark class="setrole" n="greet" b=(userHasRole u._id "greet")}}
         </td>
       </tr>
       {{/each}}

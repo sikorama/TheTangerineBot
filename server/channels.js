@@ -1,4 +1,4 @@
-import { UserLocations, BotChannels, GreetMessages, Settings, QuizzQuestions, QuizzScores, Stats } from '../imports/api/collections.js';
+import { BotChannels } from '../imports/api/collections.js';
 
 
 export function addChannel(chan, fields, guestAccount) {

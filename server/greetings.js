@@ -1,7 +1,8 @@
 import { GreetMessages } from '../imports/api/collections.js';
+import { emoticones, followtxts } from './const.js';
+import { randElement } from './tools.js';
 import { hasRole } from './user_management.js';
-import { followtxts,emoticones } from './const.js';
-import {randElement} from './tools.js';
+import { regexan,regexf,regexi,regexn,regexnn } from '../imports/api/regex.js';
 
 // chan (optionel) : Pour liiter un message a un channel
 
@@ -44,40 +45,58 @@ export function addGreetLine(username, txt, chan, editor) {
 export function init_greetings() {
 
   if (GreetMessages.find().count() == 0) {
-    addGreetLine('thetangerineclub', 'we can now start the show! @icon');
+    
+    addGreetLine('DE', 'Willkommen #name #icon');
+    addGreetLine('DE', 'Moin #name #icon');
+    addGreetLine('DE', 'Moin Moin #name #icon');
 
-    addGreetLine('DE', 'Willkommen @name @icon');
-    addGreetLine('DE', 'Moin @name @icon');
-    addGreetLine('DE', 'Moin Moin @name @icon');
+    addGreetLine('EN', 'We were waiting for you #name ! #icon');
+    addGreetLine('EN', 'Hello #name');
+    addGreetLine('EN', 'Hello dear #name');
+    addGreetLine('EN', 'Right on time #name');
+    addGreetLine('EN', '#name is among us! #icon');
+    addGreetLine('EN', 'Welcome #name ! #icon');
+    addGreetLine('EN', "I'm glad you're here #name ! #icon");
 
-    addGreetLine('EN', 'We were waiting for you @name ! @icon');
-    addGreetLine('EN', 'Hello @name');
-    addGreetLine('EN', 'Hello dear @name');
-    addGreetLine('EN', 'Right on time @name');
-    addGreetLine('EN', '@name is among us! @icon');
-    addGreetLine('EN', 'Welcome @name ! @icon');
-    addGreetLine('EN', "I'm glad you're here @name ! @icon");
+    addGreetLine('ES', 'Hola #name');
+    addGreetLine('ES', 'Buenos días / Buenas tardes #name #icon');
 
-    addGreetLine('ES', 'Hola @name');
-    addGreetLine('ES', 'Buenos días / Buenas tardes @name @icon');
+    addGreetLine('FR', 'Salutations distinguées #name #icon');
+    addGreetLine('FR', 'Hello #name #icon');
+    addGreetLine('FR', 'Salut #name #icon');
+    addGreetLine('FR', 'Salut, ça va? #name');
+    addGreetLine('FR', 'Bonjour / Bonsoir #name #icon');
+    addGreetLine('FR', 'Bien ou bien #name? #icon');
+    addGreetLine('FR', 'Bienvenue #name! #icon');
 
-    addGreetLine('FR', 'Salutations distinguées @name @icon');
-    addGreetLine('FR', 'Hello @name @icon');
-    addGreetLine('FR', 'Salut @name @icon');
-    addGreetLine('FR', 'Salut, ça va? @name');
-    addGreetLine('FR', 'Bonjour / Bonsoir @name @icon');
-    addGreetLine('FR', 'Bien ou bien @name? @icon');
-    addGreetLine('FR', 'Bienvenue @name! @icon');
+    addGreetLine('PT', 'Olá #name #icon');
+    addGreetLine('PT', 'Oi #name #icon');
+    addGreetLine('PT', 'como vai? #name');
+    addGreetLine('PT', 'como está? #name');
+    addGreetLine('PT', 'todo bem? #name');
 
-    addGreetLine('PT', 'Olá @name @icon');
-    addGreetLine('PT', 'Oi @name @icon');
-    addGreetLine('PT', 'como vai? @name');
-    addGreetLine('PT', 'como está? @name');
-    addGreetLine('PT', 'todo bem? @name');
-
-    addGreetLine('RU', 'Привет @name @icon');
+    addGreetLine('RU', 'Привет #name #icon');
   }
 
+  // Fix Greetlines @=># 
+  GreetMessages.find().fetch().forEach((item) => {
+      let nt = item.texts.map((t) => {
+        export const pregexn  = /@name/gi;
+        export const pregexan = /@atname/gi;
+        export const pregexnn = /@nickname/gi;
+        export const pregexi  = /@icon/gi;
+        export const pregexf  = /@follow/gi; 
+        export const pregext  = /@twitch/gi; 
+        t.txt =t.txt.replace(pregexn,'#name');
+        t.txt =t.txt.replace(pregexan,'#atname');
+        t.txt =t.txt.replace(pregexnn,'#nickname');
+        t.txt =t.txt.replace(pregexi,'#icon');
+        t.txt =t.txt.replace(pregexf,'#follow');
+        t.txt =t.txt.replace(pregext,'#twitch');
+        return t;
+      })
+      GreetMessages.update(item._id, {$set: { texts: nt }})
+  })
 
 
   Meteor.methods({
@@ -118,7 +137,7 @@ export function init_greetings() {
         let d = GreetMessages.findOne(id);
         if (d != undefined) {
           let ov = d.texts[index];
-          // merge... on peut faire mieux?
+          // merge... can do better
           if (v.txt != undefined) ov.txt = v.txt;
           if (v.enabled != undefined) ov.enabled = v.enabled;
           if (v.channel != undefined) ov.channel = v.channel.toLowerCase();
@@ -175,13 +194,6 @@ export function getGreetMessages(username,chan) {
 }
 
 
-// regex pour les greets
-const regexn  = /@name/gi;
-const regexan = /@atname/gi;
-const regexnn = /@nickname/gi;
-const regexi  = /@icon/gi;
-const regexf  = /@follow/gi; // Various expressions for following
-
 export function replaceKeywords(txt, dispname) {
   txt = txt.replace(regexi, randElement(emoticones));
 
@@ -192,11 +204,9 @@ export function replaceKeywords(txt, dispname) {
     txt = txt.replace(regexnn, dispname);
   }
 
-  if (txt.indexOf('@follow') >= 0) {
+  if (txt.indexOf('#follow') >= 0) {
     let followtxt = randElement(followtxts)
     txt = txt.replace(regexf, followtxt);
   }
   return txt;
 }
-
-

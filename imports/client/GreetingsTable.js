@@ -11,14 +11,60 @@ Template.Greetings.onCreated(function () {
     this.subscribe('GreetChannels');
     // Pour le champ editeur de l'admin
     this.subscribe('allUsers');
+
+    Session.set('greets_limit',50);
+    Session.set('greets_page',1);
+    Session.set('greets_search','');
+
   });
   
   Template.Greetings.helpers({
-    'greetlines': function (lang) {
+    formatLine(txt) {
+      // replace # par <span ok> </span>
+      const regexs  = ['#name','#atname','#nickname','#icon','#follow','#twitch']
+      regexs.forEach((r) => {
+        txt=txt.replace(RegExp(r,'gi'),"<strong class='ok'>"+r+'</strong>')
+      })
+      //console.error(txt);
+      return txt;
+
+    },
+    greetlines: function (lang) {
       const v = (lang === 'true');
       //console.error(v, lang);
       //GreetMessages.find({ lang: v }).forEach((item) => { console.error(item); })
-      return GreetMessages.find({ lang: v }, { sort: { username: 1 } });
+      if (v)
+        return GreetMessages.find({ lang: v }, { sort: { username: 1 } });
+
+      let  greetSearch = Session.get('greets_search');
+      let prop={lang: false}
+
+/*      let sn = Session.get('greets_sort_field', 'dname');
+      let sd = Session.get('greets_sort_dir', 1);
+      let sortobj = {};
+      sortobj[sn] = sd;
+      prop.sortby = sortobj;
+  */
+
+      let l = Session.get('greets_limit');
+      if (l === undefined) l = 50;
+  
+      let s = parseInt(Session.get('greets_page') - 1);
+      s *= l;
+  
+      console.error(greetSearch,l,s,prop);
+
+      let res = GreetIndex.search(greetSearch, {
+        limit: l,
+        skip: s,
+        props: prop,
+      });
+  
+      console.error(res.count());
+      Session.set('greets_count', res.count())
+      return res.mongoCursor;
+
+
     },
     'greetChan': function () {
   
@@ -35,6 +81,10 @@ Template.Greetings.onCreated(function () {
   });
   
   Template.Greetings.events({
+    'keyup [name="addUserName"]' : _.debounce(function(event) {
+        const v = event.currentTarget.value;
+        Session.set('greets_search',v);
+    },300),
     'change .greetline': function (event) {
       const id = event.currentTarget.parentElement.id;
       const name = event.currentTarget.name;
@@ -91,6 +141,7 @@ Template.Greetings.onCreated(function () {
         const gl = GreetMessages.findOne(id);
         if (gl != undefined) {
           document.getElementsByName('addUserName')[0].value = gl.username;
+          Session.set('greets_search',gl.username);
         }
       }
     }

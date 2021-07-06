@@ -2,7 +2,7 @@
  * Gestion des utilisateurs, coté serveur
  */
 
-import { Meteor } from 'meteor/meteor'
+import { Meteor } from 'meteor/meteor';
 import { BotChannels } from '../imports/api/collections';
 
 //Renvoie vrai si l'utilisateur a un role donné
@@ -29,13 +29,13 @@ export function hasRole(userId, roles, nobypass) {
 // Raccourci pour tester si on est admin
 export function isAdmin(userId) {
     return (Roles.userIsInRole(userId, 'admin'));
-//    return hasRole(userId, ['admin']);
+    //    return hasRole(userId, ['admin']);
 }
 
 // Recuper les groupes associés a un userId
 export function getUserGroups(userId) {
     let user = Meteor.users.findOne(userId);
-//    console.info('get User Group', user);
+    //    console.info('get User Group', user);
     if (user === undefined) return [];
     let userg = user.profile.groups;
     // Si pas de groupe => pas de resulat? ou 'default' ?
@@ -67,19 +67,19 @@ export function addUser(doc) {
         'username': doc.username
     });
 
-    console.error(u,doc);
+    console.error(u, doc);
     if (u === undefined) {
         let id = Accounts.createUser({
             'username': doc.username,
             'email': doc.email,
             'password': doc.password,
             profile: {
-//                map_icon_std: "/tang1.png",
-//                map_icon_name: "/tang3.png",
-//                map_icon_msg: "/favicon-32.png",
+                //                map_icon_std: "/tang1.png",
+                //                map_icon_name: "/tang3.png",
+                //                map_icon_msg: "/favicon-32.png",
                 'groups': doc.groups // Rustine temporaire
             },
-//            'groups': doc.groups
+            //            'groups': doc.groups
         });
 
         if (Meteor.roleAssignment.find({ 'user._id': id }).count() === 0) {
@@ -97,7 +97,7 @@ export function addUser(doc) {
 function qaddUser(name, pw, roles, groups) {
     return addUser({
         username: name,
-        email: name+"@sikorama.fr",
+        email: name + "@sikorama.fr",
         password: pw,
         roles: roles,
         groups: groups,
@@ -105,16 +105,16 @@ function qaddUser(name, pw, roles, groups) {
 }
 
 function createSuperAdmin(uname, pw) {
-    let allchans = BotChannels.find({enabled: true}).fetch().map((item)=>item.channel);
+    let allchans = BotChannels.find({ enabled: true }).fetch().map((item) => item.channel);
     qaddUser(uname, pw, ['admin', 'superadmin'], allchans);
 }
 
 // chan is an array
-function createStreamerAccount(uname, chan, pw,pwguest) {
+function createStreamerAccount(uname, chan, pw, pwguest) {
     if (chan && !Array.isArray(chan))
         chan = [chan];
 
-    qaddUser(uname, pw, ['streamer'],chan);
+    qaddUser(uname, pw, ['streamer'], chan);
     // update botchannel collection?
 }
 
@@ -126,29 +126,26 @@ function createDefaultAccounts() {
 
 export function init_users() {
     // Create default account if none exists
-    if (Meteor.users.find().count()===0) {
+    if (Meteor.users.find().count() === 0) {
         createDefaultAccounts();
     }
 
     Meteor.methods({
         insertUser: function (doc) {
-            console.info('insert user', doc,this.userId,isAdmin(this.userId));
-            if (isAdmin(this.userId) ) {
+            console.info('insert user', doc, this.userId, isAdmin(this.userId));
+            if (isAdmin(this.userId)) {
                 // Sanitize?
                 // Check channels,pw...
-                if (!doc.name || !doc.pw)
-                {
+                if (!doc.name || !doc.pw) {
                     console.error('name or pw missing');
                     return;
-                } 
-                if (!doc.chan)
-                {
+                }
+                if (!doc.chan) {
                     console.error('no channel defined');
-                } 
+                }
                 createStreamerAccount(doc.name, doc.chan, doc.pw);
             }
-            else
-            {
+            else {
                 console.error('Insert User: not allowed!')
             }
         },
@@ -161,35 +158,6 @@ export function init_users() {
             if (isAdmin(this.userId)) {
                 const user = Meteor.users.findOne(doc._id);
                 if (user != undefined) {
-                    // Cas particulier du superadmin: on ne peut pas lui retirer!
-                    if (hasRole(doc._id, ['superadmin'])) {
-                        // 2 cas: soit on a un unser.role, auquel cas on le remplace par un set.role
-                        // Soit un set role et dans ce cas il faut ajouter le superadmin dedans
-                        // FIXME: il doit y avoir un moyen plus elegant de faire ca, on a bcp de tests
-                        // de undefined et des delete...
-                        if ((doc.modifier.$unset != undefined) && (doc.modifier.$unset.roles != undefined)) {
-                            delete doc.modifier.$unset.roles;
-                            if (Object.keys(doc.modifier.$unset).length === 0)
-                                delete doc.modifier.$unset;
-                            if (doc.modifier.$set === undefined)
-                                doc.modifier.$set = {};
-                            doc.modifier.$set.roles = ['superadmin'];
-                        } else {
-                            if (doc.modifier.$set.roles === undefined)
-                                doc.modifier.$set.roles = {};
-                            if (doc.modifier.$set.roles.indexOf('superadmin') < 0)
-                                doc.modifier.$set.roles.push('superadmin');
-                        }
-                    } else {
-                        // Filtrage des roles autorisés: on n'a pas le droit de se mettre superadmin
-                        if (doc.modifier.$set !== undefined)
-                            if (doc.modifier.$set.roles !== undefined)
-                                if (doc.modifier.$set.roles.indexOf('superadmin') >= 0) {
-                                    console.error("Ajout d'un role superadmin illégal")
-                                    return;
-                                }
-                    }
-
                     //console.error('modifier', doc.modifier);
                     Meteor.users.update(doc._id, doc.modifier);
                 }
@@ -214,6 +182,40 @@ export function init_users() {
                 console.warn("SetUserRoles", name, roles)
                 if (user != undefined)
                     setUserRoles(user._id, roles);
+            }
+        },
+        setUserRole: function (uid, role, state) {
+            if (isAdmin(this.userId)) {
+                if (role==='superadmin')
+                    return;
+
+                let r = Meteor.roleAssignment.find({ 'user._id': uid }).fetch();
+                let exists = r.indexOf(role) >= 0;
+                if (!exists && (state === true)) {
+                    r.push(role);
+                    setUserRoles(uid, r);
+                }
+                if (exists && (state === false)) {
+                    // Remove Role
+                    r.splice(r.indexOf(role), 1);
+                    setUserRoles(uid, r);
+                }
+            }
+
+        },
+        toggleUserRole: function (uid, role) {
+            if (isAdmin(this.userId)) {
+                if (role==='superadmin')
+                    return;                    
+                let r = Meteor.roleAssignment.find({ 'user._id': uid }).fetch().map((rr)=>rr.role._id);
+                let i = r.indexOf(role); 
+                if (i < 0) {
+                    r.push(role);
+                }
+                else {
+                    r.splice(i, 1);
+                }
+                setUserRoles(uid, r);
             }
         },
         setUserGroups: function (name, groups) {

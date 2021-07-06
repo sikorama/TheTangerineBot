@@ -156,7 +156,7 @@
 </template>
 
 <template name="CheckMark">
-  <button class="{{#if b}} ok {{else}} ko {{/if}} toggleCheck" name="{{n}}">
+  <button class="{{#if class}} {{class}} {{else}}  toggleCheck  {{/if}}{{#if b}} ok {{else}} ko {{/if}}" name="{{n}}">
     {{#if b}}
     &check;
     {{else}}

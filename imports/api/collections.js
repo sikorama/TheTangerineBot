@@ -27,6 +27,7 @@ export const ShoutOuts = new Mongo.Collection('shoutout');
 export const DiscordHooks = new Mongo.Collection('dhooks');
 
 
+
 /// Index pour les localisations
 /*const*/ UserLocIndex = new Index({
     collection: UserLocations,
@@ -178,6 +179,44 @@ export const DiscordHooks = new Mongo.Collection('dhooks');
         //        }
     })
 });
+
+
+// Index pour les questions, uniquemnt pour les admins
+/*const*/ GreetIndex = new Index({
+    collection: GreetMessages,
+    fields: ['username'],
+    permission: function (options) {
+        return checkUserRole('greet', options.userId);
+    },
+    // Options de recherche par défaut
+    defaultSearchOptions: {
+        sortBy: { username: 1 }
+    },
+    engine: new MongoDBEngine({
+        selector: function (searchObject, options, aggregation) {
+            // retrieve the default selector
+            let selector = this.defaultConfiguration().selector(searchObject, options, aggregation);
+
+              if (options.search.props.hasOwnProperty('lang')) {
+                selector.lang = {
+                    $eq: options.search.props.lang
+                };
+            }
+  
+
+            //Verifier les roles (admin) options.search.userId
+            return selector;
+        },
+        sort: function (searchObject, options) {
+            // On utilise le champ sortby tel quel
+            return (options.search.props.sortby);
+        },
+        //        fields: function(searchObject, options) {
+        //            return {dname:1, allow:1, msg:1, latitude:1, longitude:1};
+        //        }
+    })
+});
+
 
 // Map badges
 //export const 

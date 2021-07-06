@@ -1,34 +1,22 @@
-import {
-  UserLocations,
-  BotChannels,
-  GreetMessages,
-  Settings,
-  QuizzQuestions,
-  QuizzScores,
-  Stats,
-  Raiders,
-  Images,
-  ShoutOuts
-} from '../imports/api/collections.js';
+import { BotChannels, GreetMessages, Images, QuizzQuestions, QuizzScores, Raiders, Settings, ShoutOuts, Stats, UserLocations } from '../imports/api/collections.js';
+import { getUserGroups, hasRole } from './user_management.js';
 
-import { hasRole, getUserGroups } from './user_management.js';
 export function init_publications() {
   //
   // ---------------------- CHANNELS -------------------------------
   //
   Meteor.publish('botChannels', function (sel) {
     if (!sel) sel = {}
-    let opt={sort: {channel:1}};
+    let opt = { sort: { channel: 1 } };
 
     let uid = this.userId;
     if (uid) {
       // If non admin, only publish enabled channels corresponding to groups associated to the user
-      
+
       if (!hasRole(uid, ['admin'])) {
         //sel.channel = { $in: getUserGroups(uid) };
-      } 
-      else
-      {
+      }
+      else {
         //opt.fields = { channel:1, live:1, 
         //}
       }
@@ -38,30 +26,33 @@ export function init_publications() {
       // Only required fields
       //);
     }
-  
-    return BotChannels.find(sel,opt);
-  
- //   this.ready();
+
+    return BotChannels.find(sel, opt);
+
+    //   this.ready();
   });
 
   //Publish the list of all channels where the bot is enabled
   Meteor.publish('EnabledChannels', function (sel) {
     if (!sel) sel = {};
     sel.enabled = true;
-    return BotChannels.find(sel, { fields: { enabled: 1, channel: 1 , live:1} })
+    return BotChannels.find(sel, { fields: { enabled: 1, channel: 1, live: 1 } })
   });
 
   //Publish the list of all channels where the bot is enabled
   Meteor.publish('LiveChannels', function (sel) {
     if (!sel) sel = {};
     sel.live = true;
-    return BotChannels.find(sel, { fields: 
-      { enabled: 1, 
-        channel: 1, 
-        live: 1, 
-        live_title:1,
+    return BotChannels.find(sel, {
+      fields:
+      {
+        enabled: 1,
+        channel: 1,
+        live: 1,
+        live_title: 1,
         live_started: 1,
-        live_thumbnail_url:1} 
+        live_thumbnail_url: 1
+      }
     })
   });
 
@@ -81,11 +72,11 @@ export function init_publications() {
 
   // ----------------- SHOUTOUTS ------------------
   Meteor.publish('shoutouts', function (sel) {
-//    if (hasRole(this.userId, ['admin', 'quizz'])) {
-      if (!sel) sel = {}
-      return ShoutOuts.find(sel);
- //   }
-  //  this.ready();
+    //    if (hasRole(this.userId, ['admin', 'quizz'])) {
+    if (!sel) sel = {}
+    return ShoutOuts.find(sel);
+    //   }
+    //  this.ready();
   });
 
 
@@ -195,25 +186,40 @@ export function init_publications() {
       if (userid) return true;
     },
     remove(userid, doc) {
-//      if (userid) return true;
-      if (hasRole(userid, 'admin')) 
+      //      if (userid) return true;
+      if (hasRole(userid, 'admin'))
         return true;
-      
+
     }
   });
 
-Meteor.methods({
-  getGroups: function() {
-    if (hasRole(this.userId, ['admin'])) {
-      let cur =BotChannels.find({}, { fields: { channel: 1 } , sort: {channel: 1}}); 
-      let a = cur.fetch();
-//      console.error(a)
-      let res = a.map((item)=>item.channel);
-//      console.error(res);
-      return res;
+  Meteor.methods({
+    getGroups: function () {
+      if (hasRole(this.userId, ['admin'])) {
+        let cur = BotChannels.find({}, { fields: { channel: 1 }, sort: { channel: 1 } });
+        let a = cur.fetch();
+        //      console.error(a)
+        let res = a.map((item) => item.channel);
+        //      console.error(res);
+        return res;
+      }
+      return getUserGroups(this.userId);
     }
-    return getUserGroups(this.userId);
-  } 
-});
+  });
+
+
+  // publication des Roles
+  Meteor.publish('userRoles', function () {
+    // Si admin
+    if (hasRole(this.userId, ['admin'])) {
+      return Meteor.roleAssignment.find();
+      //      return Meteor.roleAssignment.find({}, {fields: {'role':1}});
+    } else {
+      this.ready()
+    }
+  });
+
 
 }
+
+

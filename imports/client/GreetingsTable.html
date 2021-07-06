@@ -50,13 +50,13 @@
       </thead>
       <tbody>
         {{#each c in (greetlines "false")}}
-          <tr style="width:100%;" id="{{c._id}}">
+          <tr style="width:100%;" id="{{c.__originalId}}">
             <td class="username">
               <a href="https://openstreetmap.org/search?query={{ul.location}}" target="_blank">&boxbox;</a>
               <span class="uname">{{c.username}}</span>
               <button class="resettimer" name={{c.username}}> &#8986; </button>
             </td>
-            <td style="width:100%;" id="{{c._id}}">
+            <td style="width:100%;" id="{{c.__originalId}}">
               {{#each l in c.texts}}
                 {{#if edit_mode}}
                 {{>CheckMark b=l.enabled n=l.index vcross="&nbsp;&nbsp;"}}
@@ -66,7 +66,7 @@
                 <button class="ko" name="remove_{{l.index}}">&cross;</button>
                 <br>
                 {{else}}
-                &bull; {{l.txt}}
+                &bull; {{{formatLine l.txt}}}
 
                 {{#if l.channel}} <strong> [ {{l.channel}} ] </strong> {{/if}}
 
@@ -125,11 +125,11 @@
 
     <h2>Instructions</h2>
     <ul>
-      <li>@atname for injecting user's Name (with @)</li>
-      <li>@nickname for injecting user's Name (without @)</li>
-      <li>@icon for inserting a random icon</li>
-      <li>@twitch for inserting a link to the twitch channel</li>
-      <li>@name for injecting user's Name</li>
+      <li>#atname for injecting user's Name (with @)</li>
+      <li>#nickname for injecting user's Name (without @)</li>
+      <li>#icon for inserting a random icon</li>
+      <li>#twitch for inserting a link to the twitch channel</li>
+      <li>#name for injecting user's Name</li>
     </ul>
 
     In personalized messages, channels can specified to constrain the message to a specific channel OR to to exclud it if the channel is preceded by a "-" symbol:

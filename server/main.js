@@ -7,6 +7,7 @@
 import { Meteor } from 'meteor/meteor';
 import { AccountsTemplates } from 'meteor/useraccounts:core';
 import { BotChannels, GreetDate, GreetMessages, QuizzQuestions, QuizzScores, Raiders, Settings, ShoutOuts, Stats, UserLocations } from '../imports/api/collections.js';
+import { regext } from '../imports/api/regex.js';
 import { addChannel } from './channels.js';
 import { genChord, genProgression, noteArray } from './chords.js';
 import { country_lang, patterns } from './const.js';
@@ -18,6 +19,7 @@ import { init_radio } from './radio.js';
 import { initRaidManagement } from './raids.js';
 import { randElement } from './tools.js';
 import { hasRole, init_users } from './user_management.js';
+
 
 const tmi = require('tmi.js');
 const gtrans = require('googletrans').default;
@@ -86,7 +88,6 @@ let gcoptions = {
 
 let geoCoder = gc(gcoptions);
 
-const regext = /@twitch /gi;
 
 AccountsTemplates.configure({
   forbidClientAccountCreation: true,
@@ -765,7 +766,7 @@ Meteor.startup(() => {
 
 
 
-    // Check if the message starts with @name
+    // Check if the message starts with #name
     // in that case, extract the name and move it at the end of the message, and process the message
     if (msg[0] === '@') {
       let atnameEndIndex = msg.indexOf(' ');
@@ -879,10 +880,10 @@ Meteor.startup(() => {
         if (cmdarray.length > 1) {
           let hugname = cmdarray[1];
           if (hugname[0] != '@') hugname = '@' + hugname;
-          hugsentence = answername + ' gives ' + hugname + ' ' + adjective + ' hug @icon';
+          hugsentence = answername + ' gives ' + hugname + ' ' + adjective + ' hug #icon';
         }
         else {
-          hugsentence = 'I give ' + answername + ' ' + adjective + ' bot hug @icon';
+          hugsentence = 'I give ' + answername + ' ' + adjective + ' bot hug #icon';
         }
         say(target, hugsentence);
       }
@@ -1509,7 +1510,7 @@ Meteor.startup(() => {
             let gmlist = getGreetMessages(soname, chan);
             let gmline = '';
             if (gmlist.length === 0) {
-              gmlist = ["@follow @twitch @icon"];
+              gmlist = ["#follow #twitch #icon"];
               gmline = randElement(gmlist);
             }
             else {
@@ -1519,7 +1520,7 @@ Meteor.startup(() => {
 
             if (gmline.length > 0) {
               gmline = replaceKeywords(gmline, soname);
-              gmline = gmline.replace(regext, "https://twitch.tv/" + soname + ' ');
+              gmline = gmline.replace(regext, "https://twitch.tv/" + soname+' ');
 
               if (botchan.me === true) {
                 gmline = '/me ' + gmline;
@@ -1636,7 +1637,7 @@ Meteor.startup(() => {
           if ((selGenSentence == false) && botchan.socmd) {
             // Vérifier qu'il y a un @twitch dans la phrase? permet de filtrer ce qui n'est pas !so
             // Sinon on ne fait rien
-            if (txt.indexOf('@twitch') >= 0) {
+            if (txt.indexOf('#twitch') >= 0) {
               txt = txt.replace(regext, "");
               txt = botchan.socmd + ' ' + dispname + ' - ' + txt;
             }

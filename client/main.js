@@ -376,7 +376,6 @@ Template.SelectChannel.helpers({
 Template.SelectChannel.events({
   'change [name="selChannel"]': function (event) {
     let v = event.currentTarget.value;
-    //console.error(v);
     Session.set('sel_channel', v);
   }
 });

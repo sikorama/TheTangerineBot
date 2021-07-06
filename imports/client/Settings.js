@@ -13,10 +13,9 @@ Template.Settings.onCreated(function () {
     this.subscribe('botChannels');
     this.subscribe('settings');
     this.subscribe('images');
+    this.subscribe('userRoles');
     Session.set('curEditChan', '');
-
     Session.setDefault('settingsPage', 1);
-
 });
 
 Template.Settings.helpers({
@@ -147,7 +146,13 @@ Template.Settings.events({
         if (res===true) 
             Images.collection.remove(id);
         
-    }
+    },
+    'click .setrole': function (event) {
+        let id = getParentId(event.currentTarget);
+        let f = event.currentTarget.name;
+        console.error("toggleUserRole", id, f);
+        Meteor.call("toggleUserRole", id, f);
+    },
 });
 
 
