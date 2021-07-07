@@ -1540,7 +1540,7 @@ Meteor.startup(() => {
       if (cmd.indexOf(t) === 0) {
 
         // Live channels, from the same team (but not the current channel)
-        const res = BotChannels.find({ live: true, team: t, channel: { $ne: chan } }, { sort: { live_started: 1 } });
+        const res = BotChannels.find({ live: true, team: t, channel: { $ne: chan } }, { sort: { live_started: -1 } });
 
         if (cmd.indexOf('live') > 0) {
 
