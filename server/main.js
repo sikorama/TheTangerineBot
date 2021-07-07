@@ -1573,7 +1573,7 @@ Meteor.startup(() => {
           let m = Settings.findOne({ param: 'team-' + t });
           console.error(m);
           if (m) {
-            say(target, m);
+            say(target, m.val);
             return;
           }
         }
