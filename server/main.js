@@ -515,7 +515,7 @@ Meteor.startup(() => {
 
       if (val === undefined)
         return Settings.findOne({ param: param });
-      Settings.update({ param: param }, { $set: { val: val } });
+      Settings.upsert({ param: param }, { $set: { val: val } });
     }
   })
 
@@ -1457,21 +1457,20 @@ Meteor.startup(() => {
     if (isModerator === true && (botchan.detectso === true)) {
 
       // SO storage can be enabled/disabled
-      if (cmd === 'store-so' || cmd==='twitchfinds' || cmd==='twitch-finds') { 
+      if (cmd === 'store-so' || cmd === 'twitchfinds' || cmd === 'twitch-finds') {
         // Enable/disable so store, defines a label
         let label = new Date().toUTCString();
         if (cmdarray.length > 1) {
           cmdarray.shift();
           label = cmdarray.join(' ').trim();
         }
-        BotChannels.update( botchan._id, {$set : { storeso_label:  label }} );
+        BotChannels.update(botchan._id, { $set: { storeso_label: label } });
 
-        if (label.toLowerCase()==='off') {
-          say(target,'Shoutout monitoring is now off')
+        if (label.toLowerCase() === 'off') {
+          say(target, 'Shoutout monitoring is now off')
         }
-        else 
-        {
-          say(target,'Shoutout monitoring is now enabled, using label '+label+ '. Use "!'+cmd+' off" to disable it.' );
+        else {
+          say(target, 'Shoutout monitoring is now enabled, using label ' + label + '. Use "!' + cmd + ' off" to disable it.');
         }
         return;
       }
@@ -1489,7 +1488,7 @@ Meteor.startup(() => {
             // Also store in database
             let label = botchan.storeso_label;
             if (!label) {
-              label='off'        
+              label = 'off'
             }
             ShoutOuts.insert({ chan: target, so: soname, timestamp: Date.now(), username: username, label: label })
           }
@@ -1497,9 +1496,9 @@ Meteor.startup(() => {
           if (botchan.discord_so_url) {
             let label = botchan.storeso_label;
             if (!label) {
-              label='off'        
+              label = 'off'
             }
-            if (label.toLowerCase()!='off')  {
+            if (label.toLowerCase() != 'off') {
               const title = 'https://twitch.tv/' + soname;
               sendDiscord(title, botchan.discord_so_url);
             }
@@ -1521,7 +1520,7 @@ Meteor.startup(() => {
 
             if (gmline.length > 0) {
               gmline = replaceKeywords(gmline, soname);
-              gmline = gmline.replace(regext, "https://twitch.tv/" + soname+' ');
+              gmline = gmline.replace(regext, "https://twitch.tv/" + soname + ' ');
 
               if (botchan.me === true) {
                 gmline = '/me ' + gmline;
@@ -1534,39 +1533,52 @@ Meteor.startup(() => {
       }
     }
 
-    let t =botchan.team;
-    if (t) {
-      let ttcmd 
-      if ((cmd===t+'live') || (cmd===t+'-live') 
-       || (cmd===t+'-raid')|| (cmd === t+'raid')) {
 
+    // Commands starting with the name of the team (if any)
+    let t = botchan.team;
+    if (t) {
+      if (cmd.indexOf(t) === 0) {
 
         // Live channels, from the same team (but not the current channel)
-        const res = BotChannels.find({ live:true , team: t, channel: {$ne: chan}}, { sort: { live_started: 1 } });
-        if (res.count()===0) {
-          say(target, 'No one from team '+t +' is currently live.');
-          return;
-        }
-        else {
-          if (cmd.index('live')>0) {
-            let tm = res.fetch().map((c) => c.channel).join(', ');
-            say(target, 'Currently live from team '+t +' : ' + tm);
+        const res = BotChannels.find({ live: true, team: t, channel: { $ne: chan } }, { sort: { live_started: 1 } });
+
+        if (cmd.indexOf('live') > 0) {
+
+          if (res.count() === 0) {
+            say(target, 'No one from team ' + t + ' is currently live. (except ' + chan + ' of course)');
             return;
           }
 
+          let tm = res.fetch().map((c) => c.channel).join(', ');
+          say(target, 'Currently live from team ' + t + ' : ' + tm);
+          return;
+        }
+
+        if (cmd.indexOf('raid') > 0) {
           if (isModerator) {
-            // poll? => /poll opens a popup
-            // !poll is a night bot command
-            
-            if (cmd.index('raid')>0) {
-              let tm = res.fetch().map((c) => c.channel);
-              let rc = randElement(tm);
-              say(target, '/raid '+rc);
+
+            if (res.count() === 0) {
+              say(target, "There's nobody from team  '+t +' we could raid right now...");
               return;
             }
+
+            let tm = res.fetch().map((c) => c.channel);
+            let rc = randElement(tm);
+            say(target, '/raid ' + rc);
+            return;
           }
         }
-      }    
+
+        if (botchan.advertteam ===true) {
+          let m = Settings.findOne({ param: 'team-' + t });
+          console.error(m);
+          if (m) {
+            say(target, m);
+            return;
+          }
+        }
+
+      }
     }
 
     // ------------------- GREET ----------------------
@@ -1695,10 +1707,10 @@ Meteor.startup(() => {
     }
 
     // Get list of commands
-    if (cmd.indexOf('ttb-command')===0 || cmd.indexOf('ttcbot-command')===0) {
+    if (cmd.indexOf('ttb-command') === 0 || cmd.indexOf('ttcbot-command') === 0) {
       let url = Settings.findOne({ param: 'URL' });
       if (url) {
-        say(target, "You'll find available commands for ttcBot here: " + url.val + "/c/" + chan+'/commands')
+        say(target, "You'll find available commands for ttcBot here: " + url.val + "/c/" + chan + '/commands')
         return;
       }
     }
@@ -1712,8 +1724,8 @@ Meteor.startup(() => {
     // Check if the message is not for the bot 
     if ((lccn.indexOf('@' + botname) >= 0) || ((lccn.indexOf('@tangerinebot') >= 0))) {
 
-      if (lccn.indexOf('ban')>=0) {
-        say(target, 'Do you want me to ban you, ' + answername +'? :P');
+      if (lccn.indexOf('ban') >= 0) {
+        say(target, 'Do you want me to ban you, ' + answername + '? :P');
         return;
       }
 
@@ -1784,8 +1796,8 @@ Meteor.startup(() => {
         console.error(e);
       }
 
-//      if (bc.raids !== true)
-//        return;
+      //      if (bc.raids !== true)
+      //        return;
 
       try {
         let title = raider + " is raiding " + chan + " with " + num + " viewers";

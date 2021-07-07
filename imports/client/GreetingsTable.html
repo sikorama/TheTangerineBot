@@ -79,6 +79,10 @@
       </tbody>
     </table>
 
+    <p class="centered">
+      {{>SkipResult v="greets" t=numGreets}}
+    </p>
+
 
     <h2> Map based Greetings <a href="/greetings/{{#unless edit_mode}}edit{{/unless}}">&#9998;</a> </h2>
     <table class="pure-table">
@@ -104,7 +108,7 @@
 
                 <button class="ko" name="remove_{{l.index}}">&cross;</button>
               {{else}}
-              &bull; {{l.txt}}
+              &bull; {{{formatLine l.txt}}}
 
               {{#if l.hmin}}
               <strong>

@@ -19,6 +19,13 @@ Template.Settings.onCreated(function () {
 });
 
 Template.Settings.helpers({
+    getTeamParamVal(team) {
+        let param = 'team-'+team;
+        const p = Settings.findOne({ param: param});
+        //console.error(param,p)
+        if (p)
+            return p.val;
+    },
     isCurEditChan(chan) {
         return Session.equals('curEditChan', chan);
     },
@@ -61,6 +68,13 @@ Template.Settings.helpers({
 
 
 Template.Settings.events({
+    "change .settings": function (event) {
+        let v = event.currentTarget.value;
+        let id = event.currentTarget.name;
+        console.info(id,'<-',v);
+        Meteor.call('parameter', id, v);
+        return false;
+    },
     'click button.selStat': function (ev) {
         Session.set('settingsPage', parseInt(ev.currentTarget.name))
     },
@@ -211,14 +225,14 @@ Template.ServerConfig.helpers({
 
 
 Template.ServerConfig.events({
-    "change .settings": function (event) {
+ /*   "change .settings": function (event) {
       let v = event.currentTarget.value;
       let id = event.currentTarget.name;
       console.info(id,'<-',v);
-      Meteor.call('parameter', event.currentTarget.id, v);
+      Meteor.call('parameter', id, v);
       return false;
   },
-
+*/
   "click .renamebtn": function(event) {
     let id = event.currentTarget.name;
     let before = document.getElementById('before').value.trim();

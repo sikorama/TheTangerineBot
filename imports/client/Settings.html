@@ -320,12 +320,33 @@
         <td>
           Main Team
         </td>
-        <td>
         <td colspan="2">
           <input type="text" value="{{c.team}}" class="chanSettings" name="team">
         </td>
+
+      </tr>
+      <tr>
+        <td>
+          Advert team
+        </td>
+        <td>
+          {{>CheckMark b=c.advertteam n="advertteam"}}
         </td>
       </tr>
+
+      <tr>
+        <td>
+          Team message (shared on every channel)
+        </td>
+        <td>
+          <td>
+            <textarea cols="40" rows="4" class="settings" name="team-{{c.team}}"
+              value="{{getTeamParamVal c.team}}"></textarea>
+          </td>
+  
+        </td>
+      </tr>
+
     </tbody>
   </table>
 

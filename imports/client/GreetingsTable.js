@@ -1,7 +1,6 @@
 import { Template } from 'meteor/templating';
 import { Session } from 'meteor/session';
 import { BotChannels, GreetMessages } from '../api/collections.js';
-import { checkUserRole } from '../api/roles.js';
 
 import './GreetingsTable.html';
 
@@ -38,13 +37,6 @@ Template.Greetings.onCreated(function () {
 
       let  greetSearch = Session.get('greets_search');
       let prop={lang: false}
-
-/*      let sn = Session.get('greets_sort_field', 'dname');
-      let sd = Session.get('greets_sort_dir', 1);
-      let sortobj = {};
-      sortobj[sn] = sd;
-      prop.sortby = sortobj;
-  */
 
       let l = Session.get('greets_limit');
       if (l === undefined) l = 50;
