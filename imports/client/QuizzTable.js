@@ -76,15 +76,11 @@ const topics = [
 
       let mres = res.mongoCursor;
       Session.set('questions_count', res.count());
-      //     console.error(mres.count(),res.count());
       return mres;
     },
     split(a) {
       return a.split(';');
     },
-    numQuestions() {
-      return Session.get('questions_count');
-    }
   });
 
   Template.QuizzTable.events({

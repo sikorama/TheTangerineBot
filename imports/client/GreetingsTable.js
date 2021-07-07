@@ -14,6 +14,7 @@ Template.Greetings.onCreated(function () {
     Session.set('greets_limit',50);
     Session.set('greets_page',1);
     Session.set('greets_search','');
+    Session.set('greets_count',0);
 
   });
   
@@ -44,7 +45,7 @@ Template.Greetings.onCreated(function () {
       let s = parseInt(Session.get('greets_page') - 1);
       s *= l;
   
-      console.error(greetSearch,l,s,prop);
+      //console.error(greetSearch,l,s,prop);
 
       let res = GreetIndex.search(greetSearch, {
         limit: l,
@@ -52,7 +53,7 @@ Template.Greetings.onCreated(function () {
         props: prop,
       });
   
-      console.error(res.count());
+      //console.error(res.count());
       Session.set('greets_count', res.count())
       return res.mongoCursor;
 
@@ -69,7 +70,8 @@ Template.Greetings.onCreated(function () {
       let u = Meteor.users.findOne(id);
       if (u) return u.username;
       return false;
-    }
+    },
+
   });
   
   Template.Greetings.events({

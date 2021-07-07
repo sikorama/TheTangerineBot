@@ -77,9 +77,6 @@ Template.LatestLocations.helpers({
     Session.set('locations_count', res.count())
     return res.mongoCursor;
   },
-  numLocations() {
-    return Session.get('locations_count');
-  }
 });
 
 
