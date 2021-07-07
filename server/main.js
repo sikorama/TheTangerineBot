@@ -1106,7 +1106,7 @@ Meteor.startup(() => {
       //  Depending on the channel, guest account differs.
       if (cmd.indexOf('map') == 0) {
         let url = Settings.findOne({ param: 'URL' });
-        console.error(url);
+        //console.error(url);
 
         if (url) {
           say(target, "You can access our EarthDay map here: " + url.val + "/c/" + chan);
@@ -1694,7 +1694,14 @@ Meteor.startup(() => {
       }
     }
 
-
+    // Get list of commands
+    if (cmd.indexOf('ttb-command')===0 || cmd.indexOf('ttcbot-command')===0) {
+      let url = Settings.findOne({ param: 'URL' });
+      if (url) {
+        say(target, "You'll find available commands for ttcBot here: " + url.val + "/c/" + chan+'/commands')
+        return;
+      }
+    }
 
     // Test command to retrieve infos
     if (cmd === 'test') {

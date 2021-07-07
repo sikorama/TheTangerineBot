@@ -226,7 +226,6 @@ FlowRouter.route('/c/:chan/map', {
   }
 });
 
-
 FlowRouter.route('/c/:chan/commands', {
   name: 'channel',
   action: function (params, queryParams) {

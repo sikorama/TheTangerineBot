@@ -197,6 +197,17 @@
       </tr>
     </tbody>
 
+{{#if team}}
+<tr>
+  <td><code>!{{team}}-live</code></td>
+  <td>Displays the list of members of team {{team}} who are curently live</td>
+</tr>
+<tr>
+  <td><code>!{{team}}-raid</code></td>
+  <td>Initiate a raid to a channel of team {{team}} - but must be allowed to conduct a raid</td>
+</tr>
+{{/if}}
+
     {{#if currentUser}}
         <tr>
           <td><code>!statement</code> or <code>!poem</code></td>

@@ -134,6 +134,16 @@ Template.ActiveChan.helpers({
   }
 });
 
+Template.CommandsTable.helpers({
+  team() {
+    let sc = Session.get('sel_channel');
+    if (!sc) return false;
+    let bc = BotChannels.findOne({ channel: sc });
+    if (!bc) return false;
+    return bc.team;
+  }
+})
+
 Template.LiveChannels.helpers({
 //  enchan() {
 //    return BotChannels.find({ enabled: true }, { sort: { channel: 1 } });
