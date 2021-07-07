@@ -62,14 +62,15 @@
   <div class="pure-g">
     {{#each w in livearr}}
     {{#if w}}
-    <div class="pure-u-1 pure-u-sm-1-2 pure-u-md-1-3 pure-u-lg-1-3 pure-u-xl-1-4">
+    <div class="pure-u-1 pure-u-sm-1-2 pure-u-md-1-3 pure-u-lg-1-3 pure-u-xl-1-4" title="{{w.channel}}
+Started {{w.live_started}}
+{{w.live_title}}">
       <a href="https://twitch.tv/{{w.channel}}" target="_blank" rel="noopener noreferrer">
         <div height="200px">
-            <img class="pure-img" src="https://static-cdn.jtvnw.net/previews-ttv/live_user_{{w.channel}}-320x200.jpg"
-            title="https://twitch.tv/{{w.channel}}">
+            <img class="pure-img" src="https://static-cdn.jtvnw.net/previews-ttv/live_user_{{w.channel}}-320x200.jpg">
           </div>
           <div>
-              {{w.channel}}
+              {{w.channel}} ({{w.live_viewers}})
           </div>
         </a>
       </div>

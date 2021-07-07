@@ -51,7 +51,8 @@ export function init_publications() {
         live: 1,
         live_title: 1,
         live_started: 1,
-        live_thumbnail_url: 1
+        live_thumbnail_url: 1,
+        live_viewers: 1
       }
     })
   });

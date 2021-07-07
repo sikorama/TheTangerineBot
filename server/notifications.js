@@ -149,7 +149,9 @@ export function checkLiveChannels(client_id, client_private) {
                 live: true,
                 live_started: f.started_at,
                 live_title: f.title,
-                live_thumbnail_url: f.thumbnail_url
+                live_thumbnail_url: f.thumbnail_url,
+                live_viewers: f.viewer_count,
+           
             }
 
             let c = BotChannels.findOne({ channel: chan });
@@ -167,7 +169,7 @@ export function checkLiveChannels(client_id, client_private) {
 
                 if (cooldown === false) {
                   setobj.live_notifdate  = d;
-                  console.error(d,chan, f);
+                  //console.error(d,chan, f);
 
                   if (c.discord === true) {
                     let glob_discord_goinglive = Settings.findOne({ param: 'discord_goinglive' });
@@ -187,6 +189,7 @@ export function checkLiveChannels(client_id, client_private) {
               }
             }
             // Updates database
+            //console.info(setobj);
             BotChannels.upsert({ channel: chan }, {
               $set: setobj
             });            

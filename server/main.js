@@ -1536,18 +1536,38 @@ Meteor.startup(() => {
 
     let t =botchan.team;
     if (t) {
-      if ((cmd===t+'live') || (cmd==='live'+t) || (cmd === t+'-live')|| (cmd === 'live-'+t)) {
-        // Live channels, from the same team (but not the current channel)
-        const res = BotChannels.find({ live:true , team: t, channel: {$ne: chan}}, { sort: { live_started_at: 1 } });
-        if (res.count()===0)
-          say(target, 'No one from team '+t +'is currently live.');
-        else {
-          let tm = res.fetch().map((c) => c.channel).join(', ');
-          say(target, 'Currently live from team '+t +' : ' + tm);
-        }
-      }
-    }
+      let ttcmd 
+      if ((cmd===t+'live') || (cmd===t+'-live') 
+       || (cmd===t+'-raid')|| (cmd === t+'raid')) {
 
+
+        // Live channels, from the same team (but not the current channel)
+        const res = BotChannels.find({ live:true , team: t, channel: {$ne: chan}}, { sort: { live_started: 1 } });
+        if (res.count()===0) {
+          say(target, 'No one from team '+t +' is currently live.');
+          return;
+        }
+        else {
+          if (cmd.index('live')>0) {
+            let tm = res.fetch().map((c) => c.channel).join(', ');
+            say(target, 'Currently live from team '+t +' : ' + tm);
+            return;
+          }
+
+          if (isModerator) {
+            // poll? => /poll opens a popup
+            // !poll is a night bot command
+            
+            if (cmd.index('raid')>0) {
+              let tm = res.fetch().map((c) => c.channel);
+              let rc = randElement(tm);
+              say(target, '/raid '+rc);
+              return;
+            }
+          }
+        }
+      }    
+    }
 
     // ------------------- GREET ----------------------
     if (botchan.greet === true) {

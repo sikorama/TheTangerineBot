@@ -148,7 +148,7 @@ Template.LiveChannels.helpers({
       else
         sobj.team=team;
     }
-    let res=BotChannels.find(sobj, { sort: { live_started_at: 1 } }).fetch();
+    let res=BotChannels.find(sobj, { sort: { live_started: 1 } }).fetch();
     return sres=res.slice(0,100);
   }
 });
