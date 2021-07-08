@@ -26,6 +26,7 @@ export const ShoutOuts = new Mongo.Collection('shoutout');
 // Collection for storing discord hooks in a handy way
 export const DiscordHooks = new Mongo.Collection('dhooks');
 
+export const LiveEvents = new Mongo.Collection('liveevents');
 
 
 /// Index pour les localisations

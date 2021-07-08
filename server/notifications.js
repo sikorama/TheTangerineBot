@@ -1,4 +1,4 @@
-import { BotChannels, Settings } from '../imports/api/collections';
+import { BotChannels, Settings, LiveEvents } from '../imports/api/collections';
 
 let httpreq = require('httpreq');
 
@@ -142,7 +142,10 @@ export function checkLiveChannels(client_id, client_private) {
         //        console.info("helix: ", JSON.parse(res.body));
         let body = JSON.parse(res.body);
         channels.forEach((chan) => {
+          let c = BotChannels.findOne({ channel: chan });
           let f = body.data.find((item) => item.user_login == chan);
+          let d = Date.now();
+
           // If there is nothing, then it's not live
           if (f) {
             let setobj = {              
@@ -150,16 +153,13 @@ export function checkLiveChannels(client_id, client_private) {
                 live_started: f.started_at,
                 live_title: f.title,
                 live_thumbnail_url: f.thumbnail_url,
-                live_viewers: f.viewer_count,
-           
+                live_viewers: f.viewer_count,           
             }
 
-            let c = BotChannels.findOne({ channel: chan });
-            if (c) {
-
-              let d = Date.now();
               // If we were not live, we'll send a notification
+              // And we store in LiveEvents database
               if (c.live !== true) {
+                LiveEvents.insert({channel: chan, timestame: d, live: true});
 
                 let cooldown = false;
                 if (c.live_notifdate)
@@ -187,7 +187,7 @@ export function checkLiveChannels(client_id, client_private) {
                   }
                 }
               }
-            }
+            
             // Updates database
             //console.info(setobj);
             BotChannels.upsert({ channel: chan }, {
@@ -195,7 +195,11 @@ export function checkLiveChannels(client_id, client_private) {
             });            
           }
           else {
-            BotChannels.upsert({ channel: chan }, { $set: { live: false } })
+            // On n'est plus live
+            if (c.live === true) {
+              LiveEvents.insert({channel: chan, timestamp: d, live: false});
+              BotChannels.upsert({ channel: chan }, { $set: { live: false } })
+            }
           }
         })
       } else {
