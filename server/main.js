@@ -6,7 +6,7 @@
 
 import { Meteor } from 'meteor/meteor';
 import { AccountsTemplates } from 'meteor/useraccounts:core';
-import { BotChannels, GreetDate, GreetMessages, QuizzQuestions, QuizzScores, Raiders, Settings, ShoutOuts, Stats, UserLocations } from '../imports/api/collections.js';
+import { BotChannels, GreetDate, GreetMessages, QuizzQuestions, QuizzScores, Raiders, Settings, ShoutOuts, Stats, UserLocations, LiveEvents } from '../imports/api/collections.js';
 import { regext } from '../imports/api/regex.js';
 import { addChannel } from './channels.js';
 import { genChord, genProgression, noteArray } from './chords.js';
@@ -598,6 +598,37 @@ Meteor.startup(() => {
         res.unshift('Name;Location;Latitude;Longitude;Country;Message')
         return res.join('\n');
       }
+    },
+    export_live_events: function(from,to,team) {
+      let sel={};
+      if (team) sel.team=team;      
+      //Channel list
+      let chans = BotChannels.find(sel).fetch().map((c)=>c.channel);
+      chans.unshift('TimeStamp');
+
+      // Live state
+      curState=chans.map(()=>0);
+
+      if (from || to) {
+        sel.timestamp= {}
+        if (from) 
+          sel.timestamp.$gt = from
+        if (to) 
+          sel.timestamp.$lt = to
+      }
+
+      let res=[];
+      res.push(chans.join(';'));
+      console.info(chans);
+      let curs = LiveEvents.find(sel, {sort: {timestamp:1}});
+      curs.forEach((ev)=> {
+        curState[0] = ev.timestamp;
+        let index = chans.indexOf(ev.channel);
+        curState[index] = ev.live?1:0;
+        res.push(curState.join(';'));
+        console.info(curState);
+      })
+      return res.join('\n');
     }
   });
 

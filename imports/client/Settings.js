@@ -107,6 +107,17 @@ Template.Settings.events({
             genDataBlob(res,'csvlink','csv')
         });        
     },  
+    'click button.export_live_events': function(event) {
+        let to = Date.now();
+        let from = to - 1000*3600*24*15;
+        let team = null; 
+        Meteor.call('export_live_events',from,to,team ,function(err,res) {
+            if (err)
+                console.error(err);
+            // To blob
+            genDataBlob(res,'livelink','csv')
+        });        
+    },  
     'click .toggleCheck': function (event) {
         let id = getParentId(event.currentTarget);
         let f = event.currentTarget.name;
