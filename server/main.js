@@ -493,10 +493,10 @@ Meteor.startup(() => {
     Settings.insert({ param: 'URL', val: WEBSITE_URL });
     Settings.insert({ param: 'location_interval', val: 60 });
     Settings.insert({ param: 'quizz_enabled_topics', val: [] });
+    Settings.insert({ param: 'ffmpeg_server_url', val: '127.0.0.1' });
+    Settings.insert({ param: 'ffmpeg_server_port', val: 8126 });
   }
 
-  Settings.insert({ param: 'ffmpeg_server_url', val: '127.0.0.1' });
-  Settings.insert({ param: 'ffmpeg_server_port', val: 8126 });
 
 
 
