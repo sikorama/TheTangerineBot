@@ -159,7 +159,7 @@ export function checkLiveChannels(client_id, client_private) {
               // If we were not live, we'll send a notification
               // And we store in LiveEvents database
               if (c.live !== true) {
-                LiveEvents.insert({channel: chan, timestame: d, live: true});
+                LiveEvents.insert({channel: chan, timestamp: d, live: true, team: c.team});
 
                 let cooldown = false;
                 if (c.live_notifdate)
@@ -197,7 +197,7 @@ export function checkLiveChannels(client_id, client_private) {
           else {
             // On n'est plus live
             if (c.live === true) {
-              LiveEvents.insert({channel: chan, timestamp: d, live: false});
+              LiveEvents.insert({channel: chan, timestamp: d, live: false, team: c.team});
               BotChannels.upsert({ channel: chan }, { $set: { live: false } })
             }
           }
