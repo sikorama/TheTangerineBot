@@ -622,7 +622,7 @@ Meteor.startup(() => {
       console.info(chans);
       let curs = LiveEvents.find(sel, {sort: {timestamp:1}});
       curs.forEach((ev)=> {
-        curState[0] = ev.timestamp;
+        curState[0] = Math.floor(ev.timestamp/1000);
         let index = chans.indexOf(ev.channel);
         curState[index] = ev.live?1:0;
         res.push(curState.join(';'));

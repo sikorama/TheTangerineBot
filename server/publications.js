@@ -36,7 +36,7 @@ export function init_publications() {
   Meteor.publish('EnabledChannels', function (sel) {
     if (!sel) sel = {};
     sel.enabled = true;
-    return BotChannels.find(sel, { fields: { enabled: 1, channel: 1, live: 1 } })
+    return BotChannels.find(sel, { fields: { enabled: 1, channel: 1, live: 1, team:1 } })
   });
 
   //Publish the list of all channels where the bot is enabled
@@ -52,7 +52,8 @@ export function init_publications() {
         live_title: 1,
         live_started: 1,
         live_thumbnail_url: 1,
-        live_viewers: 1
+        live_viewers: 1,
+        team : 1
       }
     })
   });

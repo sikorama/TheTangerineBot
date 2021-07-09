@@ -110,7 +110,18 @@ Template.Settings.events({
     'click button.export_live_events': function(event) {
         let to = Date.now();
         let from = to - 1000*3600*24*15;
-        let team = null; 
+        let team = null;
+        
+        let fe=document.getElementById('liveFrom')
+        let te=document.getElementById('liveTo')
+        let teame=document.getElementById('liveTeam')
+        if (fe.value) from = parseInt(fe.value);
+        else fe.value = from
+        if (te.value) to = parseInt(te.value);
+        else te.value = to
+        if (teame.value) team = teame.value;
+        
+      
         Meteor.call('export_live_events',from,to,team ,function(err,res) {
             if (err)
                 console.error(err);
