@@ -55,7 +55,7 @@ export function getParentId(el) {
       let cur_month = dte.getMonth() + 1;
       let cur_year = dte.getFullYear();
       if (cur_month < 10) cur_month = "0" + cur_month;
-      let cur_day = dte.getDay();
+      let cur_day = dte.getDate();
       d.download = 'export' + cur_year + '-' + cur_month + '-' + cur_day + '.' + ext;
       d.href = csvUrl;
       d.innerHTML = 'Download ' + d.download;
