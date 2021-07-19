@@ -1755,7 +1755,8 @@ Meteor.startup(() => {
     // Check if the message is not for the bot 
     if ((lccn.indexOf('@' + botname) >= 0) || ((lccn.indexOf('@tangerinebot') >= 0))) {
 
-      if (lccn.indexOf('ban') >= 0) {
+      // If someone wants to ban the bot
+      if (cmd=='ban') {
         say(target, 'Do you want me to ban you, ' + answername + '? :P');
         return;
       }
