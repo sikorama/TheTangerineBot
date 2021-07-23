@@ -6,7 +6,7 @@
 
 import { Meteor } from 'meteor/meteor';
 import { AccountsTemplates } from 'meteor/useraccounts:core';
-import { BotChannels, GreetDate, GreetMessages, QuizzQuestions, QuizzScores, Raiders, Settings, ShoutOuts, Stats, UserLocations, LiveEvents } from '../imports/api/collections.js';
+import { BotChannels, GreetDate, GreetMessages, QuizzQuestions, QuizzScores, Raiders, Settings, ShoutOuts, Stats, UserLocations, LiveEvents, BotMessage } from '../imports/api/collections.js';
 import { regext } from '../imports/api/regex.js';
 import { addChannel } from './channels.js';
 import { genChord, genProgression, noteArray } from './chords.js';
@@ -20,7 +20,6 @@ import { initRaidManagement } from './raids.js';
 import { randElement } from './tools.js';
 import { hasRole, init_users } from './user_management.js';
 
-
 const tmi = require('tmi.js');
 const gtrans = require('googletrans').default;
 const gc = require('node-geocoder');
@@ -29,13 +28,12 @@ const PhraseIt = require('phraseit');
 let botname = process.env.CHANNEL_NAME;
 let botpassword = process.env.CHANNEL_PASSWORD;
 
-
-
 // TODO: If no channel & password, then exit...
 if ((botname == undefined) || (botpassword == undefined)) {
   console.error('No CHANNEL_NAME or CHANNEL_PASSWORD environment variable found. Exiting.');
   process.exit(-1);
 }
+botname = botname.toLowerCase();
 
 // global Hooks 
 var bot_discord_raid_url = process.env.BOT_DISCORD_RAID_HOOK;
@@ -358,7 +356,7 @@ Meteor.startup(() => {
     try {
       if (greetingsStack.length > 0) {
         let g = greetingsStack.shift();
-        say(g.target, g.txt, g.username);
+        say(g.target, g.txt, {dispname: g.username, store: true});
       }
     } catch (e) {
       console.error(e.stack);
@@ -671,18 +669,28 @@ Meteor.startup(() => {
   //  opts.channels = raid_bot_channels;
   const raid_bclient = new tmi.client(opts_raid);
 
-  //
-  function say(target, txt) {
-
+  // options
+  // dispname: name of the user to answer to
+  function say(target, txt, options) {
     try {
-      txt = replaceKeywords(txt);
+      options = options || {};
 
       // Check if there is a {{ }} for Phrase it
       if (txt.indexOf('{{') >= 0) {
         txt = PhraseIt.make(txt);
       }
-      bclient.say(target, txt);
-      console.info(target, '>', txt);
+
+      let chat_txt = replaceKeywords(txt,options);
+      bclient.say(target, chat_txt);
+      console.info(target, '>', chat_txt, options);
+
+      if (options.store) {
+        // Overlay text doesn't contain twitch emotes
+        options.removeIcons = true;
+        let overlay_txt = replaceKeywords(txt,options);
+        console.error('STORE',target, overlay_txt);
+        BotMessage.upsert({channel: target}, {$set: {txt:overlay_txt}});
+      }
     } catch (e) {
       console.error(e);
     }
@@ -1132,6 +1140,7 @@ Meteor.startup(() => {
 
 
 
+
     // ------------------- MAP -------------------------
     if (botchan.map === true) {
       //  Depending on the channel, guest account differs.
@@ -1550,7 +1559,7 @@ Meteor.startup(() => {
             //console.error('so', gmline);
 
             if (gmline.length > 0) {
-              gmline = replaceKeywords(gmline, soname);
+              gmline = replaceKeywords(gmline, {dispname: soname});
               gmline = gmline.replace(regext, "https://twitch.tv/" + soname + ' ');
 
               if (botchan.me === true) {
@@ -1710,7 +1719,7 @@ Meteor.startup(() => {
           let txt = randElement(gmtext).txt;
           //console.error(gm.texts,txt);
 
-          txt = replaceKeywords(txt, dispname);
+          txt = replaceKeywords(txt, {dispname:dispname});
 
           if ((selGenSentence == false) && botchan.socmd) {
             // Vérifier qu'il y a un @twitch dans la phrase? permet de filtrer ce qui n'est pas !so
@@ -1738,7 +1747,9 @@ Meteor.startup(() => {
     }
 
     // Get list of commands
-    if (cmd.indexOf('ttb-command') === 0 || cmd.indexOf('ttcbot-command') === 0) {
+    // FIXME: use a  short name for bot,in settings
+    const botname_short = 'ttc';
+    if (cmd.indexOf(botname_short+'-command') === 0 ) {
       let url = Settings.findOne({ param: 'URL' });
       if (url) {
         say(target, "You'll find available commands for ttcBot here: " + url.val + "/c/" + chan + '/commands')
@@ -1751,15 +1762,28 @@ Meteor.startup(() => {
       console.info(target, context);
     }
 
-
-    // Check if the message is not for the bot 
-    if ((lccn.indexOf('@' + botname) >= 0) || ((lccn.indexOf('@tangerinebot') >= 0))) {
-
+    // Check if the message is for the bot     
+    if ((lccn.indexOf('@' + botname) >= 0)) //|| ((lccn.indexOf('tangerinebot') >= 0)) ((lccn.indexOf('ttcbot') >= 0)) || ((lccn.indexOf('tangerine bot') >= 0))) {
+    {
       // If someone wants to ban the bot
       if (cmd=='ban') {
         say(target, 'Do you want me to ban you, ' + answername + '? :P');
         return;
       }
+
+/*      if ( (lccn.indexOf('bday')>=0) || (lccn.indexOf('birthday')>=0) || (lccn.indexOf('feliz')>=0) || (lccn.indexOf('joyeux')>=0) )
+      {
+        const bdaytxts = [
+          'beep beep boop '+answername,
+          'beep boop! beep beep boop, '+answername,
+          answername+ ' <3 <3 <3 ',
+          'thank youuuu '+answername +' :)',
+        ]
+        //txt = ;
+        say(target, randElement(bdaytxts)); // + ' ' + answername);
+        return;
+      }
+*/
 
       let txt;
       let txts = [
@@ -1788,7 +1812,7 @@ Meteor.startup(() => {
       }
       else {
         txt = randElement(txts);
-        say(target, answername + ' ' + txt);
+        say(target, answername + ' ' + txt, {store:true});
       }
       return;
     }

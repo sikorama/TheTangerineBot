@@ -194,19 +194,27 @@ export function getGreetMessages(username,chan) {
 }
 
 
-export function replaceKeywords(txt, dispname) {
-  txt = txt.replace(regexi, randElement(emoticones));
+export function replaceKeywords(txt, options) {
+  options = options || {};
 
-  if (dispname) {
-    let answername='@'+dispname;
+  if (options.removeIcons) {
+    txt = txt.replace(regexi, '');
+  }
+  else {
+    txt = txt.replace(regexi, randElement(emoticones));
+  }
+
+  if (options.dispname) {
+    let answername='@'+options.dispname;
     txt = txt.replace(regexn, answername);
     txt = txt.replace(regexan, answername);
-    txt = txt.replace(regexnn, dispname);
+    txt = txt.replace(regexnn, options.dispname);
   }
 
   if (txt.indexOf('#follow') >= 0) {
     let followtxt = randElement(followtxts)
     txt = txt.replace(regexf, followtxt);
   }
+  
   return txt;
 }

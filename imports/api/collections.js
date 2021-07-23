@@ -27,7 +27,10 @@ export const ShoutOuts = new Mongo.Collection('shoutout');
 export const DiscordHooks = new Mongo.Collection('dhooks');
 
 export const LiveEvents = new Mongo.Collection('liveevents');
-
+// Last bot message, used for overlays
+export const BotMessage = new Mongo.Collection('botmessage');
+// Custom command, can be edited
+export const BotCommands = new Mongo.Collection('botcommands');
 
 /// Index pour les localisations
 /*const*/ UserLocIndex = new Index({

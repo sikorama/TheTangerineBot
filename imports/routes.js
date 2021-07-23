@@ -212,8 +212,7 @@ FlowRouter.route('/c/:chan', {
     BlazeLayout.render('ChannelPage', {
       main: 'DirectMap'
     });
-//    BlazeLayout.render('DirectMap', {
-//    });
+
   }
 });
 
@@ -222,6 +221,14 @@ FlowRouter.route('/c/:chan/map', {
   action: function (params, queryParams) {
     BlazeLayout.render('ChannelPage', {
       main: 'DirectMap'
+    });
+  }
+});
+
+FlowRouter.route('/c/:chan/overlay', {
+  name: 'channel',
+  action: function (params, queryParams) {
+    BlazeLayout.render('GreetingsOverlay', {
     });
   }
 });

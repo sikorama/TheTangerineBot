@@ -1,4 +1,4 @@
-import { BotChannels, GreetMessages, Images, QuizzQuestions, QuizzScores, Raiders, Settings, ShoutOuts, Stats, UserLocations } from '../imports/api/collections.js';
+import { BotChannels, GreetMessages, Images, QuizzQuestions, QuizzScores, Raiders, Settings, ShoutOuts, Stats, UserLocations, BotMessage } from '../imports/api/collections.js';
 import { getUserGroups, hasRole } from './user_management.js';
 
 export function init_publications() {
@@ -136,7 +136,7 @@ export function init_publications() {
 
   Meteor.publish('greetMessages', function (sel) {
     if (hasRole(this.userId, ['admin', 'greet'])) {
-      if (!sel) sel = {}
+      sel = sel || {};
       return GreetMessages.find(sel);
     }
     this.ready();
@@ -144,7 +144,7 @@ export function init_publications() {
 
   Meteor.publish('settings', function (sel) {
     if (hasRole(this.userId, 'admin')) {
-      if (!sel) sel = {}
+      sel = sel || {};
       return Settings.find(sel);
     }
     this.ready();
@@ -156,11 +156,22 @@ export function init_publications() {
   Meteor.publish('raiders', function (sel) {
     //if (hasRole(this.userId, 'admin')) {
     if (this.userId) {
-      if (!sel) sel = {}
+      sel = sel || {};
       return Raiders.find(sel);
     }
     this.ready();
   });
+
+  // ------------------- Bot Messages for OSD --------------
+  // No need to be logged
+  Meteor.publish('lastmessages', function (sel) {
+    sel = sel || {};
+    if (sel.channel) {
+      return BotMessage.find(sel);
+    }
+    this.ready();
+  });
+
 
   //
   // ---------------------- TRANSLATOR USAGE STATS -------------------------------
@@ -168,14 +179,14 @@ export function init_publications() {
 
   Meteor.publish('statistics', function (sel) {
     if (hasRole(this.userId, ['streamer'])) {
-      if (!sel) sel = {}
+      sel = sel || {};
       return Stats.find(sel);
     }
     this.ready();
   });
 
   Meteor.publish('images', function (sel) {
-    if (!sel) sel = {}
+    sel = sel || {};
     //    return (Images.find(sel).cursor);
     return (Images.collection.find(sel));
   });

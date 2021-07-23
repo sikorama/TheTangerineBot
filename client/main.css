@@ -89,6 +89,7 @@ textarea {
 
 
 .main-title {
+	background-color:rgba(255,255,255,0);
 	padding-left: 30px;
 	padding-top:2px;
 	font-weight: bold;
@@ -187,4 +188,78 @@ white-space: normal;
 	text-transform: uppercase ;
 }
 
+
+.overlay {
+	vertical-align: bottom;
+}
+
+
+/* Couleur du texte dans la bulle*/
+div.overlay-textarea{
+	padding: 20px;
+	color: rgba(255,255,255,255);
+}
+
+.overlay-background {
+	background-color: rgba(0,0,0,0);
+}
+
+
+.overlay-textarea {
+	resize: none;
+	outline: none;
+	border-radius: 50%;
+	border-bottom-left-radius: 0%;
+	border-style: outset;
+	border-width: 8px;
+	border-color:rgb(200,200,200);
+	text-align: center;
+	font-size: 30px;
+	
+}
+
+.overlay-fade {
+	opacity: 0;
+}
+
+.overlay-animate2 {
+	animation-name: anim2;
+	animation-duration: 8s;
+}
+
+@keyframes anim2 {
+	0% {
+		opacity:0.0
+	}
+	20% {
+		opacity:1.0
+	}
+	80% {
+		opacity:1.0
+	}
+	100% {
+		opacity: 0.0;
+	}
+}
+
+
+.overlay-animate {
+	animation-name: anim;
+	animation-duration: 8s;
+}
+
+@keyframes anim {
+	0% {
+		opacity:0.0
+	}
+	40% {
+		opacity:1.0
+	}
+	60% {
+		opacity:1.0
+	}
+	100% {
+		opacity: 0.0;
+	}
+}
 
