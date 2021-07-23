@@ -69,7 +69,7 @@ Template.GreetingsOverlay.helpers({
         txt.forEach((el) => {
             el.style = "color:" + col + ";border-color:" + ccol + ";background-color:"+bcol+";"
         });
-        console.error(msg,text);
+        //console.error(msg,text);
         return text;
     }
 });

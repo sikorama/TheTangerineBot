@@ -234,10 +234,10 @@ div.overlay-textarea{
 	0% {
 		opacity:0.0
 	}
-	20% {
+	10% {
 		opacity:1.0
 	}
-	80% {
+	90% {
 		opacity:1.0
 	}
 	100% {
@@ -255,10 +255,10 @@ div.overlay-textarea{
 	0% {
 		opacity:0.0
 	}
-	40% {
+	20% {
 		opacity:1.0
 	}
-	60% {
+	80% {
 		opacity:1.0
 	}
 	100% {
