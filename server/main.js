@@ -356,7 +356,7 @@ Meteor.startup(() => {
     try {
       if (greetingsStack.length > 0) {
         let g = greetingsStack.shift();
-        say(g.target, g.txt, {dispname: g.username, store: true});
+        say(g.target, g.txt, {me: g.me, dispname: g.dispname, store: true});
       }
     } catch (e) {
       console.error(e.stack);
@@ -679,8 +679,8 @@ Meteor.startup(() => {
       if (txt.indexOf('{{') >= 0) {
         txt = PhraseIt.make(txt);
       }
-
-      let chat_txt = replaceKeywords(txt,options);
+      
+      let chat_txt = (options.me===true)?"/me ":""+ replaceKeywords(txt,options);
       bclient.say(target, chat_txt);
       console.info(target, '>', chat_txt, options);
 
@@ -688,7 +688,6 @@ Meteor.startup(() => {
         // Overlay text doesn't contain twitch emotes
         options.removeIcons = true;
         let overlay_txt = replaceKeywords(txt,options);
-        console.error('STORE',target, overlay_txt);
         BotMessage.upsert({channel: target}, {$set: {txt:overlay_txt}});
       }
     } catch (e) {
@@ -1559,13 +1558,9 @@ Meteor.startup(() => {
             //console.error('so', gmline);
 
             if (gmline.length > 0) {
-              gmline = replaceKeywords(gmline, {dispname: soname});
+              //gmline = replaceKeywords(gmline, {dispname: soname});
               gmline = gmline.replace(regext, "https://twitch.tv/" + soname + ' ');
-
-              if (botchan.me === true) {
-                gmline = '/me ' + gmline;
-              }
-              say(target, gmline);
+              say(target, gmline, {dispname: soname, me : botchan.me});
             }
           }
           return;
@@ -1719,10 +1714,10 @@ Meteor.startup(() => {
           let txt = randElement(gmtext).txt;
           //console.error(gm.texts,txt);
 
-          txt = replaceKeywords(txt, {dispname:dispname});
+          //txt = replaceKeywords(txt, {dispname:dispname});
 
           if ((selGenSentence == false) && botchan.socmd) {
-            // Vérifier qu'il y a un @twitch dans la phrase? permet de filtrer ce qui n'est pas !so
+            // Vérifier qu'il y a un #twitch dans la phrase? permet de filtrer ce qui n'est pas !so
             // Sinon on ne fait rien
             if (txt.indexOf('#twitch') >= 0) {
               txt = txt.replace(regext, "");
@@ -1732,14 +1727,12 @@ Meteor.startup(() => {
           else
             txt = txt.replace(regext, "https://twitch.tv/" + username + ' ');
 
-          if (botchan.me === true && selGenSentence === false) {
-            txt = '/me ' + txt;
-          }
-          //console.error('me=', botchan.me, 'gensentence=', selGenSentence, '=>', txt);
-          //          say(target, txt, username);
-          //pushGreetMessage(target, txt, username);
-          greetingsStack.push({ target: target, txt: txt });
-
+          greetingsStack.push({ 
+            target: target, 
+            txt: txt, 
+            me: (botchan.me === true && selGenSentence === false),
+            dispname: dispname
+          });
           return;
         }
         //}
