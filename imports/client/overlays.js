@@ -27,10 +27,10 @@ Template.GreetingsOverlay.onCreated(function () {
 
     let bcol = FlowRouter.getQueryParam("backcol")
     if (bcol) {
-        bcol = "rgba(" + bcol + ")";
+        bcol = "rgb(" + bcol + ")";
     }
     else {
-        bcol = "rgba(255,255,255,0)";
+        bcol = "rgb(0,0,0)";
     }
     this.backColor = new ReactiveVar(bcol);
 });
