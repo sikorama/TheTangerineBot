@@ -1787,18 +1787,16 @@ Meteor.startup(() => {
 
       let txt;
       let txts = [
-        "I'm only a bot, you know! MrDestructoid",
-        "I'm a nice bot, you know! MrDestructoid",
+        "I'm only a bot, you know! #icon",
+        "I'm a nice bot, you know! #icon",
         "Do you want to be my friend?",
-        "I'm very shy! MrDestructoid",
+        "I'm very shy! #icon",
         '^^ ',
         '<3 <3 <3 ',
         ':) ',
-        'KonCha ',
-        'HeyGuys ',
         ':D :D :D ',
         ':) :) :) ',
-        'ttcBot ttcBot_SG ttcBot'
+        '#icon #icon #icon'
       ];
 
       if (lccn.indexOf('?') >= 0) {

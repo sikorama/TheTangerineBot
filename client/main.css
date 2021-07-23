@@ -196,7 +196,10 @@ white-space: normal;
 
 /* Couleur du texte dans la bulle*/
 div.overlay-textarea{
-	padding: 20px;
+	padding-left: 15px;
+	padding-right: 20px;
+	padding-top: 50px;
+	padding-bottom: 30px;
 	color: rgba(255,255,255,255);
 }
 
@@ -211,7 +214,7 @@ div.overlay-textarea{
 	border-radius: 50%;
 	border-bottom-left-radius: 0%;
 	border-style: outset;
-	border-width: 8px;
+	border-width: 4px;
 	border-color:rgb(200,200,200);
 	text-align: center;
 	font-size: 30px;

@@ -1,0 +1,21 @@
+<template name="GreetingsOverlay">
+    <table class="overlay-background">
+        <tbody class="overlay-background">
+            <tr height="400px" class="overlay" name="lastMessageCaption">
+                <td></td>
+                <td>
+                    <div name ="lastMessageText" class="overlay-textarea">
+                        {{{lastMessage}}}
+                    </div>
+                </td>
+            </tr>
+            <tr class="overlay" name="lastMessageBot">
+                <td>
+                    <img src="/bot_overlay.png">
+                </td>
+                <td>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</template>

@@ -51,7 +51,7 @@ export const country_lang = {
     've': 'es',
   };
 
-export const emoticones = ["<3", "<3 <3 <3", "KonCha", "^^", ";)", ":)", "", "CurseLit", "HeyGuys", "ttcBot", 'ttcBot_SG'];
+export const emoticones = ["<3", "<3 <3 <3", "KonCha", "^^", ";)", ":)", "", "CurseLit", "HeyGuys", "ttcBot", 'ttcBot_SG',"MrDestructoid"];
 
 export  const patterns = [
     "You're so kind, here is {{an_adjective}} {{noun}}, just for you <3",
