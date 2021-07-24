@@ -4,37 +4,29 @@ import { ReactiveVar } from 'meteor/reactive-var';
 
 // http://nicolasgallagher.com/pure-css-speech-bubbles/demo/
 
+// Decode color query param. If no param, use default color
+// r,g,b   => rgb(r,g,b)
+// r,g,b,a => rgba(r,g,b,a)
+// otherwise accepts a stadard color name (white,...)  
+function decodecolor(param, defaultcol) {
+    const col = FlowRouter.getQueryParam(param)
+    if (!col) return defaultcol;
+
+    const nv = col.split(',');
+    if (nv===3)
+        return "rgb(" + col + ")";
+    if (nv===4)
+        return "rgba(" + col + ")";
+    return col;
+}
 
 Template.GreetingsOverlay.onCreated(function () {
     let c = '#' + FlowRouter.getParam('chan')
     this.subscribe('lastmessages', { channel: c });
-    let col = FlowRouter.getQueryParam("textcol")
-    if (col) {
-        col = "rgba(" + col + ",255)";
-    }
-    else {
-        col = "rgba(255,255,255,255)";
-    }
-    this.textColor = new ReactiveVar(col);
-    let ccol = FlowRouter.getQueryParam("captioncol")
-    if (ccol) {
-        ccol = "rgb(" + ccol + ")";
-    }
-    else {
-        ccol = "rgb(255,255,255)";
-    }
-    this.captionColor = new ReactiveVar(ccol);
-
-    let bcol = FlowRouter.getQueryParam("backcol")
-    if (bcol) {
-        bcol = "rgb(" + bcol + ")";
-    }
-    else {
-        bcol = "rgb(0,0,0)";
-    }
-    this.backColor = new ReactiveVar(bcol);
+    this.textColor = new ReactiveVar(decodecolor('textcol','rgba(255,255,255,255)'));
+    this.captionColor = new ReactiveVar(decodecolor('captioncol','rgb(255,255,255)'));
+    this.backColor = new ReactiveVar(decodecolor('backcol','rgb(0,0,0)'));
 });
-
 
 Template.GreetingsOverlay.helpers({
     lastMessage() {
@@ -48,7 +40,6 @@ Template.GreetingsOverlay.helpers({
         let text = "Hello!";
         if (msg && msg.txt) {
             text = msg.txt;
-            
         }
 
         let els = document.getElementsByName('lastMessageCaption');

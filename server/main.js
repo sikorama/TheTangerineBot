@@ -64,6 +64,10 @@ let WEBSITE_URL = "http://localhost"
 let wurl = process.env.WEBSITE_URL;
 if (wurl) WEBSITE_URL = wurl;
 
+const randomWords = [
+  'ACTION',
+  "BAH C'MON"
+]
 
 
 // Stack for answering to greetings.
@@ -310,6 +314,21 @@ Meteor.startup(() => {
 
         }
       }
+
+      // Map users
+      let lfo = {},upo={};
+      lfo[lowcb] = {$exists:1};
+      upo[lowcb] = lowca;
+      upo[lowcb+'-msg'] = lowca+'-msg';
+      upo[lowcb+'-lastreq'] = lowca+'-lastreq';
+      c = UserLocations.find(lfo);
+      if (c.count()>0) {
+        desc.push('UserLocations field: Found '+c.count()+' map users');
+        if (apply) {
+          UserLocations.update(lfo, { $update: upo});
+        }
+      }
+
       // Raids
       c = Raiders.find({ raider: before });
       if (c.count() > 0) {
@@ -680,7 +699,7 @@ Meteor.startup(() => {
         txt = PhraseIt.make(txt);
       }
       
-      let chat_txt = (options.me===true)?"/me ":""+ replaceKeywords(txt,options);
+      let chat_txt = ((options.me===true)?"/me ":"") + replaceKeywords(txt,options);
       bclient.say(target, chat_txt);
       console.info(target, '>', chat_txt, options);
 

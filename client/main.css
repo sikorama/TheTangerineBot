@@ -232,13 +232,13 @@ div.overlay-textarea{
 
 @keyframes anim2 {
 	0% {
-		opacity:0.0
+		opacity:0.0;
 	}
 	10% {
-		opacity:1.0
+		opacity:1.0;
 	}
 	90% {
-		opacity:1.0
+		opacity:1.0;
 	}
 	100% {
 		opacity: 0.0;
@@ -253,13 +253,13 @@ div.overlay-textarea{
 
 @keyframes anim {
 	0% {
-		opacity:0.0
+		opacity:0.0;
 	}
 	20% {
-		opacity:1.0
+		opacity:1.0;
 	}
 	80% {
-		opacity:1.0
+		opacity:1.0;
 	}
 	100% {
 		opacity: 0.0;
