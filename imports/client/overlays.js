@@ -12,7 +12,7 @@ function decodecolor(param, defaultcol) {
     const col = FlowRouter.getQueryParam(param)
     if (!col) return defaultcol;
 
-    const nv = col.split(',');
+    const nv = col.split(',').length;
     if (nv===3)
         return "rgb(" + col + ")";
     if (nv===4)
