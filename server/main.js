@@ -325,7 +325,7 @@ Meteor.startup(() => {
       if (c.count()>0) {
         desc.push('UserLocations field: Found '+c.count()+' map users');
         if (apply) {
-          UserLocations.update(lfo, { $replace: upo});
+          UserLocations.update(lfo, { $rename: upo}, {multi:true});
         }
       }
 

@@ -31,9 +31,12 @@ Twitch Finds - {{label}}
         <tbody>
             {{#each c in shoutouts}}
             <tr title="{{c.username}}" id="{{c._id}}">
-                <td>
-                    <a href=""></a>
-                    {{c.so}}
+              <td>
+		  <button class="ko remove">&cross;</button>
+                  <a href="http://twitch.tv/{{c.so}}">
+		    {{c.so}}
+		  </a>                  
+		    
                 </td>
                 <td>
                     {{FormatDate c.timestamp}}

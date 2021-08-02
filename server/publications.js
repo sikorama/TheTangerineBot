@@ -81,6 +81,20 @@ export function init_publications() {
     //  this.ready();
   });
 
+     ShoutOuts.allow({
+    insert(userid, doc) {
+//      if (userid) return true;
+    },
+    update(userid, doc) {
+//      if (userid) return true;
+    },
+    remove(userid, doc) {
+      if (hasRole(userid, 'admin'))
+        return true;
+
+    }
+  });
+
 
   //
   // ---------------------- QUIZZ -------------------------------

@@ -1,7 +1,7 @@
 import { Session } from 'meteor/session';
 import { ShoutOuts } from '../api/collections';
 import './Shoutout.html';
-import { genDataBlob } from './tools';
+import { getParentId, genDataBlob } from './tools';
 
 Template.Shoutouts.onRendered(function () {
     this.autorun(() => {
@@ -13,7 +13,7 @@ Template.Shoutouts.onRendered(function () {
 Template.Shoutouts.helpers({
     shoutouts() {
         let sc = Session.get('sel_channel');
-        return ShoutOuts.find({ chan: '#' + sc }, { sort: { date: 1 } })
+        return ShoutOuts.find({ chan: '#' + sc }, { sort: { date: -1 } })
     },
     label() {
         return Session.get('label');
@@ -21,6 +21,12 @@ Template.Shoutouts.helpers({
     solabel() {
         let sc = Session.get('sel_channel');
         let label = Session.get('label');
+	if (!label) {
+	    let l = ShoutOuts.findOne({ chan: '#' + sc, label: {$ne: 'off'}}, {sort: {data:-1}});
+	    if (l)
+		label=l.label;
+	}
+	
         if (label)
         {
             return ShoutOuts.find({ chan: '#' + sc , label:label}, { sort: { date: -1 } })
@@ -36,6 +42,17 @@ Template.Shoutouts.events({
         let v = event.currentTarget.innerText;
         console.error(v);
         Session.set('label', v);
+    },
+    'click button.remove': function(event) {
+	let id = getParentId(event.currentTarget);
+	if (id) {
+	    let l = ShoutOuts.findOne(id);
+	    if ((l.label==='off') || confirm('Are you sure you want to remove this so? ' + l.so )) {
+		
+		// Confirmation if label !=off?
+		ShoutOuts.remove(id);
+	    }
+	}
     },
     'click button.exportCSV': function (event) {
         let sc = Session.get('sel_channel');
