@@ -1798,7 +1798,8 @@ Meteor.startup(() => {
 */
 
       let txt;
-      let txts = [
+
+	let txts = [
         "I'm only a bot, you know! #icon",
         "I'm a nice bot, you know! #icon",
         "Do you want to be my friend?",
@@ -1808,12 +1809,18 @@ Meteor.startup(() => {
         ':) ',
         ':D :D :D ',
         ':) :) :) ',
-        '#icon #icon #icon'
+        '#icon #icon #icon',
+	'I try to do my best :D'
       ];
 
       if (lccn.indexOf('?') >= 0) {
+	 txts= [
+	    "Insufficient data for meaningful answer"
+	 ];
+	    
         if (lccn.indexOf('why') >= 0)
           txts = ["I really don't know", "Why not?"];
+
         if ((lccn.indexOf('explain') >= 0) || (lccn.indexOf('can') >= 0))
           txts = ["For Sure!", "Of course!"];
 
@@ -1826,8 +1833,6 @@ Meteor.startup(() => {
       }
       return;
     }
-
-
 
   };
 
