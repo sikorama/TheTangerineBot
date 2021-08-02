@@ -316,16 +316,16 @@ Meteor.startup(() => {
       }
 
       // Map users
-      let lfo = {},upo={};
-      lfo[lowcb] = {$exists:1};
+      let lfo = {}, upo = {};
+      lfo[lowcb] = { $exists: 1 };
       upo[lowcb] = lowca;
-      upo[lowcb+'-msg'] = lowca+'-msg';
-      upo[lowcb+'-lastreq'] = lowca+'-lastreq';
+      upo[lowcb + '-msg'] = lowca + '-msg';
+      upo[lowcb + '-lastreq'] = lowca + '-lastreq';
       c = UserLocations.find(lfo);
-      if (c.count()>0) {
-        desc.push('UserLocations field: Found '+c.count()+' map users');
+      if (c.count() > 0) {
+        desc.push('UserLocations field: Found ' + c.count() + ' map users');
         if (apply) {
-          UserLocations.update(lfo, { $rename: upo}, {multi:true});
+          UserLocations.update(lfo, { $rename: upo }, { multi: true });
         }
       }
 
@@ -375,7 +375,7 @@ Meteor.startup(() => {
     try {
       if (greetingsStack.length > 0) {
         let g = greetingsStack.shift();
-        say(g.target, g.txt, {me: g.me, dispname: g.dispname, store: true});
+        say(g.target, g.txt, { me: g.me, dispname: g.dispname, store: true });
       }
     } catch (e) {
       console.error(e.stack);
@@ -616,32 +616,32 @@ Meteor.startup(() => {
         return res.join('\n');
       }
     },
-    export_live_events: function(from,to,team) {
-      let sel={};
-      if (team) sel.team=team;      
+    export_live_events: function (from, to, team) {
+      let sel = {};
+      if (team) sel.team = team;
       //Channel list
-      let chans = BotChannels.find(sel).fetch().map((c)=>c.channel);
+      let chans = BotChannels.find(sel).fetch().map((c) => c.channel);
       chans.unshift('TimeStamp');
 
       // Live state
-      curState=chans.map(()=>0);
+      curState = chans.map(() => 0);
 
-      if (from || to) {
-        sel.timestamp= {}
-        if (from) 
+      if (from || to) {
+        sel.timestamp = {}
+        if (from)
           sel.timestamp.$gt = from
-        if (to) 
+        if (to)
           sel.timestamp.$lt = to
       }
 
-      let res=[];
+      let res = [];
       res.push(chans.join(';'));
       console.info(chans);
-      let curs = LiveEvents.find(sel, {sort: {timestamp:1}});
-      curs.forEach((ev)=> {
-        curState[0] = Math.floor(ev.timestamp/1000);
+      let curs = LiveEvents.find(sel, { sort: { timestamp: 1 } });
+      curs.forEach((ev) => {
+        curState[0] = Math.floor(ev.timestamp / 1000);
         let index = chans.indexOf(ev.channel);
-        curState[index] = ev.live?1:0;
+        curState[index] = ev.live ? 1 : 0;
         res.push(curState.join(';'));
         console.info(curState);
       })
@@ -692,22 +692,22 @@ Meteor.startup(() => {
   // dispname: name of the user to answer to
   function say(target, txt, options) {
     try {
-      options = options || {};
+      options = options || {};
 
       // Check if there is a {{ }} for Phrase it
       if (txt.indexOf('{{') >= 0) {
         txt = PhraseIt.make(txt);
       }
-      
-      let chat_txt = ((options.me===true)?"/me ":"") + replaceKeywords(txt,options);
+
+      let chat_txt = ((options.me === true) ? "/me " : "") + replaceKeywords(txt, options);
       bclient.say(target, chat_txt);
       console.info(target, '>', chat_txt, options);
 
       if (options.store) {
         // Overlay text doesn't contain twitch emotes
         options.removeIcons = true;
-        let overlay_txt = replaceKeywords(txt,options);
-        BotMessage.upsert({channel: target}, {$set: {txt:overlay_txt}});
+        let overlay_txt = replaceKeywords(txt, options);
+        BotMessage.upsert({ channel: target }, { $set: { txt: overlay_txt } });
       }
     } catch (e) {
       console.error(e);
@@ -1522,14 +1522,28 @@ Meteor.startup(() => {
           cmdarray.shift();
           label = cmdarray.join(' ').trim();
         }
-        BotChannels.update(botchan._id, { $set: { storeso_label: label } });
 
         if (label.toLowerCase() === 'off') {
           say(target, 'Shoutout monitoring is now off')
+          try {
+
+            // Sending a discord notification with all so with the current label
+            if (botchan.discord_so_url) {
+              let l = botchan.storeso_label;
+              const sos = ShoutOuts.find({ label: l }, { sort: { timestamp: -1 } }).fetch();
+              const title = 'Twitch Finds ' + l;
+              let msg = title + '\n```\n' + sos.join('\n') + '```';
+              console.info(msg)
+              sendDiscord(msg, botchan.discord_so_url);
+            }
+          } catch (e) {
+            console.error(e);
+          }
         }
         else {
           say(target, 'Shoutout monitoring is now enabled, using label ' + label + '. Use "!' + cmd + ' off" to disable it.');
         }
+        BotChannels.update(botchan._id, { $set: { storeso_label: label } });
         return;
       }
 
@@ -1579,7 +1593,7 @@ Meteor.startup(() => {
             if (gmline.length > 0) {
               //gmline = replaceKeywords(gmline, {dispname: soname});
               gmline = gmline.replace(regext, "https://twitch.tv/" + soname + ' ');
-              say(target, gmline, {dispname: soname, me : botchan.me});
+              say(target, gmline, { dispname: soname, me: botchan.me });
             }
           }
           return;
@@ -1623,7 +1637,7 @@ Meteor.startup(() => {
           }
         }
 
-        if (botchan.advertteam ===true) {
+        if (botchan.advertteam === true) {
           let m = Settings.findOne({ param: 'team-' + t });
           console.error(m);
           if (m) {
@@ -1746,9 +1760,9 @@ Meteor.startup(() => {
           else
             txt = txt.replace(regext, "https://twitch.tv/" + username + ' ');
 
-          greetingsStack.push({ 
-            target: target, 
-            txt: txt, 
+          greetingsStack.push({
+            target: target,
+            txt: txt,
             me: (botchan.me === true && selGenSentence === false),
             dispname: dispname
           });
@@ -1761,7 +1775,7 @@ Meteor.startup(() => {
     // Get list of commands
     // FIXME: use a  short name for bot,in settings
     const botname_short = 'ttc';
-    if (cmd.indexOf(botname_short+'-command') === 0 ) {
+    if (cmd.indexOf(botname_short + '-command') === 0) {
       let url = Settings.findOne({ param: 'URL' });
       if (url) {
         say(target, "You'll find available commands for ttcBot here: " + url.val + "/c/" + chan + '/commands')
@@ -1778,28 +1792,28 @@ Meteor.startup(() => {
     if ((lccn.indexOf('@' + botname) >= 0)) //|| ((lccn.indexOf('tangerinebot') >= 0)) ((lccn.indexOf('ttcbot') >= 0)) || ((lccn.indexOf('tangerine bot') >= 0))) {
     {
       // If someone wants to ban the bot
-      if (cmd=='ban') {
+      if (cmd == 'ban') {
         say(target, 'Do you want me to ban you, ' + answername + '? :P');
         return;
       }
 
-/*      if ( (lccn.indexOf('bday')>=0) || (lccn.indexOf('birthday')>=0) || (lccn.indexOf('feliz')>=0) || (lccn.indexOf('joyeux')>=0) )
-      {
-        const bdaytxts = [
-          'beep beep boop '+answername,
-          'beep boop! beep beep boop, '+answername,
-          answername+ ' <3 <3 <3 ',
-          'thank youuuu '+answername +' :)',
-        ]
-        //txt = ;
-        say(target, randElement(bdaytxts)); // + ' ' + answername);
-        return;
-      }
-*/
+      /*      if ( (lccn.indexOf('bday')>=0) || (lccn.indexOf('birthday')>=0) || (lccn.indexOf('feliz')>=0) || (lccn.indexOf('joyeux')>=0) )
+            {
+              const bdaytxts = [
+                'beep beep boop '+answername,
+                'beep boop! beep beep boop, '+answername,
+                answername+ ' <3 <3 <3 ',
+                'thank youuuu '+answername +' :)',
+              ]
+              //txt = ;
+              say(target, randElement(bdaytxts)); // + ' ' + answername);
+              return;
+            }
+      */
 
       let txt;
 
-	let txts = [
+      let txts = [
         "I'm only a bot, you know! #icon",
         "I'm a nice bot, you know! #icon",
         "Do you want to be my friend?",
@@ -1810,14 +1824,14 @@ Meteor.startup(() => {
         ':D :D :D ',
         ':) :) :) ',
         '#icon #icon #icon',
-	'I try to do my best :D'
+        'I try to do my best :D'
       ];
 
       if (lccn.indexOf('?') >= 0) {
-	 txts= [
-	    "Insufficient data for meaningful answer"
-	 ];
-	    
+        txts = [
+          "Insufficient data for meaningful answer"
+        ];
+
         if (lccn.indexOf('why') >= 0)
           txts = ["I really don't know", "Why not?"];
 
@@ -1829,7 +1843,7 @@ Meteor.startup(() => {
       }
       else {
         txt = randElement(txts);
-        say(target, answername + ' ' + txt, {store:true});
+        say(target, answername + ' ' + txt, { store: true });
       }
       return;
     }
