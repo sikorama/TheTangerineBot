@@ -139,8 +139,20 @@ export function checkLiveChannels(client_id, client_private) {
       headers: headers,
     }, Meteor.bindEnvironment(function (err, res) {
       if (!err) {
-        //        console.info("helix: ", JSON.parse(res.body));
+        //console.info("helix: ", JSON.parse(res.body));
         let body = JSON.parse(res.body);
+        if (!body) return;
+        //{ error: 'Unauthorized', status: 401, message: 'Invalid OAuth token' }
+        if (body.error) {
+          console.error('helix error:', body);
+          if (body.message==='Invalid OAuth token')
+            getTwitchToken(client_id, client_private);
+        }
+        if (!body.data) {
+          console.info('body.data doesnt exist', body); 
+          return;
+        }
+        
         channels.forEach((chan) => {
           let c = BotChannels.findOne({ channel: chan });
           let f = body.data.find((item) => item.user_login == chan);

@@ -921,6 +921,20 @@ Meteor.startup(() => {
       }
     }
 
+    // custom commands, regex
+    if (botchan.custom_commands) {
+      try {
+        custom_commands.forEach((r)=> {
+          if (cmd.match(r.regex))  {
+            console.info(r.name, 'Matched!')
+            say(target, r.randElement(answer), {dispname: answername});
+            return;
+          }
+        })
+      } catch(e) {
+        console.error(e);
+      }
+    }
 
     // -------------HUG -----------------
     if (botchan.hug === true) {
