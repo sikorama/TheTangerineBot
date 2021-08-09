@@ -244,37 +244,7 @@ const selectQuestion = function () {
 };
 
 
-export function sendSOGreetings(botchan, target, soname) {
-  try {
 
-    // SO hook, for greetings
-    // Check if this user exists in Greetings Collection
-    let gmlist = getGreetMessages(soname, botchan.channel);
-    console.info(gmlist);
-    // We could add "#follow #twitch #icon" to the array
-    // but sometimes it's as if gmlis==[] although it should not be (it's in database...)
-    let gmline = '';
-    if (gmlist.length === 0) {
-      gmlist = ["#follow #twitch #icon"];
-      gmline = randElement(gmlist);
-    }
-    else {
-      gmline = randElement(gmlist).txt;
-    }
-    //console.error('so', gmline);
-
-    if (gmline.length > 0) {
-      //gmline = replaceKeywords(gmline, {dispname: soname});
-
-      gmline = gmline.replace(regext, "https://twitch.tv/" + soname + ' ');
-      say(target, gmline, { dispname: soname, me: botchan.me });
-    }
-
-  } catch (e) {
-    console.error(e);
-  }
-
-}
 
 Meteor.startup(() => {
   // Add default bot channel with some options enabled
@@ -745,6 +715,38 @@ Meteor.startup(() => {
     } catch (e) {
       console.error(e);
     }
+  }
+
+  function sendSOGreetings(botchan, target, soname) {
+    try {
+  
+      // SO hook, for greetings
+      // Check if this user exists in Greetings Collection
+      let gmlist = getGreetMessages(soname, botchan.channel);
+      console.info(gmlist);
+      // We could add "#follow #twitch #icon" to the array
+      // but sometimes it's as if gmlis==[] although it should not be (it's in database...)
+      let gmline = '';
+      if (gmlist.length === 0) {
+        gmlist = ["#follow #twitch #icon"];
+        gmline = randElement(gmlist);
+      }
+      else {
+        gmline = randElement(gmlist).txt;
+      }
+      //console.error('so', gmline);
+  
+      if (gmline.length > 0) {
+        //gmline = replaceKeywords(gmline, {dispname: soname});
+  
+        gmline = gmline.replace(regext, "https://twitch.tv/" + soname + ' ');
+        say(target, gmline, { dispname: soname, me: botchan.me });
+      }
+  
+    } catch (e) {
+      console.error(e);
+    }
+  
   }
 
   // Updates user interaction timestamp for users who are on the map
