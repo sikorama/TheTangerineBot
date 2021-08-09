@@ -52,8 +52,12 @@
     <tbody>
       {{#if c.hug}}
       <tr>
-        <td>Comma separated Keyword list
-          <br>(optional, keywords must be prefixed by 'a' or 'an')</td>
+        <td>
+          <div class="settings_item">
+            Comma separated Keyword list
+            <br>(optional, keywords must be prefixed by 'a' or 'an')
+          </div>
+        </td>
         <td colspan="2">
           <textarea rows="4" class="chanSettings" name="hug_adjectives">{{c.hug_adjectives}}</textarea>
         </td>
@@ -76,7 +80,9 @@
       {{#if c.map}}
       <tr>
         <td>
-          Standard icon:
+          <div class="settings_item">
+            Standard icon:
+          </div>
         </td>
         <td>
           <input class="chanSettings" value="{{c.map_icon_std}}" list="imagelist" name="map_icon_std">
@@ -87,7 +93,9 @@
       </tr>
       <tr>
         <td>
-          Name icon:
+          <div class="settings_item">
+            Name icon:
+          </div>
         </td>
         <td>
           <input class="chanSettings" value="{{c.map_icon_name}}" list="imagelist" name="map_icon_name">
@@ -98,7 +106,9 @@
       </tr>
       <tr>
         <td>
-          Message icon:
+          <div class="settings_item">
+            Message icon:
+          </div>
         </td>
         <td>
           <input class="chanSettings" value="{{c.map_icon_msg}}" list="imagelist" name="map_icon_msg">
@@ -148,11 +158,19 @@
 
       {{#if c.songrequest}}
       <tr>
-        <td> RegExp 1 </td>
+        <td> 
+          <div class="settings_item">
+            RegExp 1 
+          </div>
+        </td>
         <td colspan="2"> <input type="text" value="{{c.requestregex1}}" class="chanSettings" name="requestregex1"> </td>
       </tr>
       <tr>
-        <td> RegExp 2 </td>
+        <td> 
+          <div class="settings_item">
+            RegExp 2 
+          </div>
+        </td>
         <td colspan="2"> <input type="text" value="{{c.requestregex2}}" class="chanSettings" name="requestregex2"> </td>
       </tr>
       {{/if}}
@@ -171,7 +189,10 @@
     <tbody>
       <tr>
         <td>
-          Going LIVE Hook Channel URL (@everyone})
+          <div class="settings_item">
+
+            Going LIVE Hook Channel URL (@everyone})
+          </div>
         </td>
         <td colspan="2">
           <textarea rows="4" class="chanSettings" name="discord_goinglive_url1">{{c.discord_goinglive_url1}}</textarea>
@@ -180,7 +201,9 @@
 
       <tr>
         <td>
-          Going LIVE Hook Team URL
+          <div class="settings_item">
+            Going LIVE Hook Team URL
+          </div>
         </td>
         <td colspan="2">
           <textarea rows="4" class="chanSettings" name="discord_goinglive_url2">{{c.discord_goinglive_url2}}</textarea>
@@ -189,15 +212,14 @@
 
       <tr>
         <td>
-          Going LIVE Hook SO URL
+          <div class="settings_item">
+            Going LIVE Hook SO URL
+          </div>
         </td>
         <td colspan="2">
           <textarea rows="4" class="chanSettings" name="discord_goinglive_url3">{{c.discord_goinglive_url3}}</textarea>
         </td>
       </tr>
-
-
-
     </tbody>
     {{/if}}
 
@@ -213,18 +235,25 @@
     <tbody>
       <tr>
         <td>
-          RAID Channel Hook URL
+          <div class="settings_item">
+
+            RAID Channel Hook URL
+          </div>
         </td>
         <td colspan="2">
           <textarea rows="4" class="chanSettings" name="discord_raid_url">{{c.discord_raid_url}}</textarea>
         </td>
       </tr>
 
-      <tr> 
-        <td> Auto SO after raid</td>
+      <tr>
+        <td> 
+          <div class="settings_item">
+            Auto SO after raid
+          </div>
+        </td>
         <td colspan="2">
           {{>CheckMark b=c.raid_auto_so n="raid_auto_so"}}
-        </td> 
+        </td>
       </tr>
     </tbody>
 
@@ -677,9 +706,9 @@
       {{/each}}
       <!-- Additional Answer-->
       {{#if edit_mode}}
-        {{>CheckMark b=l.enabled n=l.index vcross="&nbsp;&nbsp;"}}
-        <input class="newannswer" style="width:80%;" type="text">
-        <button class="+" name="addline">&cross;</button>
+      {{>CheckMark b=l.enabled n=l.index vcross="&nbsp;&nbsp;"}}
+      <input class="newannswer" style="width:80%;" type="text">
+      <button class="+" name="addline">&cross;</button>
       {{/if}}
     </td>
   </tr>

@@ -2,7 +2,7 @@ import { GreetMessages } from '../imports/api/collections.js';
 import { emoticones, followtxts } from './const.js';
 import { randElement } from './tools.js';
 import { hasRole } from './user_management.js';
-import { regexan, regexf, regexi, regexn, regexnn } from '../imports/api/regex.js';
+import { regexan, regexf, regexi, regexn, regexnn, regext } from '../imports/api/regex.js';
 
 // chan (optionel) : Pour liiter un message a un channel
 

@@ -170,6 +170,9 @@ white-space: normal;
 	color: red;
 }
 
+.settings_item {
+	margin-left:30px;
+}
 
 .autohide {
 	color: transparent;
@@ -244,6 +247,7 @@ div.overlay-textarea{
 		opacity: 0.0;
 	}
 }
+
 
 
 .overlay-animate {

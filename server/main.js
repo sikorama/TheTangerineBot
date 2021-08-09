@@ -1130,8 +1130,8 @@ Meteor.startup(() => {
         let lazy = false;
         if (txt.length > 2) {
 
-          // Texte trop long?
-          if (txt.length > 200) {
+          // Too long text?
+          if (txt.length > 300) {
             lazy = true;
             txt = "I'm too lazy to translate long sentences ^^";
           }
