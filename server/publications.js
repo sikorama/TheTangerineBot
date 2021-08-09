@@ -1,4 +1,4 @@
-import { BotChannels, GreetMessages, Images, QuizzQuestions, QuizzScores, Raiders, Settings, ShoutOuts, Stats, UserLocations, BotMessage } from '../imports/api/collections.js';
+import { BotChannels, BotCommands, BotMessage, GreetMessages, Images, QuizzQuestions, QuizzScores, Raiders, Settings, ShoutOuts, Stats, UserLocations } from '../imports/api/collections.js';
 import { getUserGroups, hasRole } from './user_management.js';
 
 export function init_publications() {
@@ -36,7 +36,7 @@ export function init_publications() {
   Meteor.publish('EnabledChannels', function (sel) {
     if (!sel) sel = {};
     sel.enabled = true;
-    return BotChannels.find(sel, { fields: { enabled: 1, channel: 1, live: 1, team:1 } })
+    return BotChannels.find(sel, { fields: { enabled: 1, channel: 1, live: 1, team: 1 } })
   });
 
   //Publish the list of all channels where the bot is enabled
@@ -53,7 +53,7 @@ export function init_publications() {
         live_started: 1,
         live_thumbnail_url: 1,
         live_viewers: 1,
-        team : 1
+        team: 1
       }
     })
   });
@@ -81,12 +81,12 @@ export function init_publications() {
     //  this.ready();
   });
 
-     ShoutOuts.allow({
+  ShoutOuts.allow({
     insert(userid, doc) {
-//      if (userid) return true;
+      //      if (userid) return true;
     },
     update(userid, doc) {
-//      if (userid) return true;
+      //      if (userid) return true;
     },
     remove(userid, doc) {
       if (hasRole(userid, 'admin'))
@@ -142,23 +142,49 @@ export function init_publications() {
     }
   });
 
+// Custom Commands
+//
 
 
+Meteor.publish('customcommands', function (sel) {
+  if (hasRole(this.userId, ['admin'])) {
+    sel = sel || {};
+    return BotCommands.find(sel);
+  }
+  this.ready();
+});
+
+BotCommands.allow({
+  insert(userid, doc) {
+    if (hasRole(userid, 'admin'))
+      return true;
+  },
+  update(userid, doc) {
+    if (hasRole(userid, 'admin'))
+      return true;
+  },
+  remove(userid, doc) {
+    if (hasRole(userid, 'admin'))
+      return true;
+  }
+});
   //
   // ---------------------- GREET MESSAGES -------------------------------
   //
 
   Meteor.publish('greetMessages', function (sel) {
     if (hasRole(this.userId, ['admin', 'greet'])) {
-      sel = sel || {};
+      sel = sel || {};
       return GreetMessages.find(sel);
     }
     this.ready();
   });
 
+
+
   Meteor.publish('settings', function (sel) {
     if (hasRole(this.userId, 'admin')) {
-      sel = sel || {};
+      sel = sel || {};
       return Settings.find(sel);
     }
     this.ready();
@@ -170,7 +196,7 @@ export function init_publications() {
   Meteor.publish('raiders', function (sel) {
     //if (hasRole(this.userId, 'admin')) {
     if (this.userId) {
-      sel = sel || {};
+      sel = sel || {};
       return Raiders.find(sel);
     }
     this.ready();
@@ -179,7 +205,7 @@ export function init_publications() {
   // ------------------- Bot Messages for OSD --------------
   // No need to be logged
   Meteor.publish('lastmessages', function (sel) {
-    sel = sel || {};
+    sel = sel || {};
     if (sel.channel) {
       return BotMessage.find(sel);
     }
@@ -193,14 +219,14 @@ export function init_publications() {
 
   Meteor.publish('statistics', function (sel) {
     if (hasRole(this.userId, ['streamer'])) {
-      sel = sel || {};
+      sel = sel || {};
       return Stats.find(sel);
     }
     this.ready();
   });
 
   Meteor.publish('images', function (sel) {
-    sel = sel || {};
+    sel = sel || {};
     //    return (Images.find(sel).cursor);
     return (Images.collection.find(sel));
   });

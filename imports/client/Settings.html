@@ -357,11 +357,33 @@
 
     {{#if c.commands}}
     <tbody>
+      <tr>
+        <td class="AddNewCommand">
+          <input name="addCmdName" placeholder="command name" type=text value="">
+        </td>
+        <td class="AddNewCommand">
+          <input name="addCmdRegex"  placeholder="Regular Expression"  style="width:100%;"  type="text" value="">
+          <input name="addCmdAnswer"  placeholder="Default Answer"  style="width:100%;"  type="text" value="">
+        </td>
+        
+        <td class="AddNewCommand">
+            <button class="ok" name="confirm_add_cmd">&plus;</button>
+        </td>
+      </tr>
+
+   
+    
       {{#each co in (commandList)}}
       {{>CommandSetting chan=c cmd=cmd}}
       {{/each}}
     </tbody>
+
+
+
     {{/if}}
+
+
+
 
     <thead>
       <tr>
@@ -442,6 +464,7 @@
         {{#each s in (stats c.channel)}}
         <td>
           {{s.count}}
+          Month={{s.month}}
         </td>
         {{/each}}
       </tr>

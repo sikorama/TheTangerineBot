@@ -1,4 +1,4 @@
-import { Images, BotChannels, Settings, Stats } from '../api/collections.js';
+import { Images, BotChannels, Settings, Stats,BotCommands } from '../api/collections.js';
 import { getParentId, genDataBlob } from './tools.js';
 import { checkUserRole } from '../api/roles.js';
 import { Session } from 'meteor/session';
@@ -11,6 +11,7 @@ Template.Settings.onCreated(function () {
     this.subscribe("allUsers");
     this.subscribe("statistics");
     this.subscribe('botChannels');
+    this.subscribe('botCommands');
     this.subscribe('settings');
     this.subscribe('images');
     this.subscribe('userRoles');
@@ -40,7 +41,7 @@ Template.Settings.helpers({
         return Meteor.users.find();
     },
     stats(c) {
-        return Stats.find({ chan: '#' + c }, { sort: { month: 1 } });
+        return Stats.find({ chan: '#' + c }, { sort: { month: -1 } });
     },
     userHasRole(uid, role) {
         return checkUserRole(role, uid);
@@ -63,6 +64,10 @@ Template.Settings.helpers({
     },
     submenu(v) {
         return (Session.equals('settingsPage',v));
+    },
+    commandList() {
+        //
+        return BotCommands.find();
     }
 });
 

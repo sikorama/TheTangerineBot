@@ -719,7 +719,7 @@ Meteor.startup(() => {
 
   function sendSOGreetings(botchan, target, soname) {
     try {
-  
+
       // SO hook, for greetings
       // Check if this user exists in Greetings Collection
       let gmlist = getGreetMessages(soname, botchan.channel);
@@ -735,18 +735,18 @@ Meteor.startup(() => {
         gmline = randElement(gmlist).txt;
       }
       //console.error('so', gmline);
-  
+
       if (gmline.length > 0) {
         //gmline = replaceKeywords(gmline, {dispname: soname});
-  
+
         gmline = gmline.replace(regext, "https://twitch.tv/" + soname + ' ');
         say(target, gmline, { dispname: soname, me: botchan.me });
       }
-  
+
     } catch (e) {
       console.error(e);
     }
-  
+
   }
 
   // Updates user interaction timestamp for users who are on the map
@@ -1948,16 +1948,17 @@ Meteor.startup(() => {
         console.error(e);
       }
 
+      // TODO: Automatic SO after
+      if (bc.raid_auto_so === true) {
+        sendSOGreetings(bc, channel, raider);
+      }
+
+
     } catch (e) {
       console.error(e);
     }
 
 
-    // TODO: Automatic SO after
-    if (bc.raid_auto_so === true) {
-      sendSOGreetings(bc, channel, raider);
-      return;
-    }
 
   }
 
