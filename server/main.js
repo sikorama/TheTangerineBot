@@ -11,7 +11,7 @@ import { regext } from '../imports/api/regex.js';
 import { addChannel } from './channels.js';
 import { genChord, genProgression, noteArray } from './chords.js';
 import { country_lang, patterns } from './const.js';
-import { getGreetMessages, init_greetings, replaceKeywords, sendSOGreetings } from './greetings.js';
+import { getGreetMessages, init_greetings, replaceKeywords } from './greetings.js';
 import { checkLiveChannels, sendDiscord } from './notifications.js';
 import { init_publications } from './publications.js';
 import { init_quizz } from './quizz.js';
@@ -242,6 +242,39 @@ const selectQuestion = function () {
   curQuestion.clue = 0;
 
 };
+
+
+export function sendSOGreetings(botchan, target, soname) {
+  try {
+
+    // SO hook, for greetings
+    // Check if this user exists in Greetings Collection
+    let gmlist = getGreetMessages(soname, botchan.channel);
+    console.info(gmlist);
+    // We could add "#follow #twitch #icon" to the array
+    // but sometimes it's as if gmlis==[] although it should not be (it's in database...)
+    let gmline = '';
+    if (gmlist.length === 0) {
+      gmlist = ["#follow #twitch #icon"];
+      gmline = randElement(gmlist);
+    }
+    else {
+      gmline = randElement(gmlist).txt;
+    }
+    //console.error('so', gmline);
+
+    if (gmline.length > 0) {
+      //gmline = replaceKeywords(gmline, {dispname: soname});
+
+      gmline = gmline.replace(regext, "https://twitch.tv/" + soname + ' ');
+      say(target, gmline, { dispname: soname, me: botchan.me });
+    }
+
+  } catch (e) {
+    console.error(e);
+  }
+
+}
 
 Meteor.startup(() => {
   // Add default bot channel with some options enabled
