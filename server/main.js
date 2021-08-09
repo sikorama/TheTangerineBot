@@ -11,7 +11,7 @@ import { regext } from '../imports/api/regex.js';
 import { addChannel } from './channels.js';
 import { genChord, genProgression, noteArray } from './chords.js';
 import { country_lang, patterns } from './const.js';
-import { getGreetMessages, init_greetings, replaceKeywords } from './greetings.js';
+import { getGreetMessages, init_greetings, replaceKeywords, sendSOGreetings } from './greetings.js';
 import { checkLiveChannels, sendDiscord } from './notifications.js';
 import { init_publications } from './publications.js';
 import { init_quizz } from './quizz.js';
@@ -922,19 +922,20 @@ Meteor.startup(() => {
     }
 
     // custom commands, regex
-    if (botchan.custom_commands) {
-      try {
-        custom_commands.forEach((r)=> {
-          if (cmd.match(r.regex))  {
-            console.info(r.name, 'Matched!')
-            say(target, r.randElement(answer), {dispname: answername});
-            return;
-          }
-        })
-      } catch(e) {
-        console.error(e);
-      }
-    }
+    /* if (botchan.custom_commands) {
+       try {
+         custom_commands.forEach((r)=> {
+           if (cmd.match(r.regex))  {
+             console.info(r.name, 'Matched!')
+             say(target, r.randElement(answer), {dispname: answername});
+             return;
+           }
+         })
+       } catch(e) {
+         console.error(e);
+       }
+     }
+ */
 
     // -------------HUG -----------------
     if (botchan.hug === true) {
@@ -971,6 +972,16 @@ Meteor.startup(() => {
       let res = randSentence();
       for (let i = 0; i < 3; i++) res += ' / ' + randSentence();
       say(target, res);
+      return;
+    }
+
+
+    if ((cmd === 'tutu') || (cmd == 'tututu')) {
+      const tutuans = ['SingsNote tututuru tutututuruu SingsNote',
+        'SingsNote tututu tututuru tutututuruu SingsNote',
+        'SingsNote tututututututuruu SingsNote'
+      ];
+      say(target, randElement(tutuans));
       return;
     }
 
@@ -1544,7 +1555,7 @@ Meteor.startup(() => {
             // Sending a discord notification with all so with the current label
             if (botchan.discord_so_url) {
               let l = botchan.storeso_label;
-              const sos = ShoutOuts.find({ label: l }, { sort: { timestamp: -1 } }).fetch();
+              const sos = ShoutOuts.find({ label: l }, { sort: { timestamp: 1 } }).fetch().map(element => element.so);
               const title = 'Twitch Finds ' + l;
               let msg = title + '\n```\n' + sos.join('\n') + '```';
               console.info(msg)
@@ -1590,31 +1601,14 @@ Meteor.startup(() => {
             }
           }
 
-          if (botchan.so === true) {
-            // SO hook, for greetings
-            // Check if this user exists in Greetings Collection
-            let gmlist = getGreetMessages(soname, chan);
-            let gmline = '';
-            if (gmlist.length === 0) {
-              gmlist = ["#follow #twitch #icon"];
-              gmline = randElement(gmlist);
-            }
-            else {
-              gmline = randElement(gmlist).txt;
-            }
-            //console.error('so', gmline);
 
-            if (gmline.length > 0) {
-              //gmline = replaceKeywords(gmline, {dispname: soname});
-              gmline = gmline.replace(regext, "https://twitch.tv/" + soname + ' ');
-              say(target, gmline, { dispname: soname, me: botchan.me });
-            }
+          if (botchan.so === true) {
+            sendSOGreetings(botchan, target, soname)
+            return;
           }
-          return;
         }
       }
     }
-
 
     // Commands starting with the name of the team (if any)
     let t = botchan.team;
@@ -1667,7 +1661,7 @@ Meteor.startup(() => {
     if (botchan.greet === true) {
       // dnow?
       let d = Date.now();
-      // Check if user has not already been greeted recentky
+      // Check if user has not already been greeted recently
       // In this case, do nothing
       let candidate = true;
       let g = GreetDate.findOne({ name: username });
@@ -1874,6 +1868,7 @@ Meteor.startup(() => {
   }
 
   function onRaidedHandler(channel, raider, vcount, tags) {
+
     try {
       let chan = channel.toLowerCase();
       chan = chan.substring(1);
@@ -1921,6 +1916,14 @@ Meteor.startup(() => {
     } catch (e) {
       console.error(e);
     }
+
+
+    // TODO: Automatic SO after
+    if (bc.raid_auto_so === true) {
+      sendSOGreetings(bc, channel, raider);
+      return;
+    }
+
   }
 
   //   onRaidedHandler('#sikorama','duobarao',10);

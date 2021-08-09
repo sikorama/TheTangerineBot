@@ -272,3 +272,57 @@ Template.ServerConfig.events({
   }
 
 });
+
+
+
+Template.CommandSetting.events({
+    'change .greetline': function (event) {
+        const id = event.currentTarget.parentElement.id;
+        const name = event.currentTarget.name;
+        const f = name.split('_')[0];
+        const r = name.split('_')[1];
+        let o = {};
+        o[f] = event.currentTarget.value;
+        //Meteor.call('updateGreetLine', id, r, o);
+      },
+      'click button': function (event) {
+        const id = getParentId(event.currentTarget) //.parentElement.id;
+        const name = event.currentTarget.name;  
+        const cl = event.currentTarget.className;
+        if (cl.indexOf('toggleCheck') >= 0) {
+          const b = (cl.indexOf('ok') < 0)
+          console.error("toggle", id, name,b);
+          Meteor.call('updateCommand', id, parseInt(name), { enabled: b });
+          return;
+        }
+        if (name.indexOf('remove') === 0) {
+          if (confirm('Are you sure you want to permanently delete this Greetings line?') === true) {
+            const r = name.split('_')[1];
+            console.error('remove', id, r);
+            Meteor.call('removeCommand', id, r);
+          }
+          return;
+        }
+    
+        if (name === 'confirm_user_greet') {
+          const u = document.getElementsByName('addCommandName')[0].value;
+          const t = document.getElementsByName('addCommandText')[0].value;
+          if (u.length > 0 && t.length > 0) {
+            Meteor.call('addGreetLine', u, t, c);
+            document.getElementsByName('addUserText')[0].value = "";
+          }
+          return;
+        }
+      },
+      // Si on clique sur le nom d'un user, ca remplt l'input 'username'
+      'click .username': function (event) {
+        const id = event.currentTarget.parentElement.id;
+        if (id != undefined) {
+          const gl = GreetMessages.findOne(id);
+          if (gl != undefined) {
+            document.getElementsByName('addUserName')[0].value = gl.username;
+            Session.set('greets_search',gl.username);
+          }
+        }
+      }
+})

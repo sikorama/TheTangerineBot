@@ -2,7 +2,7 @@ import { GreetMessages } from '../imports/api/collections.js';
 import { emoticones, followtxts } from './const.js';
 import { randElement } from './tools.js';
 import { hasRole } from './user_management.js';
-import { regexan,regexf,regexi,regexn,regexnn } from '../imports/api/regex.js';
+import { regexan, regexf, regexi, regexn, regexnn } from '../imports/api/regex.js';
 
 // chan (optionel) : Pour liiter un message a un channel
 
@@ -45,7 +45,7 @@ export function addGreetLine(username, txt, chan, editor) {
 export function init_greetings() {
 
   if (GreetMessages.find().count() == 0) {
-    
+
     addGreetLine('DE', 'Willkommen #name #icon');
     addGreetLine('DE', 'Moin #name #icon');
     addGreetLine('DE', 'Moin Moin #name #icon');
@@ -80,22 +80,22 @@ export function init_greetings() {
 
   // Fix Greetlines @=># 
   GreetMessages.find().fetch().forEach((item) => {
-      let nt = item.texts.map((t) => {
-        export const pregexn  = /@name/gi;
-        export const pregexan = /@atname/gi;
-        export const pregexnn = /@nickname/gi;
-        export const pregexi  = /@icon/gi;
-        export const pregexf  = /@follow/gi; 
-        export const pregext  = /@twitch/gi; 
-        t.txt =t.txt.replace(pregexn,'#name');
-        t.txt =t.txt.replace(pregexan,'#atname');
-        t.txt =t.txt.replace(pregexnn,'#nickname');
-        t.txt =t.txt.replace(pregexi,'#icon');
-        t.txt =t.txt.replace(pregexf,'#follow');
-        t.txt =t.txt.replace(pregext,'#twitch');
-        return t;
-      })
-      GreetMessages.update(item._id, {$set: { texts: nt }})
+    let nt = item.texts.map((t) => {
+      export const pregexn = /@name/gi;
+      export const pregexan = /@atname/gi;
+      export const pregexnn = /@nickname/gi;
+      export const pregexi = /@icon/gi;
+      export const pregexf = /@follow/gi;
+      export const pregext = /@twitch/gi;
+      t.txt = t.txt.replace(pregexn, '#name');
+      t.txt = t.txt.replace(pregexan, '#atname');
+      t.txt = t.txt.replace(pregexnn, '#nickname');
+      t.txt = t.txt.replace(pregexi, '#icon');
+      t.txt = t.txt.replace(pregexf, '#follow');
+      t.txt = t.txt.replace(pregext, '#twitch');
+      return t;
+    })
+    GreetMessages.update(item._id, { $set: { texts: nt } })
   })
 
 
@@ -161,21 +161,21 @@ export function init_greetings() {
 
 /*
 */
-export function getGreetMessages(username,chan) {
+export function getGreetMessages(username, chan) {
 
   let gm = GreetMessages.findOne({ username: username });
   let gmtext = [];
-//  console.info('getGreetMessage - username=', username, 'chan=', chan);
-//  console.info('getGreetMessage - gm=', gm);
+  //  console.info('getGreetMessage - username=', username, 'chan=', chan);
+  //  console.info('getGreetMessage - gm=', gm);
 
   // Filtrage de gm pour virer ce qui est désactivé et ce qui est pour une autre chaine
   if (gm != undefined) {
     gmtext = gm.texts.filter((item) => {
-     // console.info('getGreetMessage - item=', item);
+      // console.info('getGreetMessage - item=', item);
 
       if (item.enabled != true) return false;
       // if there is a channel field, use it as a constraint
-      if (item.channel != undefined && item.channel.length>0) {
+      if (item.channel != undefined && item.channel.length > 0) {
         // Exlusion rule? is item.channel starts with a '-'
         if (item.channel.startsWith('-')) {
           if (item.channel.indexOf(chan) >= 0) return false;
@@ -184,7 +184,7 @@ export function getGreetMessages(username,chan) {
           if (item.channel.indexOf(chan) < 0) return false;
         }
       }
-    //  console.info('getGreetMessage - OK');
+      //  console.info('getGreetMessage - OK');
       return true;
     });
   }
@@ -195,7 +195,7 @@ export function getGreetMessages(username,chan) {
 
 
 export function replaceKeywords(txt, options) {
-  options = options || {};
+  options = options || {};
 
   if (options.removeIcons) {
     txt = txt.replace(regexi, '');
@@ -205,7 +205,7 @@ export function replaceKeywords(txt, options) {
   }
 
   if (options.dispname) {
-    let answername='@'+options.dispname;
+    let answername = '@' + options.dispname;
     txt = txt.replace(regexn, answername);
     txt = txt.replace(regexan, answername);
     txt = txt.replace(regexnn, options.dispname);
@@ -215,6 +215,42 @@ export function replaceKeywords(txt, options) {
     let followtxt = randElement(followtxts)
     txt = txt.replace(regexf, followtxt);
   }
-  
+
   return txt;
+}
+
+
+
+
+
+export function sendSOGreetings(botchan, target, soname) {
+  try {
+
+    // SO hook, for greetings
+    // Check if this user exists in Greetings Collection
+    let gmlist = getGreetMessages(soname, botchan.channel);
+    console.info(gmlist);
+    // We could add "#follow #twitch #icon" to the array
+    // but sometimes it's as if gmlis==[] although it should not be (it's in database...)
+    let gmline = '';
+    if (gmlist.length === 0) {
+      gmlist = ["#follow #twitch #icon"];
+      gmline = randElement(gmlist);
+    }
+    else {
+      gmline = randElement(gmlist).txt;
+    }
+    //console.error('so', gmline);
+
+    if (gmline.length > 0) {
+      //gmline = replaceKeywords(gmline, {dispname: soname});
+
+      gmline = gmline.replace(regext, "https://twitch.tv/" + soname + ' ');
+      say(target, gmline, { dispname: soname, me: botchan.me });
+    }
+
+  } catch (e) {
+    console.error(e);
+  }
+
 }

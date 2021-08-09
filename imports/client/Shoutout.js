@@ -22,13 +22,13 @@ Template.Shoutouts.helpers({
         let sc = Session.get('sel_channel');
         let label = Session.get('label');
         if (!label) {
-            let l = ShoutOuts.findOne({ chan: '#' + sc, label: { $ne: 'off' } }, { sort: { data: -1 } });
+            let l = ShoutOuts.findOne({ chan: '#' + sc, label: { $ne: 'off' } });
             if (l)
                 label = l.label;
         }
 
         if (label) {
-            return ShoutOuts.find({ chan: '#' + sc, label: label }, { sort: { timestamp: -1 } })
+            return ShoutOuts.find({ chan: '#' + sc, label: label }, { sort: { timestamp: 1 } })
         }
     },
     numrows(n) { return n + 3; }

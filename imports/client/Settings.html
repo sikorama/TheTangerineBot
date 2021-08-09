@@ -127,7 +127,7 @@
       </tr>
       <tr>
         <td>Mute</td>
-        <td>{{>CheckMark b=c.muteGreet n="muteGreet"}}</td>
+        <td colspan="2">{{>CheckMark b=c.muteGreet n="muteGreet"}}</td>
       </tr>
       {{/if}}
     </tbody>
@@ -219,7 +219,14 @@
           <textarea rows="4" class="chanSettings" name="discord_raid_url">{{c.discord_raid_url}}</textarea>
         </td>
       </tr>
-      </tbody>
+
+      <tr> 
+        <td> Auto SO after raid</td>
+        <td colspan="2">
+          {{>CheckMark b=c.raid_auto_so n="raid_auto_so"}}
+        </td> 
+      </tr>
+    </tbody>
 
     <thead>
       <tr>
@@ -238,13 +245,14 @@
         <td colspan="2">
           <textarea rows="4" class="chanSettings" name="discord_so_url">{{c.discord_so_url}}</textarea>
         </td>
-      </tr>  
+      </tr>
       <tr>
         <td>
           Store !so Commands:
         </td>
-        <td>
+        <td colspan="2">
           {{>CheckMark b=c.storeso n="storeso"}}
+          <input type="text" value="{{c.storeso_label}}" class="chanSettings" name="storese_label">
         </td>
       </tr>
 
@@ -308,6 +316,24 @@
     </tbody>
     {{/if}}
 
+
+    <thead>
+      <tr>
+        <th colspan="3">
+          {{>CheckMark b=c.commands n="commands"}}
+          Commands <a href="/c/{{c.commands}}">&#9732; </a>
+        </th>
+      </tr>
+    </thead>
+
+    {{#if c.commands}}
+    <tbody>
+      {{#each co in (commandList)}}
+      {{>CommandSetting chan=c cmd=cmd}}
+      {{/each}}
+    </tbody>
+    {{/if}}
+
     <thead>
       <tr>
         <th colspan="3">
@@ -329,7 +355,7 @@
         <td>
           Advert team
         </td>
-        <td>
+        <td colspan="2">
           {{>CheckMark b=c.advertteam n="advertteam"}}
         </td>
       </tr>
@@ -338,13 +364,11 @@
         <td>
           Team message (shared on every channel)
         </td>
-        <td>
-          <td>
-            <textarea cols="40" rows="4" class="settings" name="team-{{c.team}}"
-              value="{{getTeamParamVal c.team}}"></textarea>
-          </td>
-  
+        <td colspan="2">
+          <textarea cols="40" rows="4" class="settings" name="team-{{c.team}}"
+            value="{{getTeamParamVal c.team}}"></textarea>
         </td>
+
       </tr>
 
     </tbody>
@@ -366,8 +390,8 @@
     </tbody>
   </table>
 
-<h4>Export</h4>
-<button class='exportCSV pure-button pure-button-primary'>Export User Locations (CSV)</button> <a id="csvlink"></a>
+  <h4>Export</h4>
+  <button class='exportCSV pure-button pure-button-primary'>Export User Locations (CSV)</button> <a id="csvlink"></a>
 
   {{/if}}
 
@@ -599,34 +623,64 @@
   From: <input id="liveFrom">
   To: <input id="liveTo">
   Team: <input id="liveTeam">
-  <button class='export_live_events pure-button pure-button-primary'>Export Live Events </button> <a id="livelink">...</a>
+  <button class='export_live_events pure-button pure-button-primary'>Export Live Events </button> <a
+    id="livelink">...</a>
 
   <h2>Rename a user</h2>
 
 
-    <table class="pure-table">
-      <tbody>
-        <tr>
-          <td>
-            Before:
-          </td>
-          <td>
-            <input class="rename" id="before">
-          </td>
-        </tr>
-        <tr>
-          <td>
-            After:
-          </td>
-          <td>
-            <input class="rename" id="after">
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  
-    <button name="dryrun" class='renamebtn pure-button pure-button-primary'>Dry Run </button> 
-    <button name="btapply" class='renamebtn pure-button pure-button-primary'>Apply</button> 
-    
+  <table class="pure-table">
+    <tbody>
+      <tr>
+        <td>
+          Before:
+        </td>
+        <td>
+          <input class="rename" id="before">
+        </td>
+      </tr>
+      <tr>
+        <td>
+          After:
+        </td>
+        <td>
+          <input class="rename" id="after">
+        </td>
+      </tr>
+    </tbody>
+  </table>
 
+  <button name="dryrun" class='renamebtn pure-button pure-button-primary'>Dry Run </button>
+  <button name="btapply" class='renamebtn pure-button pure-button-primary'>Apply</button>
+
+
+</template>
+
+<template name="CommandSetting">
+  <tr style="width:100%;">
+    <td class="username">
+      <span class="uname">{{cmd.name}}</span>
+    </td>
+    <td style="width:100%;">
+      <input class="commandline" style="width:80%;" type="text" value="{{cmd.regex}}" name="regex">
+      <br>
+      {{#each l in cmd.answers}}
+      {{#if edit_mode}}
+      {{>CheckMark b=l.enabled n=l.index vcross="&nbsp;&nbsp;"}}
+      <input class="commandline" style="width:80%;" type="text" value="{{l.txt}}" name="txt_{{l.index}}">
+      <button class="ko" name="remove_{{l.index}}">&cross;</button>
+      <br>
+      {{else}}
+      &bull; {{l.txt}}
+      <br>
+      {{/if}}
+      {{/each}}
+      <!-- Additional Answer-->
+      {{#if edit_mode}}
+        {{>CheckMark b=l.enabled n=l.index vcross="&nbsp;&nbsp;"}}
+        <input class="newannswer" style="width:80%;" type="text">
+        <button class="+" name="addline">&cross;</button>
+      {{/if}}
+    </td>
+  </tr>
 </template>
