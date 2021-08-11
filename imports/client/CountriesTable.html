@@ -92,20 +92,22 @@
 
   {{#if showStat 3}}
 
-  <h2>Last Active Users</h2>
+  <h2>Last Active Users <button name="refresh">&#8634; </button></h2>
   {{#let ausers=getActiveUsers}}
   <table class="pure-table">
     <thead>
       <tr>
-        <th>Timestamp</th>
         <th>User</th>
+        <th>Timestamp</th>
+        <th>Last Message</th>
       </tr>
     </thead>
     <tbody>
       {{#each c in ausers}}
       <tr>
         <td>
-          {{c.name}}
+          <button id={{c.name}} name="remove_active_user" class="ko remove">&cross;</button>
+          {{c.name}}  
         </td>
         <td>
           {{c.ts}}

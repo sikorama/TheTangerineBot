@@ -160,10 +160,13 @@ export function init_greetings() {
 
 
 /*
+    Get greet message, for !so commands
 */
 export function getGreetMessages(username, chan) {
+  // Check cases? 
+  const gm = GreetMessages.findOne({ username: username });
+  if (!gm) console.info('username=', username, 'didnt find in database.');
 
-  let gm = GreetMessages.findOne({ username: username });
   let gmtext = [];
   //  console.info('getGreetMessage - username=', username, 'chan=', chan);
   //  console.info('getGreetMessage - gm=', gm);
@@ -176,20 +179,22 @@ export function getGreetMessages(username, chan) {
       if (item.enabled != true) return false;
       // if there is a channel field, use it as a constraint
       if (item.channel != undefined && item.channel.length > 0) {
-        // Exlusion rule? is item.channel starts with a '-'
+        const index = item.channel.indexOf(chan);
+        // Exlusion rule 
+        // if item.channel starts with a '-' and contains the name of the current channel
         if (item.channel.startsWith('-')) {
-          if (item.channel.indexOf(chan) >= 0) return false;
+          console.debug('getGreetings, message=',item,'exclusive,  chan=',chan,item.channel,"=> index=", index);
+          if (index >= 0) return false;
         }
         else {
-          if (item.channel.indexOf(chan) < 0) return false;
+          console.debug('getGreetings, message=',item,'inclusive mode, chan=',chan,item.channel,"=> index=", index);
+          if (index < 0) return false;
         }
       }
-      //  console.info('getGreetMessage - OK');
       return true;
     });
   }
-  //console.info('getGreetMessage - gmtext=', gmtext);
-
+  console.info('getGreetMessage - user=',username,',gmtext=', gmtext);
   return gmtext;
 }
 

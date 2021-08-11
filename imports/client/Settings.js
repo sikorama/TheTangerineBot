@@ -68,6 +68,9 @@ Template.Settings.helpers({
     commandList() {
         //
         return BotCommands.find();
+    },
+    indexed(a) {
+        return a.map((item,index) => { item.index=index; return item;})
     }
 });
 
@@ -194,6 +197,21 @@ Template.Settings.events({
         console.error("toggleUserRole", id, f);
         Meteor.call("toggleUserRole", id, f);
     },
+    'click button[name="confirm_add_cmd"]': function(event) {
+        const n = document.getElementsByName('addCmdName')[0].value;
+        const r = document.getElementsByName('addCmdRegex')[0].value;
+        const a = document.getElementsByName('addCmdAnswer')[0].value;
+        let channel = Session.get('sel_channel');
+        
+        if (n.length > 0 && r.length > 0 && a.length>0) {
+          BotCommands.insert({channel: channel, name: n, regex: r, answers: [a] })
+          //Meteor.call('addGreetLine', channel, n, r, a);
+          document.getElementsByName('addCmdName')[0].value = "";
+          document.getElementsByName('addCmdRegex')[0].value = "";
+          document.getElementsByName('addCmdAnswer')[0].value = "";
+        }
+        return;
+    } 
 });
 
 

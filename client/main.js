@@ -189,6 +189,26 @@ Template.registerHelper('rh_getchaninfo',function(chan) {
 Template.Stats.events({
   'click button.selStat': function (ev) {
     Session.set('statPage', parseInt(ev.currentTarget.name))
+  },
+  'click button.remove[name="remove_active_user"]': function(ev) {
+    let id = ev.currentTarget.id;
+    let sch = Session.get('sel_channel');
+
+    if (id && sch) {
+      Meteor.call('removeActiveUser', sch, id, function (err, res) {
+        //console.error(err, res);
+        Session.set('activeUsers', res);
+      });
+
+    }
+  },
+  'click button[name="refresh"]' : function(ev) {
+    let sch = Session.get('sel_channel');
+    if (!sch) return;
+    Meteor.call('getActiveUsers', sch, function (err, res) {
+      //console.error(err, res);
+      Session.set('activeUsers', res);
+    });
   }
 });
 

@@ -281,7 +281,22 @@ Meteor.startup(() => {
         return last_active_users[chan];
 
       return [];
+    },
+    removeActiveUser(chan,name) {
+      if (!chan)
+       return [];
+      if (!last_active_users[chan]) 
+       return [];
+      
+      let index = last_active_users[chan].findIndex(item => item.name === name);
+      //console.error(chan, name, index);
+      if (index>=0)
+        last_active_users[chan].splice(index, 1);
+      
+      return last_active_users[chan]
     }
+
+
   })
 
 
@@ -898,7 +913,7 @@ Meteor.startup(() => {
         const exceptnames = ['streamelements', 'songlistbot', 'nightbot'];
         if (exceptnames.indexOf(username) < 0) {
 
-          // Keep track os last active users 
+          // Keep track of last active users 
           if (!last_active_users[chan]) {
             last_active_users[chan] = [];
           }
