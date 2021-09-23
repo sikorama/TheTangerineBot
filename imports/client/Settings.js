@@ -69,9 +69,7 @@ Template.Settings.helpers({
         //
         return BotCommands.find();
     },
-    indexed(a) {
-        return a.map((item,index) => { item.index=index; return item;})
-    }
+ 
 });
 
 
@@ -202,7 +200,7 @@ Template.Settings.events({
         const r = document.getElementsByName('addCmdRegex')[0].value;
         const a = document.getElementsByName('addCmdAnswer')[0].value;
         let channel = Session.get('sel_channel');
-        
+        console.error(n,r,a);
         if (n.length > 0 && r.length > 0 && a.length>0) {
           BotCommands.insert({channel: channel, name: n, regex: r, answers: [a] })
           //Meteor.call('addGreetLine', channel, n, r, a);
@@ -298,6 +296,14 @@ Template.ServerConfig.events({
 
 
 
+Template.CommandSetting.helpers({
+    indexed(a) {
+        if (a)
+        return a.map((item,index) => { item.index=index; return item;});
+        return [];
+    }
+})
+
 Template.CommandSetting.events({
     'change .greetline': function (event) {
         const id = event.currentTarget.parentElement.id;
@@ -327,25 +333,5 @@ Template.CommandSetting.events({
           return;
         }
     
-        if (name === 'confirm_user_greet') {
-          const u = document.getElementsByName('addCommandName')[0].value;
-          const t = document.getElementsByName('addCommandText')[0].value;
-          if (u.length > 0 && t.length > 0) {
-            Meteor.call('addGreetLine', u, t, c);
-            document.getElementsByName('addUserText')[0].value = "";
-          }
-          return;
-        }
-      },
-      // Si on clique sur le nom d'un user, ca remplt l'input 'username'
-      'click .username': function (event) {
-        const id = event.currentTarget.parentElement.id;
-        if (id != undefined) {
-          const gl = GreetMessages.findOne(id);
-          if (gl != undefined) {
-            document.getElementsByName('addUserName')[0].value = gl.username;
-            Session.set('greets_search',gl.username);
-          }
-        }
-      }
+    },
 })

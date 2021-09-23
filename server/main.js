@@ -913,6 +913,14 @@ Meteor.startup(() => {
         const exceptnames = ['streamelements', 'songlistbot', 'nightbot'];
         if (exceptnames.indexOf(username) < 0) {
 
+          let candidate = true;
+          if (botchan.active_mods===true) {
+            if (!isModerator) 
+              candidate = false;
+          }
+
+          if (candidate===true)
+          {
           // Keep track of last active users 
           if (!last_active_users[chan]) {
             last_active_users[chan] = [];
@@ -936,6 +944,7 @@ Meteor.startup(() => {
           }
           last_active_users[chan] = ar;
           //console.error(last_active_users[chan]);
+          }
         }
       }
 
@@ -1874,8 +1883,8 @@ Meteor.startup(() => {
       let txts = [
         "I'm only a bot, you know! #icon",
         "I'm a nice bot, you know! #icon",
-        "Do you want to be my friend?",
-        "I'm very shy! #icon",
+        //"Do you want to be my friend?",
+        //"I'm very shy! #icon",
         '^^ ',
         '<3 <3 <3 ',
         ':) ',
@@ -1886,15 +1895,20 @@ Meteor.startup(() => {
       ];
 
       if (lccn.indexOf('?') >= 0) {
-        txts = [
-          "Insufficient data for meaningful answer"
-        ];
+       
+        txts.push("Insufficient data for meaningful answer");
 
         if (lccn.indexOf('why') >= 0)
-          txts = ["I really don't know", "Why not?"];
+        {
+          txts.push("I really don't know");
+          txts.push("Why not?");
+        }  
 
         if ((lccn.indexOf('explain') >= 0) || (lccn.indexOf('can') >= 0))
-          txts = ["For Sure!", "Of course!"];
+        {
+          txts.push("For Sure!");
+          txtx.push("Of course!");
+        } 
 
         txt = randElement(txts);
         say(target, txt + ' ' + answername);
