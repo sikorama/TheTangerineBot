@@ -342,6 +342,14 @@
           <input class="chanSettings" type="number" value="{{c.active_max}}" name="active_max">
         </td>
       </tr>
+      <tr>
+        <td>
+          Only Mods
+        </td>
+        <td colspan="2">
+          {{>CheckMark b=c.active_mods name="active_mods"}}
+        </td>
+      </tr>
     </tbody>
     {{/if}}
 
