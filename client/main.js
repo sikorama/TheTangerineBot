@@ -275,7 +275,27 @@ Template.Stats.helpers({
     return Session.equals('statPage', parseInt(p));
   },
   getActiveUsers() {
-    return Session.get('activeUsers');
+    let au = Session.get('activeUsers');
+    let chan = Session.get('sel_channel');
+    if (!chan) return;
+    if (!au) return;
+    const bc = BotChannels.findOne({ channel: chan });
+    if (!bc) return;
+
+    // c.active_since
+    let since = parseInt(bc.active_since);
+    //d-= sch.active_since;
+    let d = Date.now();
+    if (since<10) since = 10;
+    d-= 1000*60*since;
+    let res = au.map((item)=> {
+      item.recent = item.timestamp > d;
+      return item;
+    })
+    console.error(res);
+    return res;
+
+//    return au.filter((item) => {return (item.timestamp > d);});
   },
   getraiders() {
     let sch = Session.get('sel_channel');

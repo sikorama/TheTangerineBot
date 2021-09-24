@@ -3,11 +3,11 @@
   <button class="selStat pure-button {{#if showStat 1}}pure-button-primary{{/if}}" name="1">Countries</button>
   <button class="selStat pure-button {{#if showStat 2}}pure-button-primary{{/if}}" name="2">Songs</button>
   {{#if statsEnabled}}
-    <button class="selStat pure-button {{#if showStat 3}}pure-button-primary{{/if}}" name="3">Active Users</button>
+  <button class="selStat pure-button {{#if showStat 3}}pure-button-primary{{/if}}" name="3">Active Users</button>
   {{/if}}
   <button class="selStat pure-button {{#if showStat 4}}pure-button-primary{{/if}}" name="4">Raiders</button>
   <button class="selStat pure-button {{#if showStat 5}}pure-button-primary{{/if}}" name="5">Raids</button>
-  
+
   {{#if showStat 1}}
   <h2>Number of people per country</h2>
 
@@ -94,6 +94,13 @@
 
   <h2>Last Active Users <button name="refresh">&#8634; </button></h2>
   {{#let ausers=getActiveUsers}}
+
+  <div>
+    <code>
+    {{#each c in ausers}} {{#if c.recent}} @{{c.name}} {{/if}} {{/each}}
+   </code>
+  </div>
+
   <table class="pure-table">
     <thead>
       <tr>
@@ -105,9 +112,9 @@
     <tbody>
       {{#each c in ausers}}
       <tr>
-        <td>
+        <td class="{{#unless c.recent}} ko {{/unless}}">
           <button id={{c.name}} name="remove_active_user" class="ko remove">&cross;</button>
-          {{c.name}}  
+          {{c.name}}
         </td>
         <td>
           {{c.ts}}
@@ -211,10 +218,10 @@
 
           {{/if}}
           {{/let}}
-        
+
           <a href="https://twitch.tv/{{c.channel}}">
             {{c.channel}}
-          </a> 
+          </a>
         </td>
         <td>
           {{c.count}}

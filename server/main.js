@@ -282,17 +282,17 @@ Meteor.startup(() => {
 
       return [];
     },
-    removeActiveUser(chan,name) {
+    removeActiveUser(chan, name) {
       if (!chan)
-       return [];
-      if (!last_active_users[chan]) 
-       return [];
-      
+        return [];
+      if (!last_active_users[chan])
+        return [];
+
       let index = last_active_users[chan].findIndex(item => item.name === name);
       //console.error(chan, name, index);
-      if (index>=0)
+      if (index >= 0)
         last_active_users[chan].splice(index, 1);
-      
+
       return last_active_users[chan]
     }
 
@@ -914,36 +914,35 @@ Meteor.startup(() => {
         if (exceptnames.indexOf(username) < 0) {
 
           let candidate = true;
-          if (botchan.active_mods===true) {
-            if (!isModerator) 
+          if (botchan.active_mods === true) {
+            if (!isModerator)
               candidate = false;
           }
 
-          if (candidate===true)
-          {
-          // Keep track of last active users 
-          if (!last_active_users[chan]) {
-            last_active_users[chan] = [];
-          }
+          if (candidate === true) {
+            // Keep track of last active users 
+            if (!last_active_users[chan]) {
+              last_active_users[chan] = [];
+            }
 
-          let ar = last_active_users[chan];
-          let index = ar.findIndex(val => val.name === dispname);
+            let ar = last_active_users[chan];
+            let index = ar.findIndex(val => val.name === dispname);
 
-          //console.error('find', dispname, index)
-          if (index >= 0) {
-            // Remove last occurence with this user
-            ar.splice(index, 1);
-          }
-          ar.push({ name: dispname, ts: dnow, msg: msg });
+            //console.error('find', dispname, index)
+            if (index >= 0) {
+              // Remove last occurence with this user
+              ar.splice(index, 1);
+            }
+            ar.push({ name: dispname, ts: dnow, msg: msg });
 
-          // Keep only 40 names in the list
-          let maxnames = 32;
-          //        if (botchan.active_max) maxnames = botchan.active_max;
-          if (ar.length > maxnames) {
-            ar.shift();
-          }
-          last_active_users[chan] = ar;
-          //console.error(last_active_users[chan]);
+            // Keep only 40 names in the list
+            let maxnames = 32;
+            //        if (botchan.active_max) maxnames = botchan.active_max;
+            if (ar.length > maxnames) {
+              ar.shift();
+            }
+            last_active_users[chan] = ar;
+            //console.error(last_active_users[chan]);
           }
         }
       }
@@ -1895,20 +1894,18 @@ Meteor.startup(() => {
       ];
 
       if (lccn.indexOf('?') >= 0) {
-       
+
         txts.push("Insufficient data for meaningful answer");
 
-        if (lccn.indexOf('why') >= 0)
-        {
+        if (lccn.indexOf('why') >= 0) {
           txts.push("I really don't know");
           txts.push("Why not?");
-        }  
+        }
 
-        if ((lccn.indexOf('explain') >= 0) || (lccn.indexOf('can') >= 0))
-        {
+        if ((lccn.indexOf('explain') >= 0) || (lccn.indexOf('can') >= 0)) {
           txts.push("For Sure!");
           txtx.push("Of course!");
-        } 
+        }
 
         txt = randElement(txts);
         say(target, txt + ' ' + answername);
