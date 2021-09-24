@@ -289,7 +289,7 @@ Template.Stats.helpers({
     if (since<1) since = 10;
     d-= 1000*60*since;
     let res = au.map((item)=> {
-      item.recent = item.timestamp > d;
+      item.recent = item.ts > d;
       return item;
     })
     console.error(res);
