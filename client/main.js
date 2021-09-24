@@ -291,7 +291,8 @@ Template.Stats.helpers({
     let res = au.map((item)=> {
       item.recent = item.ts > d;
       return item;
-    })
+    }).sort((a,b) => b.ts-a.ts);
+
     console.error(res);
     return res;
 
