@@ -286,7 +286,7 @@ Template.Stats.helpers({
     let since = parseInt(bc.active_since);
     //d-= sch.active_since;
     let d = Date.now();
-    if (since<10) since = 10;
+    if (since<1) since = 10;
     d-= 1000*60*since;
     let res = au.map((item)=> {
       item.recent = item.timestamp > d;
