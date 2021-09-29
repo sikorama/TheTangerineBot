@@ -16,6 +16,7 @@ import { checkLiveChannels, sendDiscord } from './notifications.js';
 import { init_publications } from './publications.js';
 import { init_quizz } from './quizz.js';
 import { init_radio } from './radio.js';
+import { init_rss } from './rss.js';
 import { initRaidManagement } from './raids.js';
 import { randElement } from './tools.js';
 import { hasRole, init_users } from './user_management.js';
@@ -258,6 +259,7 @@ Meteor.startup(() => {
   init_publications();
   initRaidManagement();
   init_radio();
+  init_rss();
 
 
   Meteor.methods({
@@ -910,7 +912,7 @@ Meteor.startup(() => {
 
       // Ignore broadcaster
       if (!isBroadcaster) {
-        const exceptnames = ['streamelements', 'songlistbot', 'nightbot'];
+        const exceptnames = ['streamelements', 'songlistbot', 'nightbot','streamlabs'];
         if (exceptnames.indexOf(username) < 0) {
 
           let candidate = true;
