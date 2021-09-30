@@ -9,39 +9,60 @@ export function buildRSSFeed(chan) {
     console.error('host=', host);
 
     // publication date === latest so recorded
-    let lastso = ShoutOuts.findOne({},{sort:{ date: -1} });
-    console.info('lastso=',lastso);
+    let lastso = ShoutOuts.findOne({}, { sort: { timestamp: -1 } });
+    console.info('lastso=', lastso);
 
     let feed = new RSS({
         title: 'Twitch-Finds',
-       // description: 'Twitch Finds by Five Hit Dune',
-        feed_url: host+'/rss/'+chan,
+        // description: 'Twitch Finds by Five Hit Dune',
+        feed_url: host + '/rss/' + chan,
         site_url: host,
-       // language: 'en',
-       // categories:['channels'],
+        // language: 'en',
+        // categories:['channels'],
         pubDate: lastso.timestamp,
         //ttl
 
-       /* <title>Example Feed</title>',
-    '  <link href="http://example.org/"/>',
-    '  <updated>2003-12-13T18:30:02Z</updated>',
-    '  <author>',
-    '    <name>John Doe</name>',
-    '  </author>',
-    '  <id>urn:uuid:60a76c80-d399-11d9-b93C-0003939e0af6</id>',
-*/
+        /* <title>Example Feed</title>',
+     '  <link href="http://example.org/"/>',
+     '  <updated>2003-12-13T18:30:02Z</updated>',
+     '  <author>',
+     '    <name>John Doe</name>',
+     '  </author>',
+     '  <id>urn:uuid:60a76c80-d399-11d9-b93C-0003939e0af6</id>',
+ */
 
 
-});
+    });
 
-    //console.error(feed.xml())
-    //return feed.xml();
-    // 
+
+
+    ShoutOuts.find({}, {sort: {timestamp:-1}}).forEach((so) => {
+        if (so.label && so.label!='off') 
+
+            feed.item({
+                title: so.so + '(Twitch-Finds '+so.label + ')',
+                description: 'https://twitch.tv/'+so.so,
+                //url
+                //guid
+                //categories
+                // author
+                // date
+                date: so.timestamp,
+                link: 'https://twitch.tv/'+so.so,
+
+            })
+    })
+
+    
+    return feed.xml();
+
+
+    // 1st method: 1 item === 1 session
     let pipeline = [];
 
     pipeline.push({
         $match: {
-            chan: '#'+chan
+            chan: '#' + chan
         }
     });
 
@@ -54,46 +75,29 @@ export function buildRSSFeed(chan) {
         }
     })
 
-    // sort by label
-    // limit: 10 last twitch finds
-
-
-    //console.error(pipeline);
-
-    /*
-    ShoutOuts.insert({ chan: target, 
-    so: soname, 
-    timestamp: Date.now(), 
-    username: username, 
-    label: label })
-    */
-
     let res = ShoutOuts.aggregate(pipeline);
-
-    //console.error(res);
-
     res.forEach((tf) => {
         console.error(tf);
 
-        if (tf._id!='off') 
-        {
+        if (tf._id != 'off') {
 
-        let chanlist = ShoutOuts.find({ label: tf._id }).fetch().map((so) => {return so.so});
-        console.error(chanlist);
+            let chanlist = ShoutOuts.find({ label: tf._id }).fetch().map((so) => { return so.so });
+            let lastso = ShoutOuts.findOne({ label: tf._id }, { sort: { timestamp: -1 } });
+            console.error(chanlist);
 
-       feed.item({
-            title: 'Twitch-Finds ' + tf._id,
-            description: chanlist.join(' '),
-            //url
-            //guid
-            //categories
-            // author
-            // date
-            date: Date.now(),
-            //link: '/rss/'+chan,
+            feed.item({
+                title: 'Twitch-Finds ' + tf._id,
+                description: chanlist.join(' '),
+                //url
+                //guid
+                //categories
+                // author
+                // date
+                date: lastso.timestamp,
+                //link: '/rss/'+chan,
 
-        })
-    } 
+            })
+        }
 
     })
 
@@ -101,18 +105,21 @@ export function buildRSSFeed(chan) {
 }
 
 
+
+
+
 export function init_rss() {
     // Serve RSS file / Route
-    Picker.route('/rss/:chan', function(params, req, res, next) {
+    Picker.route('/rss/:chan', function (params, req, res, next) {
         console.error(params.chan);
-        res.writeHead(200, {"Content-Type": 'application/rss+xml'});        
+        res.writeHead(200, { "Content-Type": 'application/rss+xml' });
         res.end(buildRSSFeed(params.chan));
-       
+
         //        res.set('Content-Type', 'application/rss+xml')
         //res.send(buildRSSFeed(chan));
 
         //res.end(post.content);
-      });
+    });
 
 }
 
