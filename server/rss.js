@@ -36,19 +36,19 @@ export function buildRSSFeed(chan) {
 
 
 
-    ShoutOuts.find({}, {sort: {timestamp:-1}}).forEach((so) => {
-        if (so.label && so.label!='off') 
+    ShoutOuts.find({}, {limit: 100, sort: {timestamp:-1}}).forEach((so) => {
+        if (so.label) //  && so.label!='off') 
 
             feed.item({
-                title: so.so + '(Twitch-Finds '+so.label + ')',
+                title: so.so, 
                 description: 'https://twitch.tv/'+so.so,
                 //url
-                //guid
-                //categories
-                // author
+                guid: 'Twitch-Finds-'+so.label + '-'+ so.so,
+                categories: so.label,
+                author:  so.username,
                 // date
                 date: so.timestamp,
-                link: 'https://twitch.tv/'+so.so,
+                url: 'https://twitch.tv/'+so.so,
 
             })
     })
