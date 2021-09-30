@@ -6,10 +6,13 @@ var RSS = require('rss');
 export function buildRSSFeed(chan) {
 
     let host = Meteor.absoluteUrl();
-    console.error('host=', host);
+    //console.error('host=', host);
 
     // publication date === latest so recorded
-    let lastso = ShoutOuts.findOne({}, { sort: { timestamp: -1 } });
+    let lastso = ShoutOuts.findOne({chan:'#'+chan}, { sort: { timestamp: -1 } });
+    if (!lastso)
+        return;
+
     console.info('lastso=', lastso);
 
     let feed = new RSS({
@@ -20,7 +23,7 @@ export function buildRSSFeed(chan) {
         // language: 'en',
         // categories:['channels'],
         pubDate: lastso.timestamp,
-        //ttl
+        ttl: '1',
 
         /* <title>Example Feed</title>',
      '  <link href="http://example.org/"/>',
@@ -36,15 +39,15 @@ export function buildRSSFeed(chan) {
 
 
 
-    ShoutOuts.find({}, {limit: 100, sort: {timestamp:-1}}).forEach((so) => {
-        if (so.label) //  && so.label!='off') 
-
+    ShoutOuts.find({chan:'#'+chan}, {limit: 100, sort: {timestamp:-1}}).forEach((so) => {
+        if (so && so.label) //  && so.label!='off') 
+        //console.error(so);
             feed.item({
                 title: so.so, 
                 description: 'https://twitch.tv/'+so.so,
                 //url
                 guid: 'Twitch-Finds-'+so.label + '-'+ so.so,
-                categories: so.label,
+                categories: [so.label],
                 author:  so.username,
                 // date
                 date: so.timestamp,
@@ -56,7 +59,7 @@ export function buildRSSFeed(chan) {
     
     return feed.xml();
 
-
+/*
     // 1st method: 1 item === 1 session
     let pipeline = [];
 
@@ -101,7 +104,7 @@ export function buildRSSFeed(chan) {
 
     })
 
-    return feed.xml();
+    return feed.xml();*/
 }
 
 
