@@ -833,10 +833,10 @@ Meteor.startup(() => {
     //    console.error(context, isModerator);
 
     let dnow = new Date();
-    console.error(dnow.toLocaleDateString(), dnow.toLocaleTimeString(), '#' + chan, '< [' + username + ']', commandName);
+    console.info(dnow.toLocaleDateString(), dnow.toLocaleTimeString(), '#' + chan, '< [' + username + ']', commandName);
 
     // Songlisbot requests
-    if (username == "songlistbot" && botchan.map === true) {
+    if (botchan.map === true && username == "songlistbot") {
       try {
         if (botchan.songrequest) {
           // Try default regexs, as songlistbot has different messages for request      
@@ -1035,7 +1035,7 @@ Meteor.startup(() => {
       return;
     }
 
-
+    // Temporary command
     if ((cmd === 'tutu') || (cmd == 'tututu')) {
       const tutuans = ['SingsNote tututuru tutututuruu SingsNote',
         'SingsNote tututu tututuru tutututuruu SingsNote',
@@ -1765,7 +1765,7 @@ Meteor.startup(() => {
             selGenSentence = false;
         }
 
-        // Phrase generique (basée sur la langue/map)
+        // Generic Sentence (based on map)
         if (selGenSentence === true) {
           if (u) {
             // on a son pays
@@ -1850,6 +1850,27 @@ Meteor.startup(() => {
         return;
       }
     }
+
+    // Send a message on discord for calling the bot admin
+    if (cmd === 'summon' || cmd==='calladmin') {
+      //console.info(target, context);
+      if (isModerator) {
+
+        let title = 'Admin Call by '+ username +' from ' + chan + ' : ' +  msg;
+        console.error(title);
+        // Global URL(s)
+        if (bot_discord_live_url)
+        sendDiscord(title, bot_discord_live_url);
+        say(target, "Ok, i've sent a message to who-you-know");        
+        return;        
+      }
+      else {
+        say(target, "Only Mods are allowed to summon who-you-know");        
+        return;
+      }        
+
+    }
+
 
     // Test command to retrieve infos
     if (cmd === 'test') {
