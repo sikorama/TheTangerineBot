@@ -1,7 +1,7 @@
 import { UserLocations, BotChannels, GreetMessages, Settings, QuizzQuestions, QuizzScores, Stats } from '../imports/api/collections.js';
 
 
-const filterAnswer = function (a) {
+function filterAnswer (a) {
   a = a.replace(/[\r\n]/g, ";");
   let aa = a.split(';');
   let res = '';

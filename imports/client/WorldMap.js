@@ -1,4 +1,4 @@
-import './WorldMap.html'
+import './WorldMap.html';
 import { Session } from 'meteor/session';
 import { checkUserRole } from '../api/roles.js';
 import { BotChannels, Images } from '../api/collections.js';
@@ -43,7 +43,7 @@ Template.WorldMap.onRendered(function () {
     // Create Map
     let mymap = L.map('map').setView([51.505, -0.09], 2);
 
-    let layer = undefined;
+    let layer;
     let markers = {};
     let cursor;
 
@@ -106,7 +106,7 @@ Template.WorldMap.onRendered(function () {
           else {
 
             if (!isNaN(item.latitude)) {
-              let uname = ''
+              let uname = '';
               let txt = '';
               let icon = 0;
 
@@ -135,7 +135,7 @@ Template.WorldMap.onRendered(function () {
               // Message?
               if ((item[msgfield] != undefined) && (item[msgfield].length > 0)) {
                   if (txt.length > 0)
-                    txt += '<br>'
+                    txt += '<br>';
                   txt += item[msgfield];
                   icon = 2;
                 }
@@ -143,7 +143,7 @@ Template.WorldMap.onRendered(function () {
               // Song request?
               if (item[songreqfield]) {
                 if (txt.length > 0)
-                 txt += '<br>'
+                 txt += '<br>';
                 txt += item[songreqfield];                
               }
 
@@ -169,7 +169,7 @@ Template.WorldMap.onRendered(function () {
         catch (e) {
           console.error(e.stack);
         }
-      })
+      });
 
       let ak = Object.keys(markers);
       if (ak.length > 0) {
@@ -177,7 +177,7 @@ Template.WorldMap.onRendered(function () {
           let mm = markers[k];
           if (mm != undefined) {
             mymap.removeLayer(mm);
-            delete mm;
+            //delete mm;
           }
         });
       }
@@ -254,7 +254,7 @@ Template.WorldMap.onRendered(function () {
       const windowHeight = (window.innerHeight - 48) * 0.9;
       const container = document.querySelector('#map');
       $("#map").height(windowHeight);
-      setTimeout(function () { mymap.invalidateSize() }, 200);
+      setTimeout(function () { mymap.invalidateSize(); }, 200);
     }, 100);
 
     resize();
@@ -273,5 +273,5 @@ Template.WorldMap.helpers({
 
 Template.WorldMap.events({
   'input .search': _.debounce(function (event) { manageSearchEvents(event, 'searchUsers'); }, 300),
-})
+});
 

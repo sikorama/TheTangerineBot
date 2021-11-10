@@ -39,7 +39,7 @@ export function getParentId(el) {
       Session.set(field_name, n);
       Session.set(field_dir, 1);
     }
-  };
+  }
   
 
   export function genDataBlob(data, elementId,ext) {  
@@ -51,7 +51,7 @@ export function getParentId(el) {
       }
       let blob = new Blob([data], { type: 'text/dot' });
       let csvUrl = URL.createObjectURL(blob);
-      let dte = new Date()
+      let dte = new Date();
       let cur_month = dte.getMonth() + 1;
       let cur_year = dte.getFullYear();
       if (cur_month < 10) cur_month = "0" + cur_month;

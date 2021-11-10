@@ -46,7 +46,7 @@ Template.Settings.helpers({
     userHasRole(uid, role) {
         return checkUserRole(role, uid);
     },
-    stringify(o) { return JSON.stringify(o) },
+    stringify(o) { return JSON.stringify(o); },
     pictures() {
         return Images.find();
     },
@@ -82,7 +82,7 @@ Template.Settings.events({
         return false;
     },
     'click button.selStat': function (ev) {
-        Session.set('settingsPage', parseInt(ev.currentTarget.name))
+        Session.set('settingsPage', parseInt(ev.currentTarget.name));
     },
     'click button.addChannel': function (event) {
         n = document.getElementById('newChannel').value.trim();
@@ -101,7 +101,7 @@ Template.Settings.events({
             if (err)
                  console.error(err);
             // To blob
-            genDataBlob(res,'dotlink','dot')
+            genDataBlob(res,'dotlink','dot');
         });        
     },
     'click button.exportCSV': function(event) {
@@ -110,7 +110,7 @@ Template.Settings.events({
             if (err)
                 console.error(err);
             // To blob
-            genDataBlob(res,'csvlink','csv')
+            genDataBlob(res,'csvlink','csv');
         });        
     },  
     'click button.export_live_events': function(event) {
@@ -118,13 +118,13 @@ Template.Settings.events({
         let from = to - 1000*3600*24*15;
         let team = null;
         
-        let fe=document.getElementById('liveFrom')
-        let te=document.getElementById('liveTo')
-        let teame=document.getElementById('liveTeam')
+        let fe=document.getElementById('liveFrom');
+        let te=document.getElementById('liveTo');
+        let teame=document.getElementById('liveTeam');
         if (fe.value) from = parseInt(fe.value);
-        else fe.value = from
+        else fe.value = from;
         if (te.value) to = parseInt(te.value);
-        else te.value = to
+        else te.value = to;
         if (teame.value) team = teame.value;
         
       
@@ -132,7 +132,7 @@ Template.Settings.events({
             if (err)
                 console.error(err);
             // To blob
-            genDataBlob(res,'livelink','csv')
+            genDataBlob(res,'livelink','csv');
         });        
     },  
     'click .toggleCheck': function (event) {
@@ -202,7 +202,7 @@ Template.Settings.events({
         let channel = Session.get('sel_channel');
         console.error(n,r,a);
         if (n.length > 0 && r.length > 0 && a.length>0) {
-          BotCommands.insert({channel: channel, name: n, regex: r, answers: [a] })
+          BotCommands.insert({channel: channel, name: n, regex: r, answers: [a] });
           //Meteor.call('addGreetLine', channel, n, r, a);
           document.getElementsByName('addCmdName')[0].value = "";
           document.getElementsByName('addCmdRegex')[0].value = "";
@@ -284,7 +284,7 @@ Template.ServerConfig.events({
     if ((before.length>0) && (after.length>0))
     Meteor.call('rename', before, after, id==='btapply', function(err,res) {
         
-        if (err) console.error(err)
+        if (err) console.error(err);
         else 
         alert(res);
 
@@ -302,7 +302,7 @@ Template.CommandSetting.helpers({
         return a.map((item,index) => { item.index=index; return item;});
         return [];
     }
-})
+});
 
 Template.CommandSetting.events({
     'change .greetline': function (event) {
@@ -315,11 +315,11 @@ Template.CommandSetting.events({
         //Meteor.call('updateGreetLine', id, r, o);
       },
       'click button': function (event) {
-        const id = getParentId(event.currentTarget) //.parentElement.id;
+        const id = getParentId(event.currentTarget); //.parentElement.id;
         const name = event.currentTarget.name;  
         const cl = event.currentTarget.className;
         if (cl.indexOf('toggleCheck') >= 0) {
-          const b = (cl.indexOf('ok') < 0)
+          const b = (cl.indexOf('ok') < 0);
           console.error("toggle", id, name,b);
           Meteor.call('updateCommand', id, parseInt(name), { enabled: b });
           return;
@@ -334,4 +334,4 @@ Template.CommandSetting.events({
         }
     
     },
-})
+});

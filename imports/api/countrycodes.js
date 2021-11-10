@@ -10,9 +10,8 @@ export const country_names = {
     'AZ': 'Azerbaijan',
     'BA': 'Bosnia',
     'BE': 'Belgium',
-    'BF': 'Burkna Faso',
+    'BF': 'Burkina Faso',
     'BO': 'Bolivia',
-    'BG': 'Burin Faso',
     'BG': 'Bulgaria',
     'BR': 'Brazil',
     'BY': 'Belarus',
@@ -86,5 +85,5 @@ export const country_names = {
     if (cn in country_names)
       return country_names[cn];
     return cn;
- };
+ }
 

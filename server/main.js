@@ -42,16 +42,16 @@ var bot_discord_raid_url = process.env.BOT_DISCORD_RAID_HOOK;
 var bot_discord_live_url = process.env.BOT_DISCORD_LIVE_HOOK;
 
 if (bot_discord_live_url)
-  Settings.upsert({ param: 'discord_goinglive' }, { $set: { val: bot_discord_live_url } })
+  Settings.upsert({ param: 'discord_goinglive' }, { $set: { val: bot_discord_live_url } });
 
 if (bot_discord_raid_url)
-  Settings.upsert({ param: 'discord_raid' }, { $set: { val: bot_discord_raid_url } })
+  Settings.upsert({ param: 'discord_raid' }, { $set: { val: bot_discord_raid_url } });
 
 client_id = process.env.CLIENT_ID;
 client_secret = process.env.CLIENT_SECRET;
 
 if (client_id != undefined) {
-  Meteor.setInterval(function () { checkLiveChannels(client_id, client_secret) }, 1000 * 60)
+  Meteor.setInterval(function () { checkLiveChannels(client_id, client_secret); }, 1000 * 60);
 }
 
 botpassword = 'oauth:' + botpassword;
@@ -61,14 +61,14 @@ botpassword = 'oauth:' + botpassword;
 // Array to keep track of last active users (per channel)
 let last_active_users = {};
 
-let WEBSITE_URL = "http://localhost"
+let WEBSITE_URL = "http://localhost";
 let wurl = process.env.WEBSITE_URL;
 if (wurl) WEBSITE_URL = wurl;
 
 const randomWords = [
   'ACTION',
   "BAH C'MON"
-]
+];
 
 
 // Stack for answering to greetings.
@@ -82,7 +82,7 @@ let greetingsStack = [];
 let autotranslate = {};
 
 // Current Question (contains full object)
-var curQuestion = undefined;
+var curQuestion;
 var numQuestions = 0;
 
 // FIXME: Add referer, user-agent...
@@ -152,14 +152,14 @@ function findClosest(uid, chan, nb) {
     if ((cc.dist < 20) && (uid != cc._id)) {
       let u = UserLocations.findOne(cc._id);
       if (u != undefined)
-        nc.push('@' + u.dname)
+        nc.push('@' + u.dname);
     }
   }
 
   // Store / cache
   //  UserLocations.update(uid, { $set: { timestamp: t0, proximity: nc } });
   return nc;
-};
+}
 
 
 function randSentence() {
@@ -208,7 +208,7 @@ const selectQuestion = function () {
   //  console.error(p);
   let sel = {
     enabled: true
-  }
+  };
 
   if ((p != undefined) && (p.val.length > 0))
     sel.topics = { $in: p.val };
@@ -271,7 +271,7 @@ Meteor.startup(() => {
       if (hasRole(this.userId, ['admin']))
         addChannel(chan.toLowerCase(), ["enabled"]);
     }
-  })
+  });
 
   Meteor.methods({
     getActiveUsers: function (chan) {
@@ -295,11 +295,11 @@ Meteor.startup(() => {
       if (index >= 0)
         last_active_users[chan].splice(index, 1);
 
-      return last_active_users[chan]
+      return last_active_users[chan];
     }
 
 
-  })
+  });
 
 
   Meteor.methods({
@@ -357,7 +357,7 @@ Meteor.startup(() => {
         if (apply) {
           c.forEach((r) => {
             Raiders.upsert({ raider: after, channel: r.channel }, { $inc: { count: r.count, viewers: r.viewers } });
-          })
+          });
           Raiders.remove({ raider: before });
         }
       }
@@ -369,7 +369,7 @@ Meteor.startup(() => {
         if (apply) {
           c.forEach((r) => {
             Raiders.upsert({ raider: r.raider, channel: lowca }, { $inc: { count: r.count, viewers: r.viewers } });
-          })
+          });
           Raiders.remove({ channel: lowcb });
         }
       }
@@ -385,7 +385,7 @@ Meteor.startup(() => {
 
       return desc.join('\n');
     }
-  })
+  });
 
   // Every 10 seconds, check if there's someone to greet
   // It allows to answer with a random delay, and also avoir too much
@@ -439,7 +439,7 @@ Meteor.startup(() => {
           timestamp: new Date(),
           channels: ['TEMP'],
           country: randElement(['GE', 'FR', 'BR', 'JP'])
-        }
+        };
         if (Math.random() > 0.5) doc.allow = true;
         if (Math.random() > 0.5) doc.msg = randSentence();
         UserLocations.insert(doc);
@@ -490,7 +490,7 @@ Meteor.startup(() => {
       else {
         // Use geoCoder API for convrerting
         geoCoder.geocode(item.location).then(Meteor.bindEnvironment(function (res) {
-          let fres = { longitude: "NA" }
+          let fres = { longitude: "NA" };
           if (res.length > 0)
             fres = res[0];
 
@@ -498,7 +498,7 @@ Meteor.startup(() => {
             latitude: parseFloat(fres.latitude),
             longitude: parseFloat(fres.longitude),
             country: fres.countryCode
-          }
+          };
           UserLocations.update(item._id, { $set: upobj });
 
           let p = Settings.findOne({ param: 'location_interval' });
@@ -554,7 +554,7 @@ Meteor.startup(() => {
         return Settings.findOne({ param: param });
       Settings.upsert({ param: param }, { $set: { val: val } });
     }
-  })
+  });
 
   // Channels management
   Meteor.methods({
@@ -590,7 +590,7 @@ Meteor.startup(() => {
       // Check user is owner or admin
       // Chec 
       let sobj = {};
-      sobj[chan] = { $exists: true }
+      sobj[chan] = { $exists: true };
       let idfield = "$" + field;
       let nums = UserLocations.find(sobj).count();
 
@@ -613,8 +613,7 @@ Meteor.startup(() => {
           {
             $round: [
 
-              { "$multiply": [{ "$divide": ["$t", { "$literal": nums }] }, 100] }
-              , 2
+              { "$multiply": [{ "$divide": ["$t", { "$literal": nums }] }, 100] } , 2
             ]
           }
         }
@@ -626,13 +625,13 @@ Meteor.startup(() => {
     },
     export_userloc: function (channame) {
       if (this.userId) {
-        console.error('export', channame)
-        let sel = {}
-        sel[channame] = { $exists: 1 }
+        console.error('export', channame);
+        let sel = {};
+        sel[channame] = { $exists: 1 };
         let res = UserLocations.find(sel, { sort: { dname: 1 } }).fetch().map((item) => {
-          return ([item.dname, item.location, item.latitude, item.longitude, item.country, item.msg].join(';'))
+          return ([item.dname, item.location, item.latitude, item.longitude, item.country, item.msg].join(';'));
         });
-        res.unshift('Name;Location;Latitude;Longitude;Country;Message')
+        res.unshift('Name;Location;Latitude;Longitude;Country;Message');
         return res.join('\n');
       }
     },
@@ -647,11 +646,11 @@ Meteor.startup(() => {
       curState = chans.map(() => 0);
 
       if (from || to) {
-        sel.timestamp = {}
+        sel.timestamp = {};
         if (from)
-          sel.timestamp.$gt = from
+          sel.timestamp.$gt = from;
         if (to)
-          sel.timestamp.$lt = to
+          sel.timestamp.$lt = to;
       }
 
       let res = [];
@@ -664,7 +663,7 @@ Meteor.startup(() => {
         curState[index] = ev.live ? 1 : 0;
         res.push(curState.join(';'));
         console.info(curState);
-      })
+      });
       return res.join('\n');
     }
   });
@@ -773,16 +772,16 @@ Meteor.startup(() => {
     let d = Date.now(); // new Date();
     if (u != undefined) {
       let uo = {};
-      uo[chan] = d
+      uo[chan] = d;
       UserLocations.update(u._id, { $set: uo });
     }
 
     // Last Greet (greetings)
     if (username != undefined) {
-      let o = {}
+      let o = {};
       o[chan] = d;
       //      console.error(o);
-      GreetDate.upsert({ name: username }, { $set: o })
+      GreetDate.upsert({ name: username }, { $set: o });
       //      console.error(GreetDate.findOne({name:username}));
     }
   }
@@ -801,8 +800,8 @@ Meteor.startup(() => {
   raid_bclient.connect();
 
   // Default regex for parsing requests
-  const default_regsonglistreq1 = /(.*) \brequested\s(.*)\s\bat position/
-  const default_regsonglistreq2 = /@(.*), (.*)added to queue/
+  const default_regsonglistreq1 = /(.*) \brequested\s(.*)\s\bat position/;
+  const default_regsonglistreq2 = /@(.*), (.*)added to queue/;
 
   // Called every time a message comes in
   function onMessageHandler(target, context, msg, self) {
@@ -858,19 +857,18 @@ Meteor.startup(() => {
             // Removes @
             if (req_user[0] === '@')
               req_user = req_user.substring(1);
-            console.info('-- SONG REQUEST:', req_user, req_song)
+            console.info('-- SONG REQUEST:', req_user, req_song);
             if (rul) {
-              let objupdate = {
-              }
+              let objupdate = {};
               objupdate[chan + '-lastreq'] = req_song;
               console.info(' => update map:', objupdate);
 
-              UserLocations.update(rul._id, { $set: objupdate })
+              UserLocations.update(rul._id, { $set: objupdate });
             }
           }
         }
 
-      } catch (e) { console.error(e) }
+      } catch (e) { console.error(e); }
       return;
     }
 
@@ -897,7 +895,7 @@ Meteor.startup(() => {
 
       cmdarray = commandName.split(' ').filter(function (item) {
         try {
-          return (item.length > 0)
+          return (item.length > 0);
         }
         catch (e) {
           console.error(e);
@@ -1115,7 +1113,7 @@ Meteor.startup(() => {
 
       if (isModerator && cmd === "translate") {
         if (cmdarray.length > 1) {
-          let u = cmdarray[1].toLowerCase()
+          let u = cmdarray[1].toLowerCase();
           /// Remove @
           if (u[0] === '@') u = u.substring(1);
           console.error(u);
@@ -1132,11 +1130,11 @@ Meteor.startup(() => {
             }
           }
           if (atdt > 0) {
-            console.info('Autotranslate enabled for ', u)
+            console.info('Autotranslate enabled for ', u);
             autotranslate[u] = Date.now() + atdt * 60 * 1000;
           }
           else {
-            console.info('Autotranslate disabled for', u)
+            console.info('Autotranslate disabled for', u);
             delete autotranslate[u];
           }
           console.info(autotranslate);
@@ -1155,7 +1153,7 @@ Meteor.startup(() => {
         //    'germans': '',
         //    'spanish': '',
         'french': 'Vous pouvez utiliser notre bot traducteur. Commencez votre message par !en pour traduire votre message en anglais. Par exemple "!en Bonjour"',
-      }
+      };
       if (cmd in explanations) {
         say(target, explanations[cmd]);
         return;
@@ -1393,7 +1391,7 @@ Meteor.startup(() => {
           timestamp: now,
           channels: [target],
           allow: false,
-        }
+        };
         // Interaction stamp
         doc[chan] = now;
 
@@ -1408,7 +1406,7 @@ Meteor.startup(() => {
                 'Use !forget if you want me to forget your location!',
                 'Use !show to allow me to display your nickname on the map',
                 'Use !msg to add a personalized message on the map',
-              ]*/;
+              ]*/
             txt = 'Use !show to allow me to display your nickname on the map'; //,randElement(addmess); //.[Math.floor(Math.random() * (addmess.length - 1))];
             say(target, answername + " Ok, thanks! " + txt, username);
             return;
@@ -1455,7 +1453,7 @@ Meteor.startup(() => {
 
       if (cmd.indexOf('score') === 0) {
         let s = QuizzScores.findOne({ user: username });
-        let sc = 0
+        let sc = 0;
         if (s !== undefined) sc = s.score;
 
         if (sc > 1)
@@ -1571,7 +1569,7 @@ Meteor.startup(() => {
 
         if (ca === true) {
           let delta = Date.now() - curQuestion.date;
-          let dtxt = ''
+          let dtxt = '';
           if (curQuestion.comment != undefined)
             if (curQuestion.comment.length > 0)
               dtxt += ' ' + curQuestion.comment;
@@ -1609,7 +1607,7 @@ Meteor.startup(() => {
         }
 
         if (label.toLowerCase() === 'off') {
-          say(target, 'Shoutout monitoring is now off')
+          say(target, 'Shoutout monitoring is now off');
           try {
 
             // Sending a discord notification with all so with the current label
@@ -1618,7 +1616,7 @@ Meteor.startup(() => {
               const sos = ShoutOuts.find({ label: l }, { sort: { timestamp: 1 } }).fetch().map(element => element.so);
               const title = 'Twitch Finds ' + l;
               let msg = title + '\n```\n' + sos.join('\n') + '```';
-              console.info(msg)
+              console.info(msg);
               sendDiscord(msg, botchan.discord_so_url);
             }
           } catch (e) {
@@ -1645,15 +1643,15 @@ Meteor.startup(() => {
             // Also store in database
             let label = botchan.storeso_label;
             if (!label) {
-              label = 'off'
+              label = 'off';
             }
-            ShoutOuts.insert({ chan: target, so: soname, timestamp: Date.now(), username: username, label: label })
+            ShoutOuts.insert({ chan: target, so: soname, timestamp: Date.now(), username: username, label: label });
           }
 
           if (botchan.discord_so_url) {
             let label = botchan.storeso_label;
             if (!label) {
-              label = 'off'
+              label = 'off';
             }
             if (label.toLowerCase() != 'off') {
               const title = 'https://twitch.tv/' + soname;
@@ -1663,7 +1661,7 @@ Meteor.startup(() => {
 
 
           if (botchan.so === true) {
-            sendSOGreetings(botchan, target, soname)
+            sendSOGreetings(botchan, target, soname);
             return;
           }
         }
@@ -1778,7 +1776,7 @@ Meteor.startup(() => {
               }
             }
             else {
-              console.warn('No Country code for ', u)
+              console.warn('No Country code for ', u);
             }
             lang = lang.toLowerCase();
 
@@ -1798,7 +1796,7 @@ Meteor.startup(() => {
                     let a = item.hmin;
                     let b = item.hmax;
                     if (a < b)
-                      return ((localH >= a) && (localH <= b))
+                      return ((localH >= a) && (localH <= b));
                     return ((localH >= a) || (localH <= b));
                   }
                   else
@@ -1846,7 +1844,7 @@ Meteor.startup(() => {
     if (cmd.indexOf(botname_short + '-command') === 0) {
       let url = Settings.findOne({ param: 'URL' });
       if (url) {
-        say(target, "You'll find available commands for ttcBot here: " + url.val + "/c/" + chan + '/commands')
+        say(target, "You'll find available commands for ttcBot here: " + url.val + "/c/" + chan + '/commands');
         return;
       }
     }
@@ -1939,8 +1937,7 @@ Meteor.startup(() => {
       }
       return;
     }
-
-  };
+  }
 
   // Called every time the bot connects to Twitch chat
   function onConnectedHandler(addr, port) {

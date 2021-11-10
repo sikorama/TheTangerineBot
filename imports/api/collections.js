@@ -1,5 +1,5 @@
 import { Mongo } from 'meteor/mongo';
-import { Index, MongoDBEngine } from 'meteor/easy:search'
+import { Index, MongoDBEngine } from 'meteor/easy:search';
 import { FilesCollection } from 'meteor/ostrio:files';
 import { checkUserRole } from './roles.js';
 
@@ -86,7 +86,7 @@ export const BotCommands = new Mongo.Collection('botcommands');
             }
 
             if (options.search.props.hasOwnProperty('streamer')) {
-                selector.streamer = true
+                selector.streamer = true;
             }
 
             if (options.search.props.hasOwnProperty('team')) {
@@ -102,7 +102,7 @@ export const BotCommands = new Mongo.Collection('botcommands');
         },
 
         fields: function (searchObject, options) {
-            let fulldata = (options.search.props.map !== true)
+            let fulldata = (options.search.props.map !== true);
             let admin = checkUserRole('admin streamer', options.userId);
             if (admin === false) fulldata = false;
 

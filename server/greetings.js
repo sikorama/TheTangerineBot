@@ -4,6 +4,14 @@ import { randElement } from './tools.js';
 import { hasRole } from './user_management.js';
 import { regexan, regexf, regexi, regexn, regexnn, regext } from '../imports/api/regex.js';
 
+
+export const pregexn = /@name/gi;
+export const pregexan = /@atname/gi;
+export const pregexnn = /@nickname/gi;
+export const pregexi = /@icon/gi;
+export const pregexf = /@follow/gi;
+export const pregext = /@twitch/gi;
+
 // chan (optionel) : Pour liiter un message a un channel
 
 /**
@@ -17,7 +25,7 @@ export function addGreetLine(username, txt, chan, editor) {
   // On force le passage en minuscule
   username = username.trim().toLowerCase();
 
-  let doc = { username: username }
+  let doc = { username: username };
   let pgl = GreetMessages.findOne({ username: username });
   // Fusionne si existe deja
 
@@ -38,7 +46,7 @@ export function addGreetLine(username, txt, chan, editor) {
     doc.texts = [li];
   }
 
-  doc.lang = (username.length === 2)
+  doc.lang = (username.length === 2);
   GreetMessages.upsert({ username: username }, doc);
 }
 
@@ -78,15 +86,11 @@ export function init_greetings() {
     addGreetLine('RU', 'Привет #name #icon');
   }
 
+
+  
   // Fix Greetlines @=># 
   GreetMessages.find().fetch().forEach((item) => {
     let nt = item.texts.map((t) => {
-      export const pregexn = /@name/gi;
-      export const pregexan = /@atname/gi;
-      export const pregexnn = /@nickname/gi;
-      export const pregexi = /@icon/gi;
-      export const pregexf = /@follow/gi;
-      export const pregext = /@twitch/gi;
       t.txt = t.txt.replace(pregexn, '#name');
       t.txt = t.txt.replace(pregexan, '#atname');
       t.txt = t.txt.replace(pregexnn, '#nickname');
@@ -94,9 +98,9 @@ export function init_greetings() {
       t.txt = t.txt.replace(pregexf, '#follow');
       t.txt = t.txt.replace(pregext, '#twitch');
       return t;
-    })
-    GreetMessages.update(item._id, { $set: { texts: nt } })
-  })
+    });
+    GreetMessages.update(item._id, { $set: { texts: nt } });
+  });
 
 
   Meteor.methods({
@@ -217,7 +221,7 @@ export function replaceKeywords(txt, options) {
   }
 
   if (txt.indexOf('#follow') >= 0) {
-    let followtxt = randElement(followtxts)
+    let followtxt = randElement(followtxts);
     txt = txt.replace(regexf, followtxt);
   }
 

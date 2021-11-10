@@ -5,7 +5,7 @@ let httpreq = require('httpreq');
 export function sendDiscord(title, discord_url, embeds) {
   let payload = {
     content: title,
-  }
+  };
 
   if (embeds)
     payload.embeds = embeds;
@@ -27,7 +27,7 @@ function genChanEmbed(channel) {
     image: {
       url: 'https://static-cdn.jtvnw.net/previews-ttv/live_user_' + channel + '-640x400.jpg'
     }
-  }
+  };
   return embed;
 }
 
@@ -92,7 +92,7 @@ export function getTwitchToken(client_id, client_secret) {
     'client_id': client_id,
     'client_secret': client_secret,
     "grant_type": 'client_credentials'
-  }
+  };
   let url = 'https://id.twitch.tv/oauth2/token';
 
   httpreq.post(url, {
@@ -130,7 +130,7 @@ export function checkLiveChannels(client_id, client_private) {
     let headers = {
       'Client-ID': client_id,
       'Authorization': 'Bearer ' + client_token
-    }
+    };
 
     let url = "https://api.twitch.tv/helix/streams?";
     url += channels.map((item) => 'user_login=' + item).join('&');
@@ -166,7 +166,7 @@ export function checkLiveChannels(client_id, client_private) {
                 live_title: f.title,
                 live_thumbnail_url: f.thumbnail_url,
                 live_viewers: f.viewer_count,           
-            }
+            };
 
               // If we were not live, we'll send a notification
               // And we store in LiveEvents database
@@ -187,14 +187,14 @@ export function checkLiveChannels(client_id, client_private) {
                     let glob_discord_goinglive = Settings.findOne({ param: 'discord_goinglive' });
                     if (glob_discord_goinglive)
                       if (glob_discord_goinglive.val)
-                        sendLiveDiscord(f, glob_discord_goinglive.val)
+                        sendLiveDiscord(f, glob_discord_goinglive.val);
 
                     if (c.discord_goinglive_url1)
-                      sendLiveDiscord(f, c.discord_goinglive_url1, { everyone: true })
+                      sendLiveDiscord(f, c.discord_goinglive_url1, { everyone: true });
                     if (c.discord_goinglive_url2)
-                      sendLiveDiscord(f, c.discord_goinglive_url2)
+                      sendLiveDiscord(f, c.discord_goinglive_url2);
                     if (c.discord_goinglive_url3)
-                      sendLiveDiscord(f, c.discord_goinglive_url3)
+                      sendLiveDiscord(f, c.discord_goinglive_url3);
 
                   }
                 }
@@ -210,10 +210,10 @@ export function checkLiveChannels(client_id, client_private) {
             // On n'est plus live
             if (c.live === true) {
               LiveEvents.insert({channel: chan, timestamp: d, live: false, team: c.team});
-              BotChannels.upsert({ channel: chan }, { $set: { live: false } })
+              BotChannels.upsert({ channel: chan }, { $set: { live: false } });
             }
           }
-        })
+        });
       } else {
         console.error("Helix Server Err:", err);
         // probably means the token has expired

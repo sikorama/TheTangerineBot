@@ -1,4 +1,4 @@
-import { Session } from 'meteor/session'
+import { Session } from 'meteor/session';
 
 
 FlowRouter.notFound = {

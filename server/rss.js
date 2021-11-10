@@ -53,8 +53,8 @@ export function buildRSSFeed(chan) {
                 date: so.timestamp,
                 url: 'https://twitch.tv/'+so.so,
 
-            })
-    })
+            });
+    });
 
     
     return feed.xml();

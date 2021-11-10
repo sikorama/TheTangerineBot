@@ -52,13 +52,13 @@ export function setUserGroups(userid, groups) {
                 'groups': groups
             }
         });
-};
+}
 
 export function setUserRoles(userid, roles) {
-    console.warn("set User Roles", userid, roles)
+    console.warn("set User Roles", userid, roles);
     if (roles != undefined)
         Roles.setUserRoles(userid, roles);
-};
+}
 
 //doc: username, mail, password, roles, groups
 export function addUser(doc) {
@@ -122,7 +122,7 @@ function createStreamerAccount(uname, chan, pw, pwguest) {
 function createDefaultAccounts() {
     createSuperAdmin('admin', 'admin');
     createStreamerAccount('myname', 'mychannel', 'mypass');
-};
+}
 
 export function init_users() {
     // Create default account if none exists
@@ -146,7 +146,7 @@ export function init_users() {
                 createStreamerAccount(doc.name, doc.chan, doc.pw);
             }
             else {
-                console.error('Insert User: not allowed!')
+                console.error('Insert User: not allowed!');
             }
         },
         removeUser: function (uid) {
@@ -166,7 +166,7 @@ export function init_users() {
         forcePassword: function (doc) {
             if (isAdmin(this.userId)) {
                 try {
-                    const newPassword = doc.modifier['$set'].password;
+                    const newPassword = doc.modifier.$set.password;
                     Accounts.setPassword(doc._id, newPassword);
                 }
                 catch (e) {
@@ -179,7 +179,7 @@ export function init_users() {
                 const user = Meteor.users.findOne({
                     'username': name
                 });
-                console.warn("SetUserRoles", name, roles)
+                console.warn("SetUserRoles", name, roles);
                 if (user != undefined)
                     setUserRoles(user._id, roles);
             }
@@ -235,7 +235,7 @@ export function init_users() {
         if (this.userId) {
             return Meteor.roleAssignment.find({ 'user._id': this.userId });
         } else {
-            this.ready()
+            this.ready();
         }
     });
 

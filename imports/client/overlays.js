@@ -9,7 +9,7 @@ import { ReactiveVar } from 'meteor/reactive-var';
 // r,g,b,a => rgba(r,g,b,a)
 // otherwise accepts a stadard color name (white,...)  
 function decodecolor(param, defaultcol) {
-    const col = FlowRouter.getQueryParam(param)
+    const col = FlowRouter.getQueryParam(param);
     if (!col) return defaultcol;
 
     const nv = col.split(',').length;
@@ -21,7 +21,7 @@ function decodecolor(param, defaultcol) {
 }
 
 Template.GreetingsOverlay.onCreated(function () {
-    let c = '#' + FlowRouter.getParam('chan')
+    let c = '#' + FlowRouter.getParam('chan');
     this.subscribe('lastmessages', { channel: c });
     this.textColor = new ReactiveVar(decodecolor('textcol','rgba(255,255,255,255)'));
     this.captionColor = new ReactiveVar(decodecolor('captioncol','rgb(255,255,255)'));
@@ -44,21 +44,21 @@ Template.GreetingsOverlay.helpers({
 
         let els = document.getElementsByName('lastMessageCaption');
         els.forEach((el) => {
-            el.classList = " overlay overlay-fade "
-            el.offsetWidth;
-            el.classList = " overlay overlay-fade overlay-animate "
-        })
+            el.classList = " overlay overlay-fade ";
+            //el.offsetWidth;
+            el.classList = " overlay overlay-fade overlay-animate ";
+        });
 
         let bot = document.getElementsByName('lastMessageBot');
         bot.forEach((el) => {
-            el.classList = " overlay overlay-fade "
-            el.offsetWidth;
-            el.classList = " overlay overlay-fade overlay-animate2 "
+            el.classList = " overlay overlay-fade ";
+            //el.offsetWidth;
+            el.classList = " overlay overlay-fade overlay-animate2 ";
         });
 
         let txt = document.getElementsByName('lastMessageText');
         txt.forEach((el) => {
-            el.style = "color:" + col + ";border-color:" + ccol + ";background-color:"+bcol+";"
+            el.style = "color:" + col + ";border-color:" + ccol + ";background-color:"+bcol+";";
         });
         //console.error(msg,text);
         return text;

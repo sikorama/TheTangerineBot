@@ -6,7 +6,7 @@ export function init_publications() {
   // ---------------------- CHANNELS -------------------------------
   //
   Meteor.publish('botChannels', function (sel) {
-    if (!sel) sel = {}
+    if (!sel) sel = {};
     let opt = { sort: { channel: 1 } };
 
     let uid = this.userId;
@@ -36,7 +36,7 @@ export function init_publications() {
   Meteor.publish('EnabledChannels', function (sel) {
     if (!sel) sel = {};
     sel.enabled = true;
-    return BotChannels.find(sel, { fields: { enabled: 1, channel: 1, live: 1, team: 1 } })
+    return BotChannels.find(sel, { fields: { enabled: 1, channel: 1, live: 1, team: 1 } });
   });
 
   //Publish the list of all channels where the bot is enabled
@@ -55,7 +55,7 @@ export function init_publications() {
         live_viewers: 1,
         team: 1
       }
-    })
+    });
   });
 
   // Liste des channels qui ont la fonction greet activée
@@ -65,7 +65,7 @@ export function init_publications() {
       let sel = {
         enabled: true,
         greet: true
-      }
+      };
       return BotChannels.find(sel);
     }
     this.ready();
@@ -75,7 +75,7 @@ export function init_publications() {
   // ----------------- SHOUTOUTS ------------------
   Meteor.publish('shoutouts', function (sel) {
     //    if (hasRole(this.userId, ['admin', 'quizz'])) {
-    if (!sel) sel = {}
+    if (!sel) sel = {};
     return ShoutOuts.find(sel);
     //   }
     //  this.ready();
@@ -102,7 +102,7 @@ export function init_publications() {
 
   Meteor.publish('quizzQuestions', function (sel) {
     if (hasRole(this.userId, ['admin', 'quizz'])) {
-      if (!sel) sel = {}
+      if (!sel) sel = {};
       return QuizzQuestions.find(sel);
     }
     this.ready();
@@ -112,7 +112,7 @@ export function init_publications() {
 
   Meteor.publish('quizzScores', function (sel) {
     //if (this.userId) {
-    if (!sel) sel = {}
+    if (!sel) sel = {};
     return QuizzScores.find(sel, { sort: { score: -1 }, limit: 50 });
     //}
     //this.ready();
@@ -268,7 +268,7 @@ BotCommands.allow({
       return Meteor.roleAssignment.find();
       //      return Meteor.roleAssignment.find({}, {fields: {'role':1}});
     } else {
-      this.ready()
+      this.ready();
     }
   });
 

@@ -24,7 +24,7 @@ export function addChannel(chan, fields, guestAccount) {
     const arr = ['tr', 'quizz', 'map', 'enabled'];
     arr.forEach(f => {
       doc[f] = (fields.indexOf(f) >= 0);
-    })
+    });
 
     BotChannels.upsert({ channel: chan }, doc);
   }

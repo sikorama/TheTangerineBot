@@ -72,7 +72,7 @@ const topics = [
         limit: l,
         skip: s,
         props: prop,
-      })
+      });
 
       let mres = res.mongoCursor;
       Session.set('questions_count', res.count());
@@ -95,14 +95,14 @@ const topics = [
       const id = event.currentTarget.parentElement.parentElement.id;
       const name = event.currentTarget.name;
       let sd = {};
-      sd[name] = event.currentTarget.value
+      sd[name] = event.currentTarget.value;
       Meteor.call('updateQuestion', id, sd);
     },
     'click button.toggleCheck': function (event) {
       const id = getParentId(event.currentTarget);
       //    var name = event.currentTarget.name;
       const cl = event.currentTarget.className;
-      const  b = (cl.indexOf('ok') < 0)
+      const  b = (cl.indexOf('ok') < 0);
       Meteor.call('updateQuestion', id, { enabled: b });
     },
     'click button.remove': function (event) {
@@ -157,11 +157,11 @@ Template.QuizzSettings.onCreated(function() {
     topicsList() {
       let p = Settings.findOne({ param: 'quizz_enabled_topics'});
       if (p===undefined) return;
-      let res = topics.map((item) =>{ return {n: item, e: (p.val.indexOf(item)>=0) } })
+      let res = topics.map((item) =>{ return {n: item, e: (p.val.indexOf(item)>=0) }; });
     //  console.error(res);
       return res;
     }
-  })
+  });
 
   Template.QuizzSettings.events({
     "click button": function(event) {
@@ -174,4 +174,4 @@ Template.QuizzSettings.onCreated(function() {
         p.val.splice(i,1);
       Settings.update(p._id, {$set: {val:p.val}});
     }
-  })
+  });

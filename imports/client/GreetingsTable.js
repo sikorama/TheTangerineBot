@@ -21,10 +21,10 @@ Template.Greetings.onCreated(function () {
   Template.Greetings.helpers({
     formatLine(txt) {
       // replace # par <span ok> </span>
-      const regexs  = ['#name','#atname','#nickname','#icon','#follow','#twitch']
+      const regexs  = ['#name','#atname','#nickname','#icon','#follow','#twitch'];
       regexs.forEach((r) => {
-        txt=txt.replace(RegExp(r,'gi'),"<strong class='ok'>"+r+'</strong>')
-      })
+        txt=txt.replace(RegExp(r,'gi'),"<strong class='ok'>"+r+'</strong>');
+      });
       //console.error(txt);
       return txt;
 
@@ -37,7 +37,7 @@ Template.Greetings.onCreated(function () {
         return GreetMessages.find({ lang: v }, { sort: { username: 1 } });
 
       let  greetSearch = Session.get('greets_search');
-      let prop={lang: false}
+      let prop={lang: false};
 
       let l = Session.get('greets_limit');
       if (l === undefined) l = 50;
@@ -54,7 +54,7 @@ Template.Greetings.onCreated(function () {
       });
   
       //console.error(res.count());
-      Session.set('greets_count', res.count())
+      Session.set('greets_count', res.count());
       return res.mongoCursor;
 
 
@@ -64,7 +64,7 @@ Template.Greetings.onCreated(function () {
       return BotChannels.find({
         enabled: true,
         greet: true
-      }).fetch().map((item) => { return item.channel });
+      }).fetch().map((item) => { return item.channel; });
     },
     username(id) {
       let u = Meteor.users.findOne(id);
@@ -102,7 +102,7 @@ Template.Greetings.onCreated(function () {
       const cl = event.currentTarget.className;
       if (cl.indexOf('toggleCheck') >= 0) {
 
-        const b = (cl.indexOf('ok') < 0)
+        const b = (cl.indexOf('ok') < 0);
         // console.error("toggle", id, name,b);
         Meteor.call('updateGreetLine', id, parseInt(name), { enabled: b });
         return;
@@ -139,6 +139,6 @@ Template.Greetings.onCreated(function () {
         }
       }
     }
-  })
+  });
   
   

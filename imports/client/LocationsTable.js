@@ -74,7 +74,7 @@ Template.LatestLocations.helpers({
     });
 
     //    console.error(res.count());
-    Session.set('locations_count', res.count())
+    Session.set('locations_count', res.count());
     return res.mongoCursor;
   },
 });
@@ -99,7 +99,7 @@ Template.LatestLocations.events({
       let n = event.target.name;
       let v = event.target.value;
       let id = getParentId(event.currentTarget);
-      let setObj = {}
+      let setObj = {};
   
       if (n === "lastreq") {
         let chan = Session.get('sel_channel');
@@ -115,14 +115,14 @@ Template.LatestLocations.events({
         v = event.target.value.toUpperCase();
         if (!(v in country_names)) {
           v = '';
-          console.error('Unknown Country Code')
+          console.error('Unknown Country Code');
         }
 //        console.error(n,'<-',v);
       }
   
   
       if (event.target.name == 'location') {
-        UserLocations.update(id, { $unset: { latitude: "", longitude: "", country: "" } })
+        UserLocations.update(id, { $unset: { latitude: "", longitude: "", country: "" } });
       }
       if (event.target.name == 'latitude' || event.target.name == 'longitude') {
         v = parseFloat(v);
@@ -140,7 +140,7 @@ Template.LatestLocations.events({
       // Set value
       setObj[n] = v;
   //    console.error(id,setObj);
-      UserLocations.update(id, { $set: setObj })
+      UserLocations.update(id, { $set: setObj });
     },
   });
   

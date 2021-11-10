@@ -8,12 +8,12 @@ Template.Shoutouts.onRendered(function () {
         let sc = Session.get('sel_channel');
         this.subscribe('shoutouts', { chan: '#' + sc });
     });
-})
+});
 
 Template.Shoutouts.helpers({
     shoutouts() {
         let sc = Session.get('sel_channel');
-        return ShoutOuts.find({ chan: '#' + sc }, { sort: { timestamp: -1 } })
+        return ShoutOuts.find({ chan: '#' + sc }, { sort: { timestamp: -1 } });
     },
     label() {
         return Session.get('label');
@@ -28,7 +28,7 @@ Template.Shoutouts.helpers({
         }
 
         if (label) {
-            return ShoutOuts.find({ chan: '#' + sc, label: label }, { sort: { timestamp: 1 } })
+            return ShoutOuts.find({ chan: '#' + sc, label: label }, { sort: { timestamp: 1 } });
         }
     },
     numrows(n) { return n + 3; }
@@ -62,4 +62,4 @@ Template.Shoutouts.events({
         //console.error(res);
         genDataBlob(res.join('\n'), 'csvlink', 'csv');
     }
-})
+});

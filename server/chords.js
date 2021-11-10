@@ -9,7 +9,7 @@ export function genChord(options) {
   let chordtype = chordArray;
 
   if (!options)
-    options = {}
+    options = {};
 
   if (!options.num) {
     options.num = 1;
@@ -32,7 +32,7 @@ export function genChord(options) {
     res.push(r);
   }
 
-  let sres = res[0]
+  let sres = res[0];
   for (let i = 1; i < res.length; i++) {
     sres+=' / ' + res[i];
   }

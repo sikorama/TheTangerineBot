@@ -2,7 +2,7 @@
  *
  */
 
-import { Raiders, BotChannels, UserLocations } from "../imports/api/collections"
+import { Raiders, BotChannels, UserLocations } from "../imports/api/collections";
 
 // Poids/Labels:count viewer
 function export_raid_graph(weightMode) {
@@ -24,11 +24,10 @@ function export_raid_graph(weightMode) {
         let attributes = '';
 
         if (weightMode == 1) {
-            attributes += 'weight=' + item.count 
+            attributes += 'weight=' + item.count ;
         }
         if (weightMode == 2) {
-            attributes += 'weight=' + item.viewers 
-
+            attributes += 'weight=' + item.viewers ;
         }
         //        attributes+='label="'+item.viewers+'" ';
         attributes+=' penwidth='+(Math.log10(1+parseInt(item.viewers)));
@@ -39,7 +38,7 @@ function export_raid_graph(weightMode) {
         let rc2 = BotChannels.findOne({channel:item.channel});
         if (rc && rc2) {
             if (rc.team && (rc.team ==rc2.team)) {
-                attributes+=' color=red' 
+                attributes+=' color=red' ;
             }
         }
 
@@ -47,7 +46,7 @@ function export_raid_graph(weightMode) {
             attributes = '[ ' + attributes + ' ]';
 
         res.push(item.raider.toLowerCase() + ' -> ' + item.channel.toLowerCase()+ attributes+ ';');
-    })
+    });
     res.push('}');
     //console.info(res);
     return res;
@@ -58,7 +57,7 @@ export function initRaidManagement() {
         'export_raid_graph': function () {
             return export_raid_graph(0).join('\n');
         }
-    })
+    });
 }
 
 
