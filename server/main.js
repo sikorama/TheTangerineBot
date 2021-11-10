@@ -1859,11 +1859,11 @@ Meteor.startup(() => {
         // Global URL(s)
         if (bot_discord_live_url)
         sendDiscord(title, bot_discord_live_url);
-        say(target, "Ok, i've sent a message to who-you-know");        
+        say(target, "Ok, i've sent a message to you-know-who");        
         return;        
       }
       else {
-        say(target, "Only Mods are allowed to summon who-you-know");        
+        say(target, "Only Mods are allowed to summon you-know-who");        
         return;
       }        
 
