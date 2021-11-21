@@ -37,15 +37,15 @@ if ((botname == undefined) || (botpassword == undefined)) {
 botname = botname.toLowerCase();
 
 // global Hooks 
-var bot_discord_raid_url = process.env.BOT_DISCORD_RAID_HOOK;
+[ 'BOT_DISCORD_RAID_HOOK', 'BOT_DISCORD_ADMINCALL_HOOK','BOT_DISCORD_LIVE_HOOK' ].forEach((vs)=> { 
+  let pv = process.env[vs]; 
+  if (pv) Settings.upsert({ param: vs }, { $set: { val: pv} });
+});
 
-var bot_discord_live_url = process.env.BOT_DISCORD_LIVE_HOOK;
-
-if (bot_discord_live_url)
-  Settings.upsert({ param: 'discord_goinglive' }, { $set: { val: bot_discord_live_url } });
-
-if (bot_discord_raid_url)
-  Settings.upsert({ param: 'discord_raid' }, { $set: { val: bot_discord_raid_url } });
+//var bot_discord_live_url = Settings.findOne({ param: 'BOT_DISCORD_LIVE_HOOK' })?.val;
+var bot_discord_raid_url = Settings.findOne({ param: 'BOT_DISCORD_RAID_HOOK' })?.val;
+var bot_discord_admincall_url = Settings.findOne({ param: 'BOT_DISCORD_ADMINCALL_HOOK' })?.val;
+  
 
 client_id = process.env.CLIENT_ID;
 client_secret = process.env.CLIENT_SECRET;
@@ -186,6 +186,7 @@ const tr_lang = {
   'fi': ['fi', ''],
   'fr': ['fr', 'dit'],
   'ge': ['de', 'sagt'],
+  'gr': ['gr', ''],
   'german': ['de', 'sagt'],
   'it': ['it', ''],
   'jp': ['ja', ''],
@@ -1351,7 +1352,7 @@ Meteor.startup(() => {
         return;
       }
 
-      if (cmd === 'from') {
+      if (cmd === 'from' || cmd=='place' ) {
         geoloc = commandName.substring(5).trim();
         if (geoloc.length < 2) {
           say(target, answername + " Please tell me the country/state/city where you're from, for example: !from Paris,France or !from Japan.");
@@ -1363,8 +1364,6 @@ Meteor.startup(() => {
           words.forEach(function (w) {
             if (w.indexOf('@') == 0) {
               // Mods or broadcaster can change the location for someone
-              //if ((context.mod === true) || (context.badges.broadcaster == 1)) {
-              // ...only siko can do it currently.
               if (isModerator === true) {
                 username = w.substring(1).toLowerCase();
                 dispname = w.substring(1);
@@ -1857,8 +1856,8 @@ Meteor.startup(() => {
         let title = 'Admin Call by '+ username +' from ' + chan + ' : ' +  msg;
         console.error(title);
         // Global URL(s)
-        if (bot_discord_live_url)
-        sendDiscord(title, bot_discord_live_url);
+        if (bot_discord_admincall_url)
+        sendDiscord(title, bot_discord_admincall_url);
         say(target, "Ok, i've sent a message to you-know-who");        
         return;        
       }

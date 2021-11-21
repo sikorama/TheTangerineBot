@@ -184,7 +184,7 @@ export function checkLiveChannels(client_id, client_private) {
                   //console.error(d,chan, f);
 
                   if (c.discord === true) {
-                    let glob_discord_goinglive = Settings.findOne({ param: 'discord_goinglive' });
+                    let glob_discord_goinglive = Settings.findOne({ param: 'BOT_DISCORD_LIVE_HOOK' });
                     if (glob_discord_goinglive)
                       if (glob_discord_goinglive.val)
                         sendLiveDiscord(f, glob_discord_goinglive.val);

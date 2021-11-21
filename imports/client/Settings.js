@@ -263,9 +263,17 @@ Template.ServerConfig.helpers({
         //console.error(p);
         if (p)
             return p.val;
-    }
-});
+    },
+    getVal(val) {
+        if (_.isString(val)) return val;
+        if (_.isObject(val)) return JSON.stringify(val);
+        return val;
+    },
+    settings() {
+        return Settings.find({},{sort: {param:1}});
+    },
 
+});
 
 Template.ServerConfig.events({
  /*   "change .settings": function (event) {

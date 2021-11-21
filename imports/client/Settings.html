@@ -627,51 +627,16 @@
   <h2>Server Configuration</h2>
   <table class="pure-table">
     <tbody>
+      {{#each s in settings}}
       <tr>
         <td>
-          Website URL
+          {{s.param}}
         </td>
         <td>
-          <input class="settings" name="URL" value="{{getParamVal "URL"}}">
+          <textarea cols="40" rows="4"  class="settings" name={{s.param}} value="{{getVal s.val}}"></textarea>
         </td>
       </tr>
-      <tr>
-        <td>
-          Global Going live Discord Hook
-        </td>
-        <td>
-          <textarea cols="40" rows="4" class="settings" name="discord_goinglive"
-            value="{{getParamVal "discord_goinglive"}}"></textarea>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          Global Raid Discord Hook
-        </td>
-        <td>
-          <textarea cols="40" rows="4" class="settings" name="discord_raid"
-            value="{{getParamVal "discord_raid"}}"></textarea>
-        </td>
-      </tr>
-
-      <tr>
-        <td>
-          FFMPEG Stream Server URL
-        </td>
-        <td>
-          <textarea rows="1" class="settings" name="ffmpeg_server_url"
-            value="{{getParamVal "ffmpeg_server_url"}}"></textarea>
-        </td>
-      </tr>
-      <tr>
-        <td>
-          FFMPEG Stream Server Port
-        </td>
-        <td>
-          <textarea rows="1" class="settings" name="ffmpeg_server_port"
-            value="{{getParamVal "ffmpeg_server_port"}}"></textarea>
-        </td>
-      </tr>
+      {{/each}}
 
     </tbody>
   </table>
