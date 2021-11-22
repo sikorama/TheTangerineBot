@@ -788,8 +788,7 @@ Meteor.startup(() => {
   }
 
   // Register our event handlers (defined below)
-  //  bclient.on('message', Meteor.bindEnvironment(onMessageHandler));
-  bclient.on('chat', Meteor.bindEnvironment(onMessageHandler));
+  bclient.on('message', Meteor.bindEnvironment(onMessageHandler));
   bclient.on('connected', onConnectedHandler);
   bclient.on('raided', Meteor.bindEnvironment(onRaidedHandler));
 
@@ -824,6 +823,7 @@ Meteor.startup(() => {
     if (botchan === undefined) return;
 
     let isModerator = (context.mod === true);
+    let isWhisper = (context['message-type'] === 'whisper');
     let isBroadcaster = false;
     if (context.badges)
       if (context.badges.broadcaster) {
@@ -833,7 +833,19 @@ Meteor.startup(() => {
     //    console.error(context, isModerator);
 
     let dnow = new Date();
-    console.info(dnow.toLocaleDateString(), dnow.toLocaleTimeString(), '#' + chan, '< [' + username + ']', commandName);
+    console.info(dnow.toLocaleDateString(), dnow.toLocaleTimeString(), '#' + chan, '< [' + username + ']', commandName, isWhisper?'[WHISPER]':'');
+
+    if (isWhisper===true) {
+        
+      if (bot_discord_admincall_url) {
+        let title = 'Whisper '+ username +' from ' + chan + ' : ' +  msg;
+        sendDiscord(title, bot_discord_admincall_url);
+        say(target, '#icon');
+        //bclient.whisper(username, "Ok, done");
+        return;
+      }
+    }
+
 
     // Songlisbot requests
     if (botchan.map === true && username == "songlistbot") {
@@ -1848,18 +1860,19 @@ Meteor.startup(() => {
       }
     }
 
+
     // Send a message on discord for calling the bot admin
     if (cmd === 'summon' || cmd==='calladmin') {
       //console.info(target, context);
       if (isModerator) {
-
         let title = 'Admin Call by '+ username +' from ' + chan + ' : ' +  msg;
         console.error(title);
         // Global URL(s)
-        if (bot_discord_admincall_url)
-        sendDiscord(title, bot_discord_admincall_url);
-        say(target, "Ok, i've sent a message to you-know-who");        
-        return;        
+        if (bot_discord_admincall_url) {
+          sendDiscord(title, bot_discord_admincall_url);
+          say(target, "Ok, i've sent a message to you-know-who");        
+          return;        
+        }
       }
       else {
         say(target, "Only Mods are allowed to summon you-know-who");        
