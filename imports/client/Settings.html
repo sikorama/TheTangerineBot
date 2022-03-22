@@ -260,6 +260,17 @@
     <thead>
       <tr>
         <th colspan="3">
+          {{>CheckMark b=c.generator n="generator"}}
+          Chord generator
+        </th>
+      </tr>
+    </thead>
+    {{#if c.detectso}}
+    {{/if}}
+    
+    <thead>
+      <tr>
+        <th colspan="3">
           {{>CheckMark b=c.detectso n="detectso"}}
           Monitor !SO
         </th>

@@ -37,15 +37,15 @@ if ((botname == undefined) || (botpassword == undefined)) {
 botname = botname.toLowerCase();
 
 // global Hooks 
-[ 'BOT_DISCORD_RAID_HOOK', 'BOT_DISCORD_ADMINCALL_HOOK','BOT_DISCORD_LIVE_HOOK' ].forEach((vs)=> { 
-  let pv = process.env[vs]; 
-  if (pv) Settings.upsert({ param: vs }, { $set: { val: pv} });
+['BOT_DISCORD_RAID_HOOK', 'BOT_DISCORD_ADMINCALL_HOOK', 'BOT_DISCORD_LIVE_HOOK'].forEach((vs) => {
+  let pv = process.env[vs];
+  if (pv) Settings.upsert({ param: vs }, { $set: { val: pv } });
 });
 
 //var bot_discord_live_url = Settings.findOne({ param: 'BOT_DISCORD_LIVE_HOOK' })?.val;
 var bot_discord_raid_url = Settings.findOne({ param: 'BOT_DISCORD_RAID_HOOK' })?.val;
 var bot_discord_admincall_url = Settings.findOne({ param: 'BOT_DISCORD_ADMINCALL_HOOK' })?.val;
-  
+
 
 client_id = process.env.CLIENT_ID;
 client_secret = process.env.CLIENT_SECRET;
@@ -181,13 +181,15 @@ const tr_lang = {
   'en': ['en', 'says'],
   'english': ['en', 'says'],
   'eng': ['en', 'says'],
+  'el': ['el', ''], // greek
   'es': ['es', ''],
   'esp': ['es', ''],
   'fi': ['fi', ''],
   'fr': ['fr', 'dit'],
   'ge': ['de', 'sagt'],
-  'gr': ['gr', ''],
+  'gr': ['el', ''], // greek
   'german': ['de', 'sagt'],
+  'hu': ['hu',''],
   'it': ['it', ''],
   'jp': ['ja', ''],
   'ko': ['ko', ''],
@@ -197,6 +199,8 @@ const tr_lang = {
   'pt': ['pt', 'disse'],
   'ro': ['ro', ''],
   'ru': ['ru', ''],
+  'sv': ['sv',''], // swedishh
+  'sw': ['sv',''],
   'tu': ['tr', ''], // turkish
   'tr': ['tr', ''], // turkish
   'tw': ['zh', ''],
@@ -614,7 +618,7 @@ Meteor.startup(() => {
           {
             $round: [
 
-              { "$multiply": [{ "$divide": ["$t", { "$literal": nums }] }, 100] } , 2
+              { "$multiply": [{ "$divide": ["$t", { "$literal": nums }] }, 100] }, 2
             ]
           }
         }
@@ -807,7 +811,6 @@ Meteor.startup(() => {
   function onMessageHandler(target, context, msg, self) {
 
     if (self) { return; } // Ignore messages from the bot itself
-
     let commandName = msg.trim();
     // chan is the channel's name (without #)
     let chan = target.substring(1).toLowerCase();
@@ -815,15 +818,33 @@ Meteor.startup(() => {
     let username = context.username.toLowerCase();
     // Displayed name
     let dispname = context['display-name'].trim();
+
+    let isWhisper = (context['message-type'] === 'whisper');
+
+    let dnow = new Date();
+    console.info(dnow.toLocaleDateString(), dnow.toLocaleTimeString(), '#' + chan, '< [' + username + ']', commandName, isWhisper ? '[WHISPER]' : '');
+
+    if (isWhisper === true) {
+      console.info(target, context);
+      let title = 'Whisper ' + username + ' from ' + chan + ' : ' + msg;
+      //console.info(title);
+      if (bot_discord_admincall_url) {
+        sendDiscord(title, bot_discord_admincall_url);
+        say(target, '#icon');
+        //bclient.whisper(username, "Ok, done");
+      }
+      return;
+    }
+
     // Name used for answering
     let answername = '@' + dispname; //context['display-name'].trim();
 
     // get botchan object in DB
     let botchan = BotChannels.findOne({ channel: chan });
+
     if (botchan === undefined) return;
 
     let isModerator = (context.mod === true);
-    let isWhisper = (context['message-type'] === 'whisper');
     let isBroadcaster = false;
     if (context.badges)
       if (context.badges.broadcaster) {
@@ -831,20 +852,6 @@ Meteor.startup(() => {
         isModerator = true;
       }
     //    console.error(context, isModerator);
-
-    let dnow = new Date();
-    console.info(dnow.toLocaleDateString(), dnow.toLocaleTimeString(), '#' + chan, '< [' + username + ']', commandName, isWhisper?'[WHISPER]':'');
-
-    if (isWhisper===true) {
-        
-      if (bot_discord_admincall_url) {
-        let title = 'Whisper '+ username +' from ' + chan + ' : ' +  msg;
-        sendDiscord(title, bot_discord_admincall_url);
-        say(target, '#icon');
-        //bclient.whisper(username, "Ok, done");
-        return;
-      }
-    }
 
 
     // Songlisbot requests
@@ -923,7 +930,7 @@ Meteor.startup(() => {
 
       // Ignore broadcaster
       if (!isBroadcaster) {
-        const exceptnames = ['streamelements', 'songlistbot', 'nightbot','streamlabs'];
+        const exceptnames = ['streamelements', 'songlistbot', 'nightbot', 'streamlabs'];
         if (exceptnames.indexOf(username) < 0) {
 
           let candidate = true;
@@ -1058,62 +1065,64 @@ Meteor.startup(() => {
 
     // ---------------- Chord generator --------------------
     // !note !notes !chord !chords !prog commands
-    if (isModerator) {
-      if ((cmd === "prog") || (cmd === "note") || (cmd === 'notes') || (cmd === "chord") || (cmd === 'chords')) {
-        let options = {};
+    if (botchan.generator) {
 
-        let numnotes = 1;
-        if (cmd.endsWith('s') || cmd === 'prog') {
-          numnotes = 4;
-        }
-        let firstExtraIndex = 2;
+      if (isModerator) {
+        if ((cmd === "prog") || (cmd === "note") || (cmd === 'notes') || (cmd === "chord") || (cmd === 'chords')) {
+          let options = {};
 
-        // First parameter should be the number of notes
-        if (cmdarray.length > 1) {
-          let nc = parseInt(cmdarray[1]);
-          if (nc > 1) {
-            if (nc > 16) nc = 16;
-            numnotes = nc;
+          let numnotes = 1;
+          if (cmd.endsWith('s') || cmd === 'prog') {
+            numnotes = 4;
           }
-          else
-            firstExtraIndex = 1; // it was not a number, so it must be a chord or a note
-        }
+          let firstExtraIndex = 2;
 
-        options.num = numnotes;
-
-        // Mode note, pas d'accord.
-        if (cmd.startsWith('note'))
-          options.onlynotes = true;
-
-
-        if (cmdarray.length > firstExtraIndex) {
-          options.chords = [];
-          options.notes = [];
-
-          for (i = firstExtraIndex; i < cmdarray.length; i++) {
-            let ci = cmdarray[i];
-            if (noteArray.indexOf(ci.toUpperCase()) < 0)
-              options.chords.push(ci);
+          // First parameter should be the number of notes
+          if (cmdarray.length > 1) {
+            let nc = parseInt(cmdarray[1]);
+            if (nc > 1) {
+              if (nc > 16) nc = 16;
+              numnotes = nc;
+            }
             else
-              options.notes.push(ci);
+              firstExtraIndex = 1; // it was not a number, so it must be a chord or a note
           }
+
+          options.num = numnotes;
+
+          // Mode note, pas d'accord.
+          if (cmd.startsWith('note'))
+            options.onlynotes = true;
+
+
+          if (cmdarray.length > firstExtraIndex) {
+            options.chords = [];
+            options.notes = [];
+
+            for (i = firstExtraIndex; i < cmdarray.length; i++) {
+              let ci = cmdarray[i];
+              if (noteArray.indexOf(ci.toUpperCase()) < 0)
+                options.chords.push(ci);
+              else
+                options.notes.push(ci);
+            }
+          }
+          //console.error(options);
+
+          let res;
+          if (cmd === "prog")
+            res = genProgression(options);
+          else
+            res = genChord(options);
+
+          console.info(cmd, res);
+          say(target, res);
+          return;
         }
-        //console.error(options);
 
-        let res;
-        if (cmd === "prog")
-          res = genProgression(options);
-        else
-          res = genChord(options);
-
-        console.info(cmd, res);
-        say(target, res);
-        return;
       }
 
     }
-
-
 
     const langExpl = ['For example !en will translate your sentence in english. Or !pt to translate into portuguese.',
       'Available translation commands: !cn !de !en !es !fi !fr !it !jp !kr !pl !pt !ro !ru !tu ...'
@@ -1364,7 +1373,7 @@ Meteor.startup(() => {
         return;
       }
 
-      if (cmd === 'from' || cmd=='place' ) {
+      if (cmd === 'from' || cmd == 'place') {
         geoloc = commandName.substring(5).trim();
         if (geoloc.length < 2) {
           say(target, answername + " Please tell me the country/state/city where you're from, for example: !from Paris,France or !from Japan.");
@@ -1413,11 +1422,11 @@ Meteor.startup(() => {
           UserLocations.insert(doc);
 
           if (delta > 60 * 1000) {
-/*              addmess = [
-                'Use !forget if you want me to forget your location!',
-                'Use !show to allow me to display your nickname on the map',
-                'Use !msg to add a personalized message on the map',
-              ]*/
+            /*              addmess = [
+                            'Use !forget if you want me to forget your location!',
+                            'Use !show to allow me to display your nickname on the map',
+                            'Use !msg to add a personalized message on the map',
+                          ]*/
             txt = 'Use !show to allow me to display your nickname on the map'; //,randElement(addmess); //.[Math.floor(Math.random() * (addmess.length - 1))];
             say(target, answername + " Ok, thanks! " + txt, username);
             return;
@@ -1862,22 +1871,25 @@ Meteor.startup(() => {
 
 
     // Send a message on discord for calling the bot admin
-    if (cmd === 'summon' || cmd==='calladmin') {
+    if (cmd === 'summon' || cmd === 'calladmin') {
       //console.info(target, context);
       if (isModerator) {
-        let title = 'Admin Call by '+ username +' from ' + chan + ' : ' +  msg;
+        let title = 'Admin Call by ' + username + ' from ' + chan + ' : * ' + msg + ' *';
         console.error(title);
         // Global URL(s)
         if (bot_discord_admincall_url) {
           sendDiscord(title, bot_discord_admincall_url);
-          say(target, "Ok, i've sent a message to you-know-who");        
-          return;        
+          // Only answer if there is a message (some streamers may already have !summon command)
+          if (length(msg) > 0)
+            say(target, "Ok, i've sent a message to you-know-who");
+          return;
         }
       }
       else {
-        say(target, "Only Mods are allowed to summon you-know-who");        
+        if (length(msg) > 0)
+          say(target, "Only Mods are allowed to summon you-know-who");
         return;
-      }        
+      }
 
     }
 
