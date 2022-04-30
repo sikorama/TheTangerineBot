@@ -37,7 +37,11 @@ export function addGreetLine(username, txt, chan, editor) {
   }
 
   if (pgl != undefined) {
+    if (!pgl.texts)
+      pgl.texts = [];
+
     li.index = pgl.texts.length;
+
     doc.texts = pgl.texts;
     doc.texts.push(li);
   }
@@ -47,7 +51,7 @@ export function addGreetLine(username, txt, chan, editor) {
   }
 
   doc.lang = (username.length === 2);
-  GreetMessages.upsert({ username: username }, doc);
+  GreetMessages.upsert({ username: username }, { $set: doc });
 }
 
 export function init_greetings() {
@@ -85,23 +89,6 @@ export function init_greetings() {
 
     addGreetLine('RU', 'Привет #name #icon');
   }
-
-
-  
-  // Fix Greetlines @=># 
-  GreetMessages.find().fetch().forEach((item) => {
-    let nt = item.texts.map((t) => {
-      t.txt = t.txt.replace(pregexn, '#name');
-      t.txt = t.txt.replace(pregexan, '#atname');
-      t.txt = t.txt.replace(pregexnn, '#nickname');
-      t.txt = t.txt.replace(pregexi, '#icon');
-      t.txt = t.txt.replace(pregexf, '#follow');
-      t.txt = t.txt.replace(pregext, '#twitch');
-      return t;
-    });
-    GreetMessages.update(item._id, { $set: { texts: nt } });
-  });
-
 
   Meteor.methods({
     'addGreetLine': function (u, t, chan) {
@@ -167,39 +154,47 @@ export function init_greetings() {
     Get greet message, for !so commands
 */
 export function getGreetMessages(username, chan) {
-  // Check cases? 
-  const gm = GreetMessages.findOne({ username: username });
-  //if (!gm) console.info('username=', username, 'didnt find in database.');
+  try {
 
-  let gmtext = [];
-  //  console.info('getGreetMessage - username=', username, 'chan=', chan);
-  //  console.info('getGreetMessage - gm=', gm);
+    // Check cases? 
+    const gm = GreetMessages.findOne({ username: username });
+    //if (!gm) console.info('username=', username, 'didnt find in database.');
 
-  // Keeps only enabled messaes for this channel
-  if (gm != undefined) {
+    let gmtext = [];
+    //  console.info('getGreetMessage - username=', username, 'chan=', chan);
+    //  console.info('getGreetMessage - gm=', gm);
+
+    // Keeps only enabled messaes for this channel
+    if (gm != undefined && gm.texts!=undefined) {
       gmtext = gm.texts.filter((item) => {
-      // console.info('getGreetMessage - item=', item);
-      
-      if (item.enabled != true) return false;
-      // if there is a channel field, use it as a constraint
-      if (item.channel != undefined && item.channel.length > 0) {
-        const index = item.channel.indexOf(chan);
-        // Exlusion rule 
-        // if item.channel starts with a '-' and contains the name of the current channel
-        if (item.channel.startsWith('-')) {
-          //console.debug('getGreetings, message=',item,'exclusive,  chan=',chan,item.channel,"=> index=", index);
-          if (index >= 0) return false;
+        // console.info('getGreetMessage - item=', item);
+
+        if (item.enabled != true) return false;
+        // if there is a channel field, use it as a constraint
+        if (item.channel != undefined && item.channel.length > 0) {
+          const index = item.channel.indexOf(chan);
+          // Exlusion rule 
+          // if item.channel starts with a '-' and contains the name of the current channel
+          if (item.channel.startsWith('-')) {
+            //console.debug('getGreetings, message=',item,'exclusive,  chan=',chan,item.channel,"=> index=", index);
+            if (index >= 0) return false;
+          }
+          else {
+            //console.debug('getGreetings, message=',item,'inclusive mode, chan=',chan,item.channel,"=> index=", index);
+            if (index < 0) return false;
+          }
         }
-        else {
-          //console.debug('getGreetings, message=',item,'inclusive mode, chan=',chan,item.channel,"=> index=", index);
-          if (index < 0) return false;
-        }
-      }
-      return true;
-    });
+        return true;
+      });
+    }
+    //console.info('getGreetMessage - user=',username,',gmtext=', gmtext);
+    return gmtext;
+
+  } catch (e) {
+    console.error(e);
+    return [];
   }
-  //console.info('getGreetMessage - user=',username,',gmtext=', gmtext);
-  return gmtext;
+
 }
 
 

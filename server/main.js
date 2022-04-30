@@ -640,13 +640,11 @@ Meteor.startup(() => {
   }
 
   // Register our event handlers (defined below)
+  // see https://github.com/tmijs/docs/blob/gh-pages/_posts/v1.4.2/2019-03-03-Events.md#ban
   bclient.on('message', Meteor.bindEnvironment(onMessageHandler));
   bclient.on('connected', onConnectedHandler);
   bclient.on('raided', Meteor.bindEnvironment(onRaidedHandler));
-//  bclient.on('action', Meteor.bindEnvironment(onActionHandler));
   bclient.on('ban', Meteor.bindEnvironment(onBanHandler));
-
-  
 
   raid_bclient.on('connected', onConnectedHandler);
   raid_bclient.on('raided', Meteor.bindEnvironment(onRaidedHandler));
@@ -1972,7 +1970,7 @@ function onBanHandler(channel, username, reason, userstate) {
       }
     }
     
-    GreetMessages.upsert({username: username}, {$set: {ban:ban}});
+    GreetMessages.upsert({username: username}, {$set: {lang: false, ban:ban}});
 
     // TODO: remove/mark on  other collections (map, active users)
 

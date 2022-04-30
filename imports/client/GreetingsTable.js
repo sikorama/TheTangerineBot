@@ -33,6 +33,7 @@ Template.Greetings.onCreated(function () {
       const v = (lang === 'true');
       //console.error(v, lang);
       //GreetMessages.find({ lang: v }).forEach((item) => { console.error(item); })
+      // Special case: languages:
       if (v)
         return GreetMessages.find({ lang: v }, { sort: { username: 1 } });
 
@@ -53,7 +54,7 @@ Template.Greetings.onCreated(function () {
         props: prop,
       });
   
-      //console.error(res.count());
+      console.error(res.count());
       Session.set('greets_count', res.count());
       return res.mongoCursor;
 
