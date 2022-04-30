@@ -37,14 +37,14 @@ if ((botname == undefined) || (botpassword == undefined)) {
 botname = botname.toLowerCase();
 
 // global Hooks 
-['BOT_DISCORD_RAID_HOOK', 
- 'BOT_DISCORD_ADMINCALL_HOOK', 
- 'BOT_DISCORD_LIVE_HOOK',
- 'BOT_DISCORD_BAN_HOOK',
- 'BOT_DISCORD_NOTGREETED_HOOK'].forEach((vs) => {
-  let pv = process.env[vs];
-  if (pv) Settings.upsert({ param: vs }, { $set: { val: pv } });
-});
+['BOT_DISCORD_RAID_HOOK',
+  'BOT_DISCORD_ADMINCALL_HOOK',
+  'BOT_DISCORD_LIVE_HOOK',
+  'BOT_DISCORD_BAN_HOOK',
+  'BOT_DISCORD_NOTGREETED_HOOK'].forEach((vs) => {
+    let pv = process.env[vs];
+    if (pv) Settings.upsert({ param: vs }, { $set: { val: pv } });
+  });
 
 //var bot_discord_live_url = Settings.findOne({ param: 'BOT_DISCORD_LIVE_HOOK' })?.val;
 var bot_discord_raid_url = Settings.findOne({ param: 'BOT_DISCORD_RAID_HOOK' })?.val;
@@ -272,7 +272,25 @@ Meteor.startup(() => {
   init_radio();
   init_rss();
 
+/**
+ * 
+ * @param {*} chan : name of channel (low cases, without heading '#')
+ * @param {*} name : user name (low cases)
+ * @returns 
+ */
+  function removeActiveUser(chan, name) {
+    if (!chan)
+      return [];
 
+    if (!last_active_users[chan])
+      return [];
+
+    let index = last_active_users[chan].findIndex(item => item.name === name);
+    if (index >= 0)
+      last_active_users[chan].splice(index, 1);
+
+    return last_active_users[chan];
+  }
 
   Meteor.methods({
     getActiveUsers: function (chan) {
@@ -286,17 +304,8 @@ Meteor.startup(() => {
       return [];
     },
     removeActiveUser(chan, name) {
-      if (!chan)
-        return [];
-      if (!last_active_users[chan])
-        return [];
-
-      let index = last_active_users[chan].findIndex(item => item.name === name);
-      //console.error(chan, name, index);
-      if (index >= 0)
-        last_active_users[chan].splice(index, 1);
-
-      return last_active_users[chan];
+      if (this.userId)
+        removeActiveUser(chan, name);
     }
   });
 
@@ -759,7 +768,7 @@ Meteor.startup(() => {
     let lccn = commandName.toLowerCase();
 
     let cmd = '';
-    
+
     // Filter commands (options)
     if (commandName[0] === '!') {
 
@@ -894,31 +903,31 @@ Meteor.startup(() => {
     if (botchan.autoban === true) {
       if (isModerator) {
         // Command !autoban
-        if (cmdarray.length>=1) {
+        if (cmdarray.length >= 1) {
 
-          let target_user  = cmdarray[1];
-         
+          let target_user = cmdarray[1];
+
           if (cmd === 'ultimate-ban') {
-          // Add/mark the user specified to the greetings 
-          GreetMessages.upsert({ username: target_user }, { $set: { autoban: true } });
-          say(target, 'With great power comes great responsability ' + dispname);
-          // Sends a notification to discord channel
-          if (discord_autoban_url)
-            sendDiscord(target_user+ " has been added to ultimate ban list! It will be automatically banned", discord_autoban_url);
-          return;
+            // Add/mark the user specified to the greetings 
+            GreetMessages.upsert({ username: target_user }, { $set: { autoban: true } });
+            say(target, 'With great power comes great responsability ' + dispname);
+            // Sends a notification to discord channel
+            if (discord_autoban_url)
+              sendDiscord(target_user + " has been added to ultimate ban list! It will be automatically banned", discord_autoban_url);
+            return;
+          }
+
+          if (cmd === 'ultimate-unban') {
+            // Add/mark the user specified to the greetings 
+            GreetMessages.upsert({ username: target_user }, { $unset: { autoban: true } });
+            say(target, 'Peace, Love... and  redemption :) ' + dispname);
+            // Sends a notification to discord channel
+            if (discord_autoban_url)
+              sendDiscord(target_user + " has been removed from ultimate ban list! Note it has not been unbaned on every channels", discord_autoban_url);
+            return;
+          }
         }
-        
-        if (cmd === 'ultimate-unban') {
-          // Add/mark the user specified to the greetings 
-          GreetMessages.upsert({ username: target_user }, { $unset: { autoban: true } });
-          say(target, 'Peace, Love... and  redemption :) ' + dispname);
-          // Sends a notification to discord channel
-          if (discord_autoban_url)
-            sendDiscord(target_user+ " has been removed from ultimate ban list! Note it has not been unbaned on every channels", discord_autoban_url);
-          return;
-        }        
       }
-        }
 
       // bot must be a mod
       const gm = GreetMessages.findOne({ username: username, autoban: true });
@@ -1570,10 +1579,10 @@ Meteor.startup(() => {
 
           // If shoutout channel is not in greetings database, send a notification to a discord channel 
           if (botchan.notgreeted) {
-            if (!GreetMessages.findOne({username: soname})) {
+            if (!GreetMessages.findOne({ username: soname })) {
               console.info('User', soname, 'not in greetings database');
               if (discord_notgreeted_url) {
-                const title = 'This channel has been !so on '+ target + ' https://twitch.tv/' + soname + ' but is not in greetings database';
+                const title = 'This channel has been !so on ' + target + ' https://twitch.tv/' + soname + ' but is not in greetings database';
                 sendDiscord(title, discord_notgreeted_url);
               }
             }
@@ -1951,33 +1960,33 @@ Meteor.startup(() => {
     }
   }
 
-function onBanHandler(channel, username, reason, userstate) {
-  try {
-    console.log('>>>>', channel, 'BAN', username, JSON.stringify(userstate));
+  function onBanHandler(channel, username, reason, userstate) {
+    try {
+      let chan = channel.substring(1).toLowerCase();
+      console.log('>>>>', chan, 'BAN', username, JSON.stringify(userstate));
 
-    if (discord_autoban_url) 
-      sendDiscord(username+ ' has been baned on '+channel+' channel', discord_autoban_url);
+      if (discord_autoban_url)
+        sendDiscord(username + ' has been baned on ' + chan + ' channel', discord_autoban_url);
 
-    // mark in greetings list
-    let gu = GreetMessages.findOne({ username: username});
-    let ban=[channel];
-    if (gu) {
-      if (gu.ban) 
-      {
-        ban = gu.ban;
-        if (ban.indexOf(channel)<0)
-          ban.push(channel);
+      // mark in greetings list
+      let gu = GreetMessages.findOne({ username: username });
+      let ban = [chan];
+      if (gu) {
+        if (gu.ban) {
+          ban = gu.ban;
+          if (ban.indexOf(chan) < 0)
+            ban.push(chan);
+        }
       }
+
+      GreetMessages.upsert({ username: username }, { $set: { lang: false, ban: ban } });
+
+      // TODO: remove/mark on  other collections (map, active users)
+      removeActiveUser(chan, username);
+
+    } catch (e) {
+      console.error(e);
     }
-    
-    GreetMessages.upsert({username: username}, {$set: {lang: false, ban:ban}});
-
-    // TODO: remove/mark on  other collections (map, active users)
-
-
-  } catch (e) {
-    console.error(e);
   }
-}
 
 });
