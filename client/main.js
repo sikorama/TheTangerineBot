@@ -24,7 +24,7 @@ import { Accounts } from 'meteor/accounts-base';
 Accounts.ui.config({
   //  passwordSignupFields: 'USERNAME_ONLY'
   passwordSignupFields: 'USERNAME_AND_OPTIONAL_EMAIL'
-})
+});
 
 
 const Chart = require('chart.js');
@@ -59,7 +59,7 @@ Template.registerHelper(
     let d = new Date(ts);
     return d.toLocaleString();
   }
-)
+);
 
 Template.registerHelper(
   "FormatGeoloc", function (lat, long) {
@@ -68,13 +68,13 @@ Template.registerHelper(
     let l1 = Math.round(long * 100) / 100;
 
     let h0 = "N";
-    if (l0 < 0) { l0 = -l0; h0 = 'S' }
+    if (l0 < 0) { l0 = -l0; h0 = 'S'; }
     let h1 = "E";
-    if (l1 < 0) { l1 = -l1; h1 = 'W' }
+    if (l1 < 0) { l1 = -l1; h1 = 'W'; }
 
-    return '' + l0 + '°' + h0 + ' ' + l1 + '°' + h1
+    return '' + l0 + '°' + h0 + ' ' + l1 + '°' + h1;
   }
-)
+);
 
 
 Template.PageTop.onRendered(function () {
@@ -95,7 +95,7 @@ Tracker.autorun(function() {
       }
     }
   }
-})
+});
 
 Template.registerHelper('rh_featureEnabled', function (feature) {
   let sc = Session.get('sel_channel');
@@ -112,7 +112,7 @@ Template.PageTop.helpers({
     return ((FlowRouter.getRouteName() === s) ? 'pure-menu-active active' : '');
   },
   curSelChan() { return Session.get('sel_channel'); }
-})
+});
 
 
 Template.ChannelPage.helpers({
@@ -120,7 +120,7 @@ Template.ChannelPage.helpers({
     return ((FlowRouter.getRouteName() === s) ? 'pure-menu-active active' : '');
   },
   curSelChan() { return Session.get('sel_channel'); }
-})
+});
 
 
 Template.LiveChannels.onCreated(function () {
@@ -143,7 +143,7 @@ Template.CommandsTable.helpers({
     if (!bc) return false;
     return bc.team;
   }
-})
+});
 
 Template.LiveChannels.helpers({
 //  enchan() {
@@ -154,13 +154,13 @@ Template.LiveChannels.helpers({
     let sobj = { live:true };
     if (team) {
       if (team==='none') {
-        sobj.team={$exists: 0}
+        sobj.team={$exists: 0};
       }
       else
         sobj.team=team;
     }
     let res=BotChannels.find(sobj, { sort: { live_started: -1 } }).fetch();
-    return sres=res.slice(0,100);
+    return res.slice(0,100);
   }
 });
 
@@ -188,7 +188,7 @@ Template.registerHelper('rh_getchaninfo',function(chan) {
 
 Template.Stats.events({
   'click button.selStat': function (ev) {
-    Session.set('statPage', parseInt(ev.currentTarget.name))
+    Session.set('statPage', parseInt(ev.currentTarget.name));
   },
   'click button.remove[name="remove_active_user"]': function(ev) {
     let id = ev.currentTarget.id;
@@ -329,10 +329,10 @@ Template.ShowMore.helpers({
   selected(v) {
     if (Session.equals(this.v + '_limit', parseInt(v)))
       return 'selected';
-    return ''
+    return '';
   },
   limits() { return [20, 50, 100, 500, 1000]; }
-})
+});
 
 Template.ShowMore.events({
   'change select': function (event) {
@@ -342,7 +342,7 @@ Template.ShowMore.events({
       Session.set(this.v + '_page', 1);
     }
   }
-})
+});
 
 Template.SkipResult.helpers({
   pages() {
@@ -362,13 +362,13 @@ Template.SkipResult.helpers({
     let nbp = Math.ceil(parseInt(t) / npp);
     Session.set(d.var + '_numpages', nbp);
 
-    let p = Session.get(d.var + '_page')
+    let p = Session.get(d.var + '_page');
     //console.info('page', d.var, p,nbp,npp,t);
     // Si la page courante est supérieure au nombre de pages 
     // On retourne a la page 0
     if (p>nbp || p<1)  {
       //console.error('Reinit current page');
-      Session.set(d.var + '_page',1)
+      Session.set(d.var + '_page',1);
     }
 
     if (nbp <= 1) return;
@@ -404,13 +404,13 @@ Template.SkipResult.helpers({
   },
   first() { 
     let d = Template.currentData();
-    return (Session.equals(d.var + '_page', 1)) },
+    return (Session.equals(d.var + '_page', 1)); },
   last() {
     let d = Template.currentData();
     let nbp = Session.get(d.var + '_numpages');
-    return (Session.equals(d.var + '_page', nbp))
+    return (Session.equals(d.var + '_page', nbp));
   },
-})
+});
 
 Template.SkipResult.events({
   'click .prevpage': function (event) {
@@ -431,7 +431,7 @@ Template.SkipResult.events({
     v = parseInt(event.currentTarget.textContent);
     Session.set(sv, v);
   }
-})
+});
 
 
 
@@ -472,7 +472,7 @@ Template.SelectChannel.helpers({
           return {
             l: item,
             s: (item == cg)
-          }
+          };
         });
     return undefined;
   },
@@ -480,7 +480,7 @@ Template.SelectChannel.helpers({
     return Session.get(s);
   }
 
-})
+});
 
 Template.SelectChannel.events({
   'change [name="selChannel"]': function (event) {

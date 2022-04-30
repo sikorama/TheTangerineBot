@@ -207,7 +207,18 @@ export const BotCommands = new Mongo.Collection('botcommands');
                 };
             }
   
+            if (options.search.props.hasOwnProperty('autoban')) {
+                selector.autoban = {
+                    $eq: options.search.props.autoban
+                };
+            }
 
+            if (options.search.props.hasOwnProperty('ban')) {
+                selector.ban = {
+                    $eq: options.search.props.ban
+                };
+            }
+  
             //Verifier les roles (admin) options.search.userId
             return selector;
         },

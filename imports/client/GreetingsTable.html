@@ -52,7 +52,7 @@
       </thead>
       <tbody>
         {{#each c in (greetlines "false")}}
-          <tr style="width:100%;" id="{{c.__originalId}}">
+          <tr class="{{#if c.autoban}}ko{{/if}}" style="width:100%;" id="{{c.__originalId}}">
             <td class="username">
               <a href="https://openstreetmap.org/search?query={{ul.location}}" target="_blank">&boxbox;</a>
               <span class="uname">{{c.username}}</span>
