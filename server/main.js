@@ -19,7 +19,7 @@ import { init_radio } from './radio.js';
 import { init_rss } from './rss.js';
 import { initRaidManagement } from './raids.js';
 import { randElement } from './tools.js';
-import { hasRole, init_users } from './user_management.js';
+import { init_users } from './user_management.js';
 
 const tmi = require('tmi.js');
 const gtrans = require('googletrans').default;
@@ -599,7 +599,7 @@ Meteor.startup(() => {
     try {
 
       // SO hook, for greetings
-      // Check if this user exists in Greetings Collection
+      // Check if this user exists in Greetings Collection (and is not banned)
       let gmlist = getGreetMessages(soname, botchan.channel);
       console.info(gmlist);
       // We could add "#follow #twitch #icon" to the array

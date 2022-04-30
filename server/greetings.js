@@ -151,13 +151,20 @@ export function init_greetings() {
 
 
 /*
-    Get greet message, for !so commands
+
 */
+/**
+ * 
+ * Get greet message, for !so commands, or when a viewers enters the chat
+ * User must not be banned anywhere
+ * 
+ * @param {*} username : low case name
+ * @param {*} chan : channel (without heading #)
+ * @returns 
+ */
 export function getGreetMessages(username, chan) {
   try {
-
-    // Check cases? 
-    const gm = GreetMessages.findOne({ username: username });
+    const gm = GreetMessages.findOne({ username: username , ban : {$exists: false}});
     //if (!gm) console.info('username=', username, 'didnt find in database.');
 
     let gmtext = [];
