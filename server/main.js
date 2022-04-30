@@ -1930,7 +1930,7 @@ Meteor.startup(() => {
 
 
     // Send a message on discord for calling the bot admin
-    if (cmd === 'summon' || cmd === 'calladmin') {
+    if (cmd === 'calladmin') {
       //console.info(target, context);
       if (isModerator) {
         let title = 'Admin Call by ' + username + ' from ' + chan + ' : * ' + msg + ' *';
