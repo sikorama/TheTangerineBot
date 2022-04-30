@@ -37,7 +37,11 @@ if ((botname == undefined) || (botpassword == undefined)) {
 botname = botname.toLowerCase();
 
 // global Hooks 
-['BOT_DISCORD_RAID_HOOK', 'BOT_DISCORD_ADMINCALL_HOOK', 'BOT_DISCORD_LIVE_HOOK'].forEach((vs) => {
+['BOT_DISCORD_RAID_HOOK', 
+ 'BOT_DISCORD_ADMINCALL_HOOK', 
+ 'BOT_DISCORD_LIVE_HOOK',
+ 'BOT_DISCORD_BAN_HOOK',
+ 'BOT_DISCORD_NOTGREETED_HOOK'].forEach((vs) => {
   let pv = process.env[vs];
   if (pv) Settings.upsert({ param: vs }, { $set: { val: pv } });
 });
@@ -45,8 +49,8 @@ botname = botname.toLowerCase();
 //var bot_discord_live_url = Settings.findOne({ param: 'BOT_DISCORD_LIVE_HOOK' })?.val;
 var bot_discord_raid_url = Settings.findOne({ param: 'BOT_DISCORD_RAID_HOOK' })?.val;
 var bot_discord_admincall_url = Settings.findOne({ param: 'BOT_DISCORD_ADMINCALL_HOOK' })?.val;
-
-
+var discord_autoban_url = Settings.findOne({ param: 'BOT_DISCORD_BAN_HOOK' })?.val;
+var discord_notgreeted_url = Settings.findOne({ param: 'BOT_DISCORD_NOTGREETED_HOOK' })?.val;
 client_id = process.env.CLIENT_ID;
 client_secret = process.env.CLIENT_SECRET;
 
@@ -172,7 +176,9 @@ function randSentence() {
   }
 }
 
+// see https://sites.google.com/site/opti365/translate_codes
 const tr_lang = {
+  'ar': ['ar', ''],
   'br': ['pt', 'disse'],
   'cn': ['zh', ''],
   'co': ['ko', ''],
@@ -189,7 +195,7 @@ const tr_lang = {
   'ge': ['de', 'sagt'],
   'gr': ['el', ''], // greek
   'german': ['de', 'sagt'],
-  'hu': ['hu',''],
+  'hu': ['hu', ''],
   'it': ['it', ''],
   'jp': ['ja', ''],
   'ko': ['ko', ''],
@@ -199,8 +205,8 @@ const tr_lang = {
   'pt': ['pt', 'disse'],
   'ro': ['ro', ''],
   'ru': ['ru', ''],
-  'sv': ['sv',''], // swedishh
-  'sw': ['sv',''],
+  'sv': ['sv', ''], // swedishh
+  'sw': ['sv', ''],
   'tu': ['tr', ''], // turkish
   'tr': ['tr', ''], // turkish
   'tw': ['zh', ''],
@@ -795,6 +801,9 @@ Meteor.startup(() => {
   bclient.on('message', Meteor.bindEnvironment(onMessageHandler));
   bclient.on('connected', onConnectedHandler);
   bclient.on('raided', Meteor.bindEnvironment(onRaidedHandler));
+  bclient.on('action', Meteor.bindEnvironment(onActionHandler));
+
+  
 
   raid_bclient.on('connected', onConnectedHandler);
   raid_bclient.on('raided', Meteor.bindEnvironment(onRaidedHandler));
@@ -814,7 +823,7 @@ Meteor.startup(() => {
     let commandName = msg.trim();
     // chan is the channel's name (without #)
     let chan = target.substring(1).toLowerCase();
-    // username est tres utilisé, et deja en minuscule, mais on veut en etre sur
+    // username uses lower cases only
     let username = context.username.toLowerCase();
     // Displayed name
     let dispname = context['display-name'].trim();
@@ -1040,6 +1049,43 @@ Meteor.startup(() => {
       }
     }
 
+    // ------------------- AUTOBAN -------------------
+    if (botchan.autoban === true) {
+      if (isModerator) {
+        // Command !autoban
+        if (cmdarray.length>=1) {
+
+          let target_user  = cmdarray[1];
+         
+          if (cmd === 'ultimate-ban') {
+          // Add/mark the user specified to the greetings 
+          GreetMessages.upsert({ username: target_user }, { $set: { autoban: true } });
+          say(target, 'With great power comes great responsability ' + dispname);
+          // Sends a notification to discord channel
+          sendDiscord(target_user+ " has been added to ultimate ban list! It will be automatically banned", discord_autoban_url);          
+          return;
+        }
+        
+        if (cmd === 'ultimate-unban') {
+          // Add/mark the user specified to the greetings 
+          GreetMessages.upsert({ username: target_user }, { $unset: { autoban: true } });
+          say(target, 'Peace, Love... and  redemption :) ' + dispname);
+          // Sends a notification to discord channel
+          if (discord_autoban_url)
+          sendDiscord(target_user+ " has been removed from ultimate ban list! Note it has not been unbaned on every channels", discord_autoban_url);
+          return;
+        }        
+      }
+        }
+
+      // bot must be a mod
+      const gm = GreetMessages.findOne({ username: username, autoban: true });
+      if (gm) {
+        say(target, '/ban ' + username);
+        return;
+      }
+    }
+
     // Remove whitespace from chat message
     if (cmd === "statement") {
       say(target, randSentence());
@@ -1128,7 +1174,7 @@ Meteor.startup(() => {
       'Available translation commands: !cn !de !en !es !fi !fr !it !jp !kr !pl !pt !ro !ru !tu ...'
     ];
 
-    // -------------- Traduction -----------------------
+    // -------------- Translation -----------------------
     if (botchan.tr === true) {
       // Command for enabling translation for a user during a few minutes
       // Only mods can use it
@@ -1235,7 +1281,6 @@ Meteor.startup(() => {
               // means the command was not correctly used (ex: "!en hello friends")
 
               // Filter the answer to avoid jokes like:
-
               // 3/26/2021 11:43:05 !en me está picando la cara
               // 3/26/2021 11:43:05 says: I'm fucking my face              
 
@@ -1659,6 +1704,7 @@ Meteor.startup(() => {
           if (soname[0] === '@')
             soname = soname.substring(1);
 
+          // store so in database          
           if (botchan.storeso === true) {
             // Also store in database
             let label = botchan.storeso_label;
@@ -1668,6 +1714,7 @@ Meteor.startup(() => {
             ShoutOuts.insert({ chan: target, so: soname, timestamp: Date.now(), username: username, label: label });
           }
 
+          // Send !so notification to a discord channel
           if (botchan.discord_so_url) {
             let label = botchan.storeso_label;
             if (!label) {
@@ -1679,7 +1726,18 @@ Meteor.startup(() => {
             }
           }
 
+          // If shoutout channel is not in greetings database, send a notification to a discord channel 
+          if (botchan.notgreeted) {
+            if (!GreetMessages.findOne({username: soname})) {
+              console.info('User', soname, 'not in greetings database');
+              if (discord_notgreeted_url) {
+                const title = 'This channel has been !so on '+ target + ' https://twitch.tv/' + soname + ' but is not in greetings database';
+                sendDiscord(title, discord_notgreeted_url);
+              }
+            }
+          }
 
+          // Sends SO
           if (botchan.so === true) {
             sendSOGreetings(botchan, target, soname);
             return;
@@ -1734,6 +1792,7 @@ Meteor.startup(() => {
 
       }
     }
+
 
     // ------------------- GREET ----------------------
     if (botchan.greet === true) {
@@ -2045,10 +2104,6 @@ Meteor.startup(() => {
     try {
       if (self) return;
       console.log('>>>>', channel, 'Action', JSON.stringify(userstate), 'm=', message);
-      // check /raid commands
-      if (message.indexOf('/raid') === 0) {
-        console.log('>>>>', channel, 'RAID COMMAND', message);
-      }
     } catch (e) {
       console.error(e);
     }

@@ -169,17 +169,17 @@ export function init_greetings() {
 export function getGreetMessages(username, chan) {
   // Check cases? 
   const gm = GreetMessages.findOne({ username: username });
-  if (!gm) console.info('username=', username, 'didnt find in database.');
+  //if (!gm) console.info('username=', username, 'didnt find in database.');
 
   let gmtext = [];
   //  console.info('getGreetMessage - username=', username, 'chan=', chan);
   //  console.info('getGreetMessage - gm=', gm);
 
-  // Filtrage de gm pour virer ce qui est désactivé et ce qui est pour une autre chaine
+  // Keeps only enabled messaes for this channel
   if (gm != undefined) {
-    gmtext = gm.texts.filter((item) => {
+      gmtext = gm.texts.filter((item) => {
       // console.info('getGreetMessage - item=', item);
-
+      
       if (item.enabled != true) return false;
       // if there is a channel field, use it as a constraint
       if (item.channel != undefined && item.channel.length > 0) {
@@ -227,8 +227,3 @@ export function replaceKeywords(txt, options) {
 
   return txt;
 }
-
-
-
-
-

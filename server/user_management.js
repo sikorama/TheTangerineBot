@@ -97,7 +97,7 @@ export function addUser(doc) {
 function qaddUser(name, pw, roles, groups) {
     return addUser({
         username: name,
-        email: name + "@sikorama.fr",
+        email: name + "@sikorama.fr", // not used, so any domain will do
         password: pw,
         roles: roles,
         groups: groups,
