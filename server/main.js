@@ -1845,7 +1845,7 @@ Meteor.startup(() => {
         // Generic Sentence (based on map)
         if (selGenSentence === true) {
           if (u) {
-            // on a son pays
+            // default language
             let lang = 'EN';
 
             if (u.country) {
@@ -1855,7 +1855,7 @@ Meteor.startup(() => {
               }
             }
             else {
-              console.warn('No Country code for ', u);
+              console.warn('No Country code for ', u.name);
             }
             lang = lang.toLowerCase();
 
