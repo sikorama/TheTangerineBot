@@ -1963,10 +1963,7 @@ Meteor.startup(() => {
   function onBanHandler(channel, username, reason, userstate) {
     try {
       let chan = channel.substring(1).toLowerCase();
-      console.log('>>>>', chan, 'BAN', username, JSON.stringify(userstate));
-
-      if (discord_autoban_url)
-        sendDiscord(username + ' has been baned on ' + chan + ' channel', discord_autoban_url);
+      let notif = username + ' has been banned from ' + chan + ' channel.';
 
       // mark in greetings list
       let gu = GreetMessages.findOne({ username: username });
@@ -1974,10 +1971,16 @@ Meteor.startup(() => {
       if (gu) {
         if (gu.ban) {
           ban = gu.ban;
-          if (ban.indexOf(chan) < 0)
+          if (ban.indexOf(chan) < 0) {
+            notif += 'They have already been banned from the following channels:' + ban.join(',');
             ban.push(chan);
+          }
         }
       }
+
+      if (discord_autoban_url)
+        sendDiscord(notif, discord_autoban_url);
+      console.log('[BAN]', notif, JSON.stringify(userstate));
 
       GreetMessages.upsert({ username: username }, { $set: { lang: false, ban: ban } });
 
