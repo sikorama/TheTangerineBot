@@ -142,6 +142,16 @@ export function init_publications() {
     }
   });
 
+  UserLocations.allow({
+    update(userid, doc) {
+      if (hasRole(userid, 'admin')) return true;
+    },
+    remove(userid, doc) {
+      if (hasRole(userid, 'admin')) return true;
+    }
+  });
+
+
 // Custom Commands
 //
 
@@ -261,9 +271,9 @@ BotCommands.allow({
   });
 
 
-  // publication des Roles
+  // Roles publication
   Meteor.publish('userRoles', function () {
-    // Si admin
+    // admin only
     if (hasRole(this.userId, ['admin'])) {
       return Meteor.roleAssignment.find();
       //      return Meteor.roleAssignment.find({}, {fields: {'role':1}});
@@ -271,8 +281,32 @@ BotCommands.allow({
       this.ready();
     }
   });
-
-
 }
 
 
+// ------------------ Settings
+
+Meteor.methods({
+  // get/set parameters
+  parameter: function (param, val) {
+
+    if (val === undefined)
+      return Settings.findOne({ param: param });
+    Settings.upsert({ param: param }, { $set: { val: val } });
+  }
+});
+
+if (Settings.findOne() === undefined) {
+  Settings.insert({ param: 'URL', val: WEBSITE_URL });
+  Settings.insert({ param: 'location_interval', val: 60 });
+  Settings.insert({ param: 'quizz_enabled_topics', val: [] });
+  Settings.insert({ param: 'ffmpeg_server_url', val: '127.0.0.1' });
+  Settings.insert({ param: 'ffmpeg_server_port', val: 8126 });
+}
+
+
+Settings.allow({
+  update(userid, doc) {
+    if (hasRole(userid, 'admin')) return true;
+  }
+});

@@ -61,3 +61,12 @@ export function init_quizz() {
 
 
 }
+
+
+// --------------- methods --------------
+
+Meteor.methods({
+  'clearScores': function () {
+    QuizzScores.remove({}, { multi: true });
+  }
+});

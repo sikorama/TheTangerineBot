@@ -187,18 +187,18 @@ export function getGreetMessages(username, chan) {
         // Exlusion rule 
         // if item.channel starts with a '-' and contains the name of the current channel
         if (item.channel.startsWith('-')) {
-          console.debug('getGreetings, message=',item,'exclusive,  chan=',chan,item.channel,"=> index=", index);
+          //console.debug('getGreetings, message=',item,'exclusive,  chan=',chan,item.channel,"=> index=", index);
           if (index >= 0) return false;
         }
         else {
-          console.debug('getGreetings, message=',item,'inclusive mode, chan=',chan,item.channel,"=> index=", index);
+          //console.debug('getGreetings, message=',item,'inclusive mode, chan=',chan,item.channel,"=> index=", index);
           if (index < 0) return false;
         }
       }
       return true;
     });
   }
-  console.info('getGreetMessage - user=',username,',gmtext=', gmtext);
+  //console.info('getGreetMessage - user=',username,',gmtext=', gmtext);
   return gmtext;
 }
 
@@ -227,3 +227,17 @@ export function replaceKeywords(txt, options) {
 
   return txt;
 }
+
+
+
+
+
+
+Meteor.methods({
+  'resetGreetTimer': function (uname) {
+    if (hasRole(this.userId, ['admin', 'greet'])) {
+      if (uname)
+        GreetDate.remove({ name: uname });
+    }
+  }
+});

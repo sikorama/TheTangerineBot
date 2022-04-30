@@ -28,3 +28,17 @@ export function addChannel(chan, fields, guestAccount) {
 
     BotChannels.upsert({ channel: chan }, doc);
   }
+
+
+  Meteor.methods({
+    // Admins can add channels from client
+    addChannel: function (chan) {
+      if (!chan)
+        return [];
+
+      if (hasRole(this.userId, ['admin']))
+        addChannel(chan.toLowerCase(), ["enabled"]);
+    }
+  });
+
+  

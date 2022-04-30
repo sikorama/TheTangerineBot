@@ -273,16 +273,6 @@ Meteor.startup(() => {
   init_rss();
 
 
-  Meteor.methods({
-    // Admins can add channels from client
-    addChannel: function (chan) {
-      if (!chan)
-        return [];
-
-      if (hasRole(this.userId, ['admin']))
-        addChannel(chan.toLowerCase(), ["enabled"]);
-    }
-  });
 
   Meteor.methods({
     getActiveUsers: function (chan) {
@@ -308,95 +298,10 @@ Meteor.startup(() => {
 
       return last_active_users[chan];
     }
-
-
   });
 
 
-  Meteor.methods({
-    // Search a twitch name inevery colections, and replace by the new name;
-    rename: function (before, after, apply) {
-      let desc = [];
-      desc.push("Replacing " + before + " by " + after + ' ' + (apply ? '' : '(dry run)'));
-      let lowcb = before.toLowerCase();
-      let lowca = after.toLowerCase();
 
-      let c, n;
-      // Bot Channem
-      c = BotChannels.findOne({ channel: lowcb });
-      if (c) {
-        desc.push('BotChannel: Found 1 occurence');
-        console.info(c);
-        if (apply) {
-          BotChannels.update({ channel: lowcb }, { $set: { channel: lowca } });
-        }
-      }
-
-      // Locations
-      c = UserLocations.findOne({ name: lowcb });
-      if (c) {
-        desc.push('UserLocations: Found 1 occurence');
-        console.info(c);
-        if (apply) {
-          let sobj = { name: lowca, dname: after };
-          if (c.mapname)
-            sobj.mapname = after;
-          UserLocations.update({ name: lowcb }, { $set: sobj });
-
-        }
-      }
-
-      // Map users
-      let lfo = {}, upo = {};
-      lfo[lowcb] = { $exists: 1 };
-      upo[lowcb] = lowca;
-      upo[lowcb + '-msg'] = lowca + '-msg';
-      upo[lowcb + '-lastreq'] = lowca + '-lastreq';
-      c = UserLocations.find(lfo);
-      if (c.count() > 0) {
-        desc.push('UserLocations field: Found ' + c.count() + ' map users');
-        if (apply) {
-          UserLocations.update(lfo, { $rename: upo }, { multi: true });
-        }
-      }
-
-      // Raids
-      c = Raiders.find({ raider: before });
-      if (c.count() > 0) {
-        desc.push('Raiders: Found ' + c.count() + ' occurence');
-        console.info(c);
-        if (apply) {
-          c.forEach((r) => {
-            Raiders.upsert({ raider: after, channel: r.channel }, { $inc: { count: r.count, viewers: r.viewers } });
-          });
-          Raiders.remove({ raider: before });
-        }
-      }
-      c = Raiders.find({ channel: lowcb });
-      if (c.count() > 0) {
-        desc.push('Raids: Found ' + c.count() + ' occurence');
-        console.info(c);
-
-        if (apply) {
-          c.forEach((r) => {
-            Raiders.upsert({ raider: r.raider, channel: lowca }, { $inc: { count: r.count, viewers: r.viewers } });
-          });
-          Raiders.remove({ channel: lowcb });
-        }
-      }
-
-      c = GreetMessages.findOne({ username: lowcb });
-      if (c) {
-        desc.push('GreetMessage: Found 1 occurence');
-        console.info(c);
-        if (apply) {
-          GreetMessages.update({ username: lowcb }, { $set: { username: lowca } });
-        }
-      }
-
-      return desc.join('\n');
-    }
-  });
 
   // Every 10 seconds, check if there's someone to greet
   // It allows to answer with a random delay, and also avoir too much
@@ -420,11 +325,7 @@ Meteor.startup(() => {
   });
 
   // ---------------- Methods ------------------
-  Meteor.methods({
-    'clearScores': function () {
-      QuizzScores.remove({}, { multi: true });
-    }
-  });
+
 
   Meteor.methods({
     // Counts number of people registered on the map, for a given channel
@@ -436,36 +337,9 @@ Meteor.startup(() => {
     'getNumQuestions': function () {
       return numQuestions;
     },
-    // For test only, generate random people on the map
-    'genRandomMapPeople': function (nb) {
-      for (let i = 0; i < nb; i++) {
 
-        let n = 'gen' + PhraseIt.make("gen_{{adjective}}_{{noun}}");
-        let doc = {
-          name: n,
-          dname: n,
-          location: 'generated',
-          latitude: Math.random() * 180 - 90,
-          longitude: Math.random() * 180 - 90,
-          timestamp: new Date(),
-          channels: ['TEMP'],
-          country: randElement(['GE', 'FR', 'BR', 'JP'])
-        };
-        if (Math.random() > 0.5) doc.allow = true;
-        if (Math.random() > 0.5) doc.msg = randSentence();
-        UserLocations.insert(doc);
-      }
-    }
   });
 
-  Meteor.methods({
-    'resetGreetTimer': function (uname) {
-      if (hasRole(this.userId, ['admin', 'greet'])) {
-        if (uname)
-          GreetDate.remove({ name: uname });
-      }
-    }
-  });
 
   Meteor.methods({
     'sentence': function () {
@@ -537,35 +411,11 @@ Meteor.startup(() => {
 
   //  Settings.remove({});
 
-  if (Settings.findOne() === undefined) {
-    Settings.insert({ param: 'URL', val: WEBSITE_URL });
-    Settings.insert({ param: 'location_interval', val: 60 });
-    Settings.insert({ param: 'quizz_enabled_topics', val: [] });
-    Settings.insert({ param: 'ffmpeg_server_url', val: '127.0.0.1' });
-    Settings.insert({ param: 'ffmpeg_server_port', val: 8126 });
-  }
-
-
-
-
-  Settings.allow({
-    update(userid, doc) {
-      if (hasRole(userid, 'admin')) return true;
-    }
-  });
 
 
   setTimeout(Meteor.bindEnvironment(checkLocations), 60 * 1000);
 
-  Meteor.methods({
-    // get/set parameters
-    parameter: function (param, val) {
 
-      if (val === undefined)
-        return Settings.findOne({ param: param });
-      Settings.upsert({ param: param }, { $set: { val: val } });
-    }
-  });
 
   // Channels management
   Meteor.methods({
@@ -679,14 +529,6 @@ Meteor.startup(() => {
     }
   });
 
-  UserLocations.allow({
-    update(userid, doc) {
-      if (hasRole(userid, 'admin')) return true;
-    },
-    remove(userid, doc) {
-      if (hasRole(userid, 'admin')) return true;
-    }
-  });
 
   let bot_channels = BotChannels.find({ enabled: true }).fetch().map(i => i.channel);
   console.info('Connecting to channels:', bot_channels);
@@ -862,6 +704,7 @@ Meteor.startup(() => {
       }
     //    console.error(context, isModerator);
 
+    let cmdarray = [];
 
     // Songlisbot requests
     if (botchan.map === true && username == "songlistbot") {
@@ -901,6 +744,35 @@ Meteor.startup(() => {
       return;
     }
 
+/*    // special case  /commands /ban /unban commands
+    // might not be visible in chat tho
+    if (msg[0] === '/') {
+      let cmda = msg.split(' ').filter(function (item) {
+        try {
+          return (item.length > 0);
+        }
+        catch (e) {
+          console.error(e);
+          return false;
+        }
+      });
+      
+      if (cmda[0]==='/ban') {
+        // Notification
+        if (discord_autoban_url)
+        sendDiscord(target_user+ " has been added to ultimate ban list! It will be automatically banned", discord_autoban_url);
+  
+
+      }
+
+      if (cmda[0]==='/unban') {
+        // Notification
+      }
+
+
+    }
+*/
+    //    cmdarray = commandName.split(' ').filter(function (item) {
 
 
     // Check if the message starts with #name
@@ -917,8 +789,7 @@ Meteor.startup(() => {
     let lccn = commandName.toLowerCase();
 
     let cmd = '';
-    let cmdarray = [];
-
+    
     // Filter commands (options)
     if (commandName[0] === '!') {
 
@@ -1062,7 +933,8 @@ Meteor.startup(() => {
           GreetMessages.upsert({ username: target_user }, { $set: { autoban: true } });
           say(target, 'With great power comes great responsability ' + dispname);
           // Sends a notification to discord channel
-          sendDiscord(target_user+ " has been added to ultimate ban list! It will be automatically banned", discord_autoban_url);          
+          if (discord_autoban_url)
+            sendDiscord(target_user+ " has been added to ultimate ban list! It will be automatically banned", discord_autoban_url);
           return;
         }
         
@@ -1072,7 +944,7 @@ Meteor.startup(() => {
           say(target, 'Peace, Love... and  redemption :) ' + dispname);
           // Sends a notification to discord channel
           if (discord_autoban_url)
-          sendDiscord(target_user+ " has been removed from ultimate ban list! Note it has not been unbaned on every channels", discord_autoban_url);
+            sendDiscord(target_user+ " has been removed from ultimate ban list! Note it has not been unbaned on every channels", discord_autoban_url);
           return;
         }        
       }
@@ -1081,7 +953,7 @@ Meteor.startup(() => {
       // bot must be a mod
       const gm = GreetMessages.findOne({ username: username, autoban: true });
       if (gm) {
-        say(target, '/ban ' + username);
+        say(target, '/ban ' + username); // Maybe there is an API for that
         return;
       }
     }
