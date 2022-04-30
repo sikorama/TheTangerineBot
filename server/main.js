@@ -1579,6 +1579,7 @@ Meteor.startup(() => {
 
           // If shoutout channel is not in greetings database, send a notification to a discord channel 
           if (botchan.notgreeted) {
+            soname=soname.toLowerCase();
             if (!GreetMessages.findOne({ username: soname })) {
               console.info('User', soname, 'not in greetings database');
               if (discord_notgreeted_url) {
