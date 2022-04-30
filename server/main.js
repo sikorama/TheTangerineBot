@@ -643,7 +643,8 @@ Meteor.startup(() => {
   bclient.on('message', Meteor.bindEnvironment(onMessageHandler));
   bclient.on('connected', onConnectedHandler);
   bclient.on('raided', Meteor.bindEnvironment(onRaidedHandler));
-  bclient.on('action', Meteor.bindEnvironment(onActionHandler));
+//  bclient.on('action', Meteor.bindEnvironment(onActionHandler));
+  bclient.on('ban', Meteor.bindEnvironment(onBanHandler));
 
   
 
@@ -744,35 +745,6 @@ Meteor.startup(() => {
       return;
     }
 
-/*    // special case  /commands /ban /unban commands
-    // might not be visible in chat tho
-    if (msg[0] === '/') {
-      let cmda = msg.split(' ').filter(function (item) {
-        try {
-          return (item.length > 0);
-        }
-        catch (e) {
-          console.error(e);
-          return false;
-        }
-      });
-      
-      if (cmda[0]==='/ban') {
-        // Notification
-        if (discord_autoban_url)
-        sendDiscord(target_user+ " has been added to ultimate ban list! It will be automatically banned", discord_autoban_url);
-  
-
-      }
-
-      if (cmda[0]==='/unban') {
-        // Notification
-      }
-
-
-    }
-*/
-    //    cmdarray = commandName.split(' ').filter(function (item) {
 
 
     // Check if the message starts with #name
@@ -1980,5 +1952,34 @@ Meteor.startup(() => {
       console.error(e);
     }
   }
+
+function onBanHandler(channel, username, reason, userstate) {
+  try {
+    console.log('>>>>', channel, 'BAN', username, JSON.stringify(userstate));
+
+    if (discord_autoban_url) 
+      sendDiscord(username+ ' has been baned on '+channel+' channel', discord_autoban_url);
+
+    // mark in greetings list
+    let gu = GreetMessages.findOne({ username: username});
+    let ban=[channel];
+    if (gu) {
+      if (gu.ban) 
+      {
+        ban = gu.ban;
+        if (ban.indexOf(channel)<0)
+          ban.push(channel);
+      }
+    }
+    
+    GreetMessages.upsert({username: username}, {$set: {ban:ban}});
+
+    // TODO: remove/mark on  other collections (map, active users)
+
+
+  } catch (e) {
+    console.error(e);
+  }
+}
 
 });
