@@ -1,4 +1,4 @@
-import { GreetMessages } from '../imports/api/collections.js';
+import { GreetDate, GreetMessages } from '../imports/api/collections.js';
 import { emoticones, followtxts } from './const.js';
 import { randElement } from './tools.js';
 import { hasRole } from './user_management.js';
