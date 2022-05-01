@@ -913,7 +913,7 @@ Meteor.startup(() => {
             say(target, 'With great power comes great responsability ' + dispname);
             // Sends a notification to discord channel
             if (discord_autoban_url)
-              sendDiscord(target_user + " has been added to ultimate ban list! It will be automatically banned", discord_autoban_url);
+              sendDiscord(target_user + " has been added to ultimate ban list by "+dispname+"! It will be automatically banned on channel where the feature is enabled", discord_autoban_url);
             return;
           }
 
@@ -923,7 +923,7 @@ Meteor.startup(() => {
             say(target, 'Peace, Love... and  redemption :) ' + dispname);
             // Sends a notification to discord channel
             if (discord_autoban_url)
-              sendDiscord(target_user + " has been removed from ultimate ban list! Note it has not been unbaned on every channels", discord_autoban_url);
+              sendDiscord(target_user + " has been removed from ultimate ban list by "+dispname+"! Note it has not been unbaned", discord_autoban_url);
             return;
           }
         }
