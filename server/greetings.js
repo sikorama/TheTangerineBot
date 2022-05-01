@@ -180,7 +180,7 @@ export function getGreetMessages(username, chan) {
         // if there is a channel field, use it as a constraint
         if (item.channel != undefined && item.channel.length > 0) {
           const index = item.channel.indexOf(chan);
-          // Exlusion rule 
+          // Exclusion rule 
           // if item.channel starts with a '-' and contains the name of the current channel
           if (item.channel.startsWith('-')) {
             //console.debug('getGreetings, message=',item,'exclusive,  chan=',chan,item.channel,"=> index=", index);

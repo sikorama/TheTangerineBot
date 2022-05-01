@@ -909,7 +909,7 @@ Meteor.startup(() => {
 
           if (cmd === 'ultimate-ban') {
             // Add/mark the user specified to the greetings 
-            GreetMessages.upsert({ username: target_user }, { $set: { autoban: true } });
+            GreetMessages.upsert({ username: target_user }, { $set: { autoban: true, lang: false } });
             say(target, 'With great power comes great responsability ' + dispname);
             // Sends a notification to discord channel
             if (discord_autoban_url)
@@ -1965,25 +1965,35 @@ Meteor.startup(() => {
     try {
       let chan = channel.substring(1).toLowerCase();
       let notif = username + ' has been banned from ' + chan + ' channel.';
+      let bo = {chan:chan, mod:username};
+      let update_obj = { lang: false};
 
       // mark in greetings list
       let gu = GreetMessages.findOne({ username: username });
-      let ban = [chan];
+      let ban = [bo];
       if (gu) {
         if (gu.ban) {
           ban = gu.ban;
           if (ban.indexOf(chan) < 0) {
             notif += 'They have already been banned from the following channels:' + ban.join(',');
-            ban.push(chan);
+
+            ban.push([bo]);
+            if (ban.length>=3) {
+              // Check if they were banned by 3 different mods? 
+              notif += 'Which means they will be added to ultimate ban list... Which means they will be automatically banned on every channel with ultimate ban feature enabled.';
+              update_obj.autoban = true;
+            }
           }
         }
       }
+
+      update_obj.ban = ban;
 
       if (discord_autoban_url)
         sendDiscord(notif, discord_autoban_url);
       console.log('[BAN]', notif, JSON.stringify(userstate));
 
-      GreetMessages.upsert({ username: username }, { $set: { lang: false, ban: ban } });
+      GreetMessages.upsert({ username: username }, { $set: update_obj });
 
       // TODO: remove/mark on  other collections (map, active users)
       removeActiveUser(chan, username);
