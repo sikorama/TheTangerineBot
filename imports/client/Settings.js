@@ -30,9 +30,9 @@ Template.Settings.helpers({
     isCurEditChan(chan) {
         return Session.equals('curEditChan', chan);
     },
-    getChannels() {
+    getChannel() {
         let sch = Session.get('sel_channel');
-        return BotChannels.find({channel:sch});
+        return BotChannels.findOne({channel:sch});
     },
     getStatChannels() {
         return BotChannels.find({});

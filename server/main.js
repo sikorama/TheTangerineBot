@@ -661,8 +661,8 @@ Meteor.startup(() => {
   raid_bclient.on('raided', Meteor.bindEnvironment(onRaidedHandler));
 
   // Connect to Twitch:
-  bclient.connect();
-  raid_bclient.connect();
+  bclient.connect().catch(console.error);
+  raid_bclient.connect().catch(console.error);
 
   // Default regex for parsing requests
   const default_regsonglistreq1 = /(.*) \brequested\s(.*)\s\bat position/;

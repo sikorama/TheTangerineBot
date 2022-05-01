@@ -1,5 +1,5 @@
 import { BotChannels } from '../imports/api/collections.js';
-
+import { hasRole } from './user_management.js';
 
 export function addChannel(chan, fields, guestAccount) {
 
@@ -41,4 +41,3 @@ export function addChannel(chan, fields, guestAccount) {
     }
   });
 
-  

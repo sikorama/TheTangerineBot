@@ -6,9 +6,9 @@
   <button class="selStat pure-button {{#if submenu 5}}pure-button-primary{{/if}}" name="5">Emotes</button>
   <button class="selStat pure-button {{#if submenu 4}}pure-button-primary{{/if}}" name="4">Discord Hooks</button>
 
-
   {{#if submenu 1}}
-  <h2>Channels Management</h2>
+  <h2>Channel Management</h2>
+
   <!-- TODO: use an image collection, and generate options -->
   <datalist id="imagelist">
     {{#each i in iconnames}}
@@ -17,10 +17,11 @@
     <option value="/default.png"></option>
     <option value="/favicon-32.png"></option>
   </datalist>
-  {{#each c in getChannels}}
+  
+  {{#let c =getChannel}}
 
   {{#if c.live}}
-  LIVE - {{c.title}} - {{c.started_at}}
+  Currently LIVE - {{c.title}} - {{c.started_at}}
   {{/if}}
 
 
@@ -482,7 +483,7 @@
 
   <h4>Remove Channel</h4>
   <button id="{{c._id}}" class="delete">Remove Channel</button>
-  {{/each}}
+  {{/let}}
 
   <!---    {{#if isUserRole "admin greet"}}
 -->
