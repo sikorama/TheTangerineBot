@@ -20,6 +20,7 @@ import { init_rss } from './rss.js';
 import { initRaidManagement } from './raids.js';
 import { randElement } from './tools.js';
 import { init_users } from './user_management.js';
+import { tryClause } from 'jshint/src/prod-params';
 
 const tmi = require('tmi.js');
 const gtrans = require('googletrans').default;
@@ -1975,10 +1976,18 @@ Meteor.startup(() => {
   }
 
   function onNotice(channel, msgid, message) {
-    console.log('>>>>', channel, msgid, message);
+    try {
+
+      console.log('>>>>', 'NOTICE', channel, msgid, message);
+      
+      // Bot has been banned
+      if (msgid==='msg_banned') {
+        // Disable account
+        let chan = channel.toLowerCase().substring(1);  
+        BotChannels.update({channel: chan}, {$set: {suspended:true, suspended_reason: 'Bot has been banned on '+chan+'channel :('}});
+      }
+    }catch(e) {console.error(e);}
   }
-
-
 
   function onBanHandler(channel, username, reason, userstate) {
     try {
