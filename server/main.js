@@ -902,44 +902,46 @@ Meteor.startup(() => {
     }
 
     // ------------------- AUTOBAN -------------------
-    if (botchan.autobancmd === true) {
-      if (isModerator) {
-        // Command !autoban
-        if (cmdarray.length >= 1) {
+    if (botchan.manageban === true) {
+      if (botchan.autobancmd === true) {
+        if (isModerator) {
+          // Command !autoban
+          if (cmdarray.length >= 1) {
 
-          let target_user = cmdarray[1];
+            let target_user = cmdarray[1];
 
-          // TODO: only available if ultimate-ban command is enabled (add an option)
-          if (cmd === 'ultimate-ban') {
-            // Add/mark the user specified to the greetings 
-            GreetMessages.upsert({ username: target_user }, { $set: { autoban: true, lang: false } });
-            say(target, 'With great power comes great responsability ' + dispname);
-            // Sends a notification to discord channel
-            if (discord_autoban_url)
-              sendDiscord(target_user + " has been added to *ultimate ban* list by *" + dispname + "* .  It will be automatically banned on channel where the feature is enabled", discord_autoban_url);
-            return;
-          }
+            // TODO: only available if ultimate-ban command is enabled (add an option)
+            if (cmd === 'ultimate-ban') {
+              // Add/mark the user specified to the greetings 
+              GreetMessages.upsert({ username: target_user }, { $set: { autoban: true, lang: false } });
+              say(target, 'With great power comes great responsability ' + dispname);
+              // Sends a notification to discord channel
+              if (discord_autoban_url)
+                sendDiscord(target_user + " has been added to *ultimate ban* list by *" + dispname + "* .  It will be automatically banned on channel where the feature is enabled", discord_autoban_url);
+              return;
+            }
 
-          if (cmd === 'ultimate-unban') {
-            // Add/mark the user specified to the greetings 
-            GreetMessages.upsert({ username: target_user }, { $unset: { autoban: true } });
-            say(target, 'Peace, Love... and  redemption :) ' + dispname);
-            // Sends a notification to discord channel
-            if (discord_autoban_url)
-              sendDiscord(target_user + " has been removed from ultimate ban list by " + dispname + "! Note it has not been unbanned", discord_autoban_url);
-            return;
+            if (cmd === 'ultimate-unban') {
+              // Add/mark the user specified to the greetings 
+              GreetMessages.upsert({ username: target_user }, { $unset: { autoban: true } });
+              say(target, 'Peace, Love... and  redemption :) ' + dispname);
+              // Sends a notification to discord channel
+              if (discord_autoban_url)
+                sendDiscord(target_user + " has been removed from ultimate ban list by " + dispname + "! Note it has not been unbanned", discord_autoban_url);
+              return;
+            }
           }
         }
       }
-    }
 
-    if (botchan.autoban === true) {
-      // bot must be a mod
-      const gm = GreetMessages.findOne({ username: username, autoban: true });
-      if (gm) {
-        let chans = gm.ban.map((item) => item.chan).join(",");
-        say(target, '/ban ' + username + ' because they were already banned from ' + chans); // Maybe there is an API for that
-        return;
+      if (botchan.autoban === true) {
+        // bot must be a mod
+        const gm = GreetMessages.findOne({ username: username, autoban: true });
+        if (gm) {
+          let chans = gm.ban.map((item) => item.chan).join(",");
+          say(target, '/ban ' + username + ' because they were already banned from ' + chans); // Maybe there is an API for that
+          return;
+        }
       }
     }
 
@@ -1983,7 +1985,7 @@ Meteor.startup(() => {
       // TODO: only available if manageban is enabled?
       let chan = channel.substring(1).toLowerCase();
       let bc = BotChannels.findOne({ channel: chan });
-      if (bc?.manageban===true) {
+      if (bc?.manageban === true) {
 
         let notif = username + ' has been banned from ' + chan + ' channel.';
         let bo = { chan: chan }; // we don't know the name of the mod who banned, even as a moderator
@@ -2003,7 +2005,7 @@ Meteor.startup(() => {
 
               // TODO: add an option for automatic trigger
 
-              if (bc.autoban===true && ban.length >= 3) {
+              if (bc.autoban === true && ban.length >= 3) {
                 notif += ' Which means they will be added to ultimate ban list... Which means they will be automatically banned on every channel with ultimate ban feature enabled.';
                 update_obj.autoban = true;
               }
@@ -2012,7 +2014,7 @@ Meteor.startup(() => {
         }
 
         update_obj.ban = ban;
-        if (bc.notifban===true && discord_autoban_url)
+        if (bc.notifban === true && discord_autoban_url)
           sendDiscord(notif, discord_autoban_url);
 
         console.log('[BAN]', notif, JSON.stringify(userstate), reason);
