@@ -654,6 +654,8 @@ Meteor.startup(() => {
   bclient.on('connected', onConnectedHandler);
   bclient.on('raided', Meteor.bindEnvironment(onRaidedHandler));
   bclient.on('ban', Meteor.bindEnvironment(onBanHandler));
+  bclient.on('unban', Meteor.bindEnvironment(onUnBanHandler));
+  bclient.on('notice', Meteor.bindEnvironment(onNotice));
 
   raid_bclient.on('connected', onConnectedHandler);
   raid_bclient.on('raided', Meteor.bindEnvironment(onRaidedHandler));
@@ -913,7 +915,7 @@ Meteor.startup(() => {
             say(target, 'With great power comes great responsability ' + dispname);
             // Sends a notification to discord channel
             if (discord_autoban_url)
-              sendDiscord(target_user + " has been added to ultimate ban list by "+dispname+"! It will be automatically banned on channel where the feature is enabled", discord_autoban_url);
+              sendDiscord(target_user + " has been added to *ultimate ban* list by *"+dispname+"* .  It will be automatically banned on channel where the feature is enabled", discord_autoban_url);
             return;
           }
 
@@ -923,7 +925,7 @@ Meteor.startup(() => {
             say(target, 'Peace, Love... and  redemption :) ' + dispname);
             // Sends a notification to discord channel
             if (discord_autoban_url)
-              sendDiscord(target_user + " has been removed from ultimate ban list by "+dispname+"! Note it has not been unbaned", discord_autoban_url);
+              sendDiscord(target_user + " has been removed from ultimate ban list by "+dispname+"! Note it has not been unbanned", discord_autoban_url);
             return;
           }
         }
@@ -932,7 +934,8 @@ Meteor.startup(() => {
       // bot must be a mod
       const gm = GreetMessages.findOne({ username: username, autoban: true });
       if (gm) {
-        say(target, '/ban ' + username); // Maybe there is an API for that
+        let chans = gm.ban.map((item)=>item.chan).join(",");
+        say(target, '/ban ' + username + ' ultimate-ban because they were banned from '+ chans); // Maybe there is an API for that
         return;
       }
     }
@@ -1961,11 +1964,22 @@ Meteor.startup(() => {
     }
   }
 
+  function onUnBanHandler(channel, username, userstate) {
+    console.log('>>>>', channel, 'Unban', username);
+   
+  }
+
+  function onNotice(channel, msgid, message) {
+    console.log('>>>>', channel, msgid, message);
+  }
+
+
+
   function onBanHandler(channel, username, reason, userstate) {
     try {
       let chan = channel.substring(1).toLowerCase();
       let notif = username + ' has been banned from ' + chan + ' channel.';
-      let bo = {chan:chan, mod:username};
+      let bo = {chan:chan}; // we don't know the name of the mod who banned, even as a moderator
       let update_obj = { lang: false};
 
       // mark in greetings list
@@ -1974,13 +1988,13 @@ Meteor.startup(() => {
       if (gu) {
         if (gu.ban) {
           ban = gu.ban;
-          if (ban.indexOf(chan) < 0) {
-            notif += 'They have already been banned from the following channels:' + ban.join(',');
+          let chans= ban.map((item)=>item.chan);
+          if (chans.indexOf(chan) < 0) {
+            notif += 'They have already been banned from the following channels:' + chans.join(',');
 
             ban.push([bo]);
-            if (ban.length>=3) {
-              // Check if they were banned by 3 different mods? 
-              notif += 'Which means they will be added to ultimate ban list... Which means they will be automatically banned on every channel with ultimate ban feature enabled.';
+            if (ban.length>=3) {            
+              notif += ' Which means they will be added to ultimate ban list... Which means they will be automatically banned on every channel with ultimate ban feature enabled.';
               update_obj.autoban = true;
             }
           }
@@ -1991,7 +2005,8 @@ Meteor.startup(() => {
 
       if (discord_autoban_url)
         sendDiscord(notif, discord_autoban_url);
-      console.log('[BAN]', notif, JSON.stringify(userstate));
+
+      console.log('[BAN]', notif, JSON.stringify(userstate), reason);
 
       GreetMessages.upsert({ username: username }, { $set: update_obj });
 

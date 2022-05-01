@@ -48,7 +48,7 @@
         <tr style="width:100%;">
           <th style="width:25%;">User's name</th>
           <th style="width:75%;">Message</th>
-          <th>Baned on</th>
+          <th>Banned on</th>
         </tr>
       </thead>
       <tbody>
@@ -78,7 +78,9 @@
               {{/each}}
             </td>
             <td>
-              {{c.ban.chan}}
+              {{#each cb in c.ban}}
+              {{cb.chan}}
+              {{/each}}
             </td>            
           </tr>
 
