@@ -330,13 +330,28 @@
     <thead>
       <tr>
         <th colspan="3">
-          {{>CheckMark b=c.autoban n="autoban"}}
-          Ultimate ban
+          {{>CheckMark b=c.manageban n="manageban"}}
+          Manage Ban
         </th>
       </tr>
     </thead>
 
-
+    {{#if c.manageban}}
+    <tbody>
+      <tr>
+        <td>Discord Notification</td>
+        <td colspan="2">{{>CheckMark b=c.notifban n="notifban"}}</td>
+      </tr>
+      <tr>
+        <td>Allow Ultimate Ban Command</td>
+        <td colspan="2">{{>CheckMark b=c.autobancmd n="autobancmd"}}</td>
+      </tr>
+      <tr>
+        <td>Enable Ultimate Ban</td>
+        <td colspan="2">{{>CheckMark b=c.autoban n="autoban"}}</td>
+      </tr>
+    </tbody>
+    {{/if}}
 
     <thead>
       <tr>

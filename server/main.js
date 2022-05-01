@@ -272,12 +272,12 @@ Meteor.startup(() => {
   init_radio();
   init_rss();
 
-/**
- * 
- * @param {*} chan : name of channel (low cases, without heading '#')
- * @param {*} name : user name (low cases)
- * @returns 
- */
+  /**
+   * 
+   * @param {*} chan : name of channel (low cases, without heading '#')
+   * @param {*} name : user name (low cases)
+   * @returns 
+   */
   function removeActiveUser(chan, name) {
     if (!chan)
       return [];
@@ -902,20 +902,21 @@ Meteor.startup(() => {
     }
 
     // ------------------- AUTOBAN -------------------
-    if (botchan.autoban === true) {
+    if (botchan.autobancmd === true) {
       if (isModerator) {
         // Command !autoban
         if (cmdarray.length >= 1) {
 
           let target_user = cmdarray[1];
 
+          // TODO: only available if ultimate-ban command is enabled (add an option)
           if (cmd === 'ultimate-ban') {
             // Add/mark the user specified to the greetings 
             GreetMessages.upsert({ username: target_user }, { $set: { autoban: true, lang: false } });
             say(target, 'With great power comes great responsability ' + dispname);
             // Sends a notification to discord channel
             if (discord_autoban_url)
-              sendDiscord(target_user + " has been added to *ultimate ban* list by *"+dispname+"* .  It will be automatically banned on channel where the feature is enabled", discord_autoban_url);
+              sendDiscord(target_user + " has been added to *ultimate ban* list by *" + dispname + "* .  It will be automatically banned on channel where the feature is enabled", discord_autoban_url);
             return;
           }
 
@@ -925,17 +926,19 @@ Meteor.startup(() => {
             say(target, 'Peace, Love... and  redemption :) ' + dispname);
             // Sends a notification to discord channel
             if (discord_autoban_url)
-              sendDiscord(target_user + " has been removed from ultimate ban list by "+dispname+"! Note it has not been unbanned", discord_autoban_url);
+              sendDiscord(target_user + " has been removed from ultimate ban list by " + dispname + "! Note it has not been unbanned", discord_autoban_url);
             return;
           }
         }
       }
+    }
 
+    if (botchan.autoban === true) {
       // bot must be a mod
       const gm = GreetMessages.findOne({ username: username, autoban: true });
       if (gm) {
-        let chans = gm.ban.map((item)=>item.chan).join(",");
-        say(target, '/ban ' + username + ' ultimate-ban because they were banned from '+ chans); // Maybe there is an API for that
+        let chans = gm.ban.map((item) => item.chan).join(",");
+        say(target, '/ban ' + username + ' because they were already banned from ' + chans); // Maybe there is an API for that
         return;
       }
     }
@@ -1582,7 +1585,7 @@ Meteor.startup(() => {
 
           // If shoutout channel is not in greetings database, send a notification to a discord channel 
           if (botchan.notgreeted) {
-            soname=soname.toLowerCase();
+            soname = soname.toLowerCase();
             if (!GreetMessages.findOne({ username: soname })) {
               console.info('User', soname, 'not in greetings database');
               if (discord_notgreeted_url) {
@@ -1966,7 +1969,7 @@ Meteor.startup(() => {
 
   function onUnBanHandler(channel, username, userstate) {
     console.log('>>>>', channel, 'Unban', username);
-   
+
   }
 
   function onNotice(channel, msgid, message) {
@@ -1977,38 +1980,46 @@ Meteor.startup(() => {
 
   function onBanHandler(channel, username, reason, userstate) {
     try {
+      // TODO: only available if manageban is enabled?
       let chan = channel.substring(1).toLowerCase();
-      let notif = username + ' has been banned from ' + chan + ' channel.';
-      let bo = {chan:chan}; // we don't know the name of the mod who banned, even as a moderator
-      let update_obj = { lang: false};
+      let bc = BotChannels.findOne({ channel: chan });
+      if (bc?.manageban) {
 
-      // mark in greetings list
-      let gu = GreetMessages.findOne({ username: username });
-      let ban = [bo];
-      if (gu) {
-        if (gu.ban) {
-          ban = gu.ban;
-          let chans= ban.map((item)=>item.chan);
-          if (chans.indexOf(chan) < 0) {
-            notif += 'They have already been banned from the following channels:' + chans.join(',');
+        let notif = username + ' has been banned from ' + chan + ' channel.';
+        let bo = { chan: chan }; // we don't know the name of the mod who banned, even as a moderator
+        let update_obj = { lang: false };
 
-            ban.push([bo]);
-            if (ban.length>=3) {            
-              notif += ' Which means they will be added to ultimate ban list... Which means they will be automatically banned on every channel with ultimate ban feature enabled.';
-              update_obj.autoban = true;
+        // mark in greetings list
+        let gu = GreetMessages.findOne({ username: username });
+        let ban = [bo];
+        if (gu) {
+          if (gu.ban) {
+            ban = gu.ban;
+            let chans = ban.map((item) => item.chan);
+            if (chans.indexOf(chan) < 0) {
+              notif += 'They have already been banned from the following channels:' + chans.join(',');
+
+              ban.push([bo]);
+
+              // TODO: add an option for automatic trigger
+
+              if (bc.autoban && ban.length >= 3) {
+                notif += ' Which means they will be added to ultimate ban list... Which means they will be automatically banned on every channel with ultimate ban feature enabled.';
+                update_obj.autoban = true;
+              }
             }
           }
         }
+
+        update_obj.ban = ban;
+        if (bc.notifban && discord_autoban_url)
+          sendDiscord(notif, discord_autoban_url);
+
+        console.log('[BAN]', notif, JSON.stringify(userstate), reason);
+
+        GreetMessages.upsert({ username: username }, { $set: update_obj });
+
       }
-
-      update_obj.ban = ban;
-
-      if (discord_autoban_url)
-        sendDiscord(notif, discord_autoban_url);
-
-      console.log('[BAN]', notif, JSON.stringify(userstate), reason);
-
-      GreetMessages.upsert({ username: username }, { $set: update_obj });
 
       // TODO: remove/mark on  other collections (map, active users)
       removeActiveUser(chan, username);
