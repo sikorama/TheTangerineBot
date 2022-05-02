@@ -1,5 +1,5 @@
 import { BotChannels, BotCommands, BotMessage, GreetMessages, Images, QuizzQuestions, QuizzScores, Raiders, Settings, ShoutOuts, Stats, UserLocations } from '../imports/api/collections.js';
-import { getUserGroups, hasRole } from './user_management.js';
+import { assertMethodAccess, getUserGroups, hasRole } from './user_management.js';
 
 export function init_publications() {
   //
@@ -152,32 +152,32 @@ export function init_publications() {
   });
 
 
-// Custom Commands
-//
+  // Custom Commands
+  //
 
 
-Meteor.publish('customcommands', function (sel) {
-  if (hasRole(this.userId, ['admin'])) {
-    sel = sel || {};
-    return BotCommands.find(sel);
-  }
-  this.ready();
-});
+  Meteor.publish('customcommands', function (sel) {
+    if (hasRole(this.userId, ['admin'])) {
+      sel = sel || {};
+      return BotCommands.find(sel);
+    }
+    this.ready();
+  });
 
-BotCommands.allow({
-  insert(userid, doc) {
-    if (hasRole(userid, 'admin'))
-      return true;
-  },
-  update(userid, doc) {
-    if (hasRole(userid, 'admin'))
-      return true;
-  },
-  remove(userid, doc) {
-    if (hasRole(userid, 'admin'))
-      return true;
-  }
-});
+  BotCommands.allow({
+    insert(userid, doc) {
+      if (hasRole(userid, 'admin'))
+        return true;
+    },
+    update(userid, doc) {
+      if (hasRole(userid, 'admin'))
+        return true;
+    },
+    remove(userid, doc) {
+      if (hasRole(userid, 'admin'))
+        return true;
+    }
+  });
   //
   // ---------------------- GREET MESSAGES -------------------------------
   //
@@ -258,6 +258,8 @@ BotCommands.allow({
 
   Meteor.methods({
     getGroups: function () {
+      assertMethodAccess('getGroups', this.userId);
+
       if (hasRole(this.userId, ['admin'])) {
         let cur = BotChannels.find({}, { fields: { channel: 1 }, sort: { channel: 1 } });
         let a = cur.fetch();
@@ -266,6 +268,7 @@ BotCommands.allow({
         //      console.error(res);
         return res;
       }
+
       return getUserGroups(this.userId);
     }
   });
@@ -289,6 +292,7 @@ BotCommands.allow({
 Meteor.methods({
   // get/set parameters
   parameter: function (param, val) {
+    assertMethodAccess('parameter', this.userId);
 
     if (val === undefined)
       return Settings.findOne({ param: param });
@@ -296,6 +300,7 @@ Meteor.methods({
   }
 });
 
+// Default Settings
 if (Settings.findOne() === undefined) {
   Settings.insert({ param: 'URL', val: WEBSITE_URL });
   Settings.insert({ param: 'location_interval', val: 60 });

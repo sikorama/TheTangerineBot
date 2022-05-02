@@ -1,3 +1,4 @@
+import { assertMethodAccess } from "./user_management";
 
 /**
  *   Randomly Returns an item from an array
@@ -17,8 +18,9 @@ export function randElement(a) {
 Meteor.methods({
   // Search a twitch name inevery colections, and replace by the new name;
   rename: function (before, after, apply) {
-    if (this.userId) {
+    assertMethodAccess('rename', this.userId,'admin');
 
+  
       let desc = [];
       desc.push("Replacing " + before + " by " + after + ' ' + (apply ? '' : '(dry run)'));
       let lowcb = before.toLowerCase();
@@ -98,13 +100,13 @@ Meteor.methods({
       }
 
       return desc.join('\n');
-    }
 
   },
 
   // For test purpose only, generate random people on the map
   'genRandomMapPeople': function (nb) {
-    if (this.userId) {
+    assertMethodAccess('genRandomMapPeople', this.userId,'admin');
+
       for (let i = 0; i < nb; i++) {
 
         let n = 'gen' + PhraseIt.make("gen_{{adjective}}_{{noun}}");
@@ -122,8 +124,5 @@ Meteor.methods({
         if (Math.random() > 0.5) doc.msg = randSentence();
         UserLocations.insert(doc);
       }
-    }
   }
-
-
 });

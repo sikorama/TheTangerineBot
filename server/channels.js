@@ -1,5 +1,5 @@
 import { BotChannels } from '../imports/api/collections.js';
-import { hasRole } from './user_management.js';
+import { assertMethodAccess } from './user_management.js';
 
 export function addChannel(chan, fields, guestAccount) {
 
@@ -33,11 +33,12 @@ export function addChannel(chan, fields, guestAccount) {
   Meteor.methods({
     // Admins can add channels from client
     addChannel: function (chan) {
+      assertMethodAccess('addChannel', this.userId, ['admin']);
+
       if (!chan)
         return [];
 
-      if (hasRole(this.userId, ['admin']))
-        addChannel(chan.toLowerCase(), ["enabled"]);
+      addChannel(chan.toLowerCase(), ["enabled"]);
     }
   });
 

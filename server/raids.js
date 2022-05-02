@@ -3,6 +3,7 @@
  */
 
 import { Raiders, BotChannels, UserLocations } from "../imports/api/collections";
+import { assertMethodAccess } from "./user_management";
 
 // Poids/Labels:count viewer
 function export_raid_graph(weightMode) {
@@ -55,6 +56,7 @@ function export_raid_graph(weightMode) {
 export function initRaidManagement() {
     Meteor.methods({
         'export_raid_graph': function () {
+            assertMethodAccess('export_raid_graph', this.userId);
             return export_raid_graph(0).join('\n');
         }
     });

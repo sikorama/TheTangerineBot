@@ -132,100 +132,92 @@ export function init_users() {
 
     Meteor.methods({
         insertUser: function (doc) {
+            assertMethodAccess('insertUser', this.userId, 'admin');
             console.info('insert user', doc, this.userId, isAdmin(this.userId));
-            if (isAdmin(this.userId)) {
-                // Sanitize?
-                // Check channels,pw...
-                if (!doc.name || !doc.pw) {
-                    console.error('name or pw missing');
-                    return;
-                }
-                if (!doc.chan) {
-                    console.error('no channel defined');
-                }
-                createStreamerAccount(doc.name, doc.chan, doc.pw);
+            // Sanitize?
+            // Check channels,pw...
+            if (!doc.name || !doc.pw) {
+                console.error('name or pw missing');
+                return;
             }
-            else {
-                console.error('Insert User: not allowed!');
+            if (!doc.chan) {
+                console.error('no channel defined');
             }
+            createStreamerAccount(doc.name, doc.chan, doc.pw);
+
         },
         removeUser: function (uid) {
-            if (isAdmin(this.userId) && (uid != undefined)) {
+            assertMethodAccess('removeUser', this.userId, 'admin');
+            if (uid)
                 Meteor.users.remove(uid);
-            }
         },
         updateUser: function (doc) {
-            if (isAdmin(this.userId)) {
-                const user = Meteor.users.findOne(doc._id);
-                if (user != undefined) {
-                    //console.error('modifier', doc.modifier);
-                    Meteor.users.update(doc._id, doc.modifier);
-                }
+            assertMethodAccess('updateUser', this.userId, 'admin');
+            const user = Meteor.users.findOne(doc._id);
+            if (user != undefined) {
+                //console.error('modifier', doc.modifier);
+                Meteor.users.update(doc._id, doc.modifier);
             }
         },
         forcePassword: function (doc) {
-            if (isAdmin(this.userId)) {
-                try {
-                    const newPassword = doc.modifier.$set.password;
-                    Accounts.setPassword(doc._id, newPassword);
-                }
-                catch (e) {
-                    console.error(e);
-                }
+            assertMethodAccess('forcePassword', this.userId, 'admin');
+
+            try {
+                const newPassword = doc.modifier.$set.password;
+                Accounts.setPassword(doc._id, newPassword);
+            }
+            catch (e) {
+                console.error(e);
             }
         },
         setUserRoles: function (name, roles) {
-            if (isAdmin(this.userId)) {
-                const user = Meteor.users.findOne({
-                    'username': name
-                });
-                console.warn("SetUserRoles", name, roles);
-                if (user != undefined)
-                    setUserRoles(user._id, roles);
-            }
+            assertMethodAccess('setUserRoles', this.userId, 'admin');
+            const user = Meteor.users.findOne({
+                'username': name
+            });
+            console.warn("SetUserRoles", name, roles);
+            if (user != undefined)
+                setUserRoles(user._id, roles);
         },
         setUserRole: function (uid, role, state) {
-            if (isAdmin(this.userId)) {
-                if (role==='superadmin')
-                    return;
+            assertMethodAccess('setUserRole', this.userId, 'admin');
+            if (role === 'superadmin')
+                return;
 
-                let r = Meteor.roleAssignment.find({ 'user._id': uid }).fetch();
-                let exists = r.indexOf(role) >= 0;
-                if (!exists && (state === true)) {
-                    r.push(role);
-                    setUserRoles(uid, r);
-                }
-                if (exists && (state === false)) {
-                    // Remove Role
-                    r.splice(r.indexOf(role), 1);
-                    setUserRoles(uid, r);
-                }
+            let r = Meteor.roleAssignment.find({ 'user._id': uid }).fetch();
+            let exists = r.indexOf(role) >= 0;
+            if (!exists && (state === true)) {
+                r.push(role);
+                setUserRoles(uid, r);
             }
-
-        },
-        toggleUserRole: function (uid, role) {
-            if (isAdmin(this.userId)) {
-                if (role==='superadmin')
-                    return;                    
-                let r = Meteor.roleAssignment.find({ 'user._id': uid }).fetch().map((rr)=>rr.role._id);
-                let i = r.indexOf(role); 
-                if (i < 0) {
-                    r.push(role);
-                }
-                else {
-                    r.splice(i, 1);
-                }
+            if (exists && (state === false)) {
+                // Remove Role
+                r.splice(r.indexOf(role), 1);
                 setUserRoles(uid, r);
             }
         },
-        setUserGroups: function (name, groups) {
-            if (isAdmin(this.userId)) {
-                const user = Meteor.users.findOne({
-                    'username': name
-                });
-                if (user != undefined)
-                    setUserGroups(user._id, groups);
+        toggleUserRole: function (uid, role) {
+            assertMethodAccess('toggleUserRole', this.userId, 'admin');
+
+            if (role === 'superadmin')
+                return;
+            let r = Meteor.roleAssignment.find({ 'user._id': uid }).fetch().map((rr) => rr.role._id);
+            let i = r.indexOf(role);
+            if (i < 0) {
+                r.push(role);
             }
+            else {
+                r.splice(i, 1);
+            }
+            setUserRoles(uid, r);
+        },
+        setUserGroups: function (name, groups) {
+            assertMethodAccess('setUserGroups', this.userId, 'admin');
+            const user = Meteor.users.findOne({
+                'username': name
+            });
+            if (user != undefined)
+                setUserGroups(user._id, groups);
         }
     });
 
@@ -278,4 +270,52 @@ export function init_users() {
         }
     });
 
+}
+
+
+
+
+// Fonction pour verifier les roles pour la souscription à une publication
+export function checkSubscriptionRole(publication, userId, role) {
+    return checkResourceAccess('Souscription ' + publication, userId, role);
+}
+
+// Fonction pour verifier les roles pour l'appel à une méthode
+// Si l'acces est impossible, emet une exception
+export function assertMethodAccess(methodname, userId, role) {
+    const r = checkResourceAccess('Method ' + methodname, userId, role);
+    if (!r) throwError('methodNotAllowed', 'Accès méthode ' + methodname + ' non autorisée', 'UserId=' + userId);
+    return r;
+}
+
+/**
+ *  Verifie le droit d'acces a une ressource pour un utilisateur donné
+ *  Si un ou des roles sont spécifiés, vérifie que l'utilisateur a le role. Sinon vérifie qu'il est logué
+ *  Si non autorisé, notifie l'erreur 
+ *  
+ * @param {*} resource : nom de la ressource, sert pour le message logué/notifié
+ * @param {*} userId : id de l'utiliasteur (e.g. this.userId())
+ * @param {*} role : roles pour acceder à la ressource
+ * @returns true si l'utilisateur est autorisé à acceder à la ressource
+ */
+export function checkResourceAccess(resource, userId, role) {
+
+    if (!userId) {
+        //notifyError('Accès '+resource + ' non autorisée pour un utilisateur non logué');
+        console.error('Accès ' + resource + ' non autorisée pour un utilisateur non logué');
+        return false;
+    }
+
+    if (role && !hasRole(userId, role)) {
+        let u = Meteor.users.findOne(userId);
+        if (!u)
+            u = userId;
+        else
+            u = u.username;
+
+        console.error('Acces ' + resource + ' non autorisée pour ' + u, { level: 'warn', reason: 'droit requis:' + role });
+        //        notifyError('Acces ' + resource + ' non autorisée pour ' + u, { level: 'warn', reason: 'droit requis:' + role });
+        return false;
+    }
+    return true;
 }

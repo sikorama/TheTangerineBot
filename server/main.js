@@ -15,12 +15,12 @@ import { getGreetMessages, init_greetings, replaceKeywords } from './greetings.j
 import { checkLiveChannels, sendDiscord } from './notifications.js';
 import { init_publications } from './publications.js';
 import { init_quizz } from './quizz.js';
-import { init_radio } from './radio.js';
+//import { init_radio } from './radio.js';
 import { init_rss } from './rss.js';
 import { initRaidManagement } from './raids.js';
 import { randElement } from './tools.js';
-import { init_users } from './user_management.js';
-import { tryClause } from 'jshint/src/prod-params';
+import { init_users,assertMethodAccess } from './user_management.js';
+
 
 const tmi = require('tmi.js');
 const gtrans = require('googletrans').default;
@@ -270,7 +270,7 @@ Meteor.startup(() => {
   init_greetings();
   init_publications();
   initRaidManagement();
-  init_radio();
+//  init_radio();
   init_rss();
 
   /**
@@ -295,6 +295,7 @@ Meteor.startup(() => {
 
   Meteor.methods({
     getActiveUsers: function (chan) {
+      assertMethodAccess('getActiveUsers', this.userId);
 
       if (!chan)
         return [];
@@ -305,7 +306,8 @@ Meteor.startup(() => {
       return [];
     },
     removeActiveUser(chan, name) {
-      if (this.userId)
+      assertMethodAccess('removeActiveUser', this.userId);
+
         removeActiveUser(chan, name);
     }
   });
@@ -340,11 +342,15 @@ Meteor.startup(() => {
   Meteor.methods({
     // Counts number of people registered on the map, for a given channel
     'getNumPeople': function (ch) {
+      assertMethodAccess('getNumPeople', this.userId);
+
       let sobj = {};
       sobj[ch] = { $exists: true };
       return UserLocations.find(sobj).count();
     },
     'getNumQuestions': function () {
+      assertMethodAccess('getNumQuestions', this.userId);
+
       return numQuestions;
     },
 
@@ -353,6 +359,8 @@ Meteor.startup(() => {
 
   Meteor.methods({
     'sentence': function () {
+      assertMethodAccess('sentence', this.userId);
+
       return randSentence();
     }
   });
@@ -430,13 +438,12 @@ Meteor.startup(() => {
   // Channels management
   Meteor.methods({
     removeChannel: function (chanid) {
-      if (this.userId) {
+      assertMethodAccess('removeChannel', this.userId);
         console.warn('Removing channel', chanid);
         BotChannels.remove(chanid);
-      }
     },
     toggleChanSettings: function (chanid, field) {
-      if (this.userId) {
+      assertMethodAccess('toggleChanSettings', this.userId);
         let bc = BotChannels.findOne(chanid);
         if (bc === undefined)
           return;
@@ -444,9 +451,10 @@ Meteor.startup(() => {
         objset = {};
         objset[field] = !v;
         BotChannels.update(chanid, { $set: objset });
-      }
     },
     setChanSettings: function (chanid, field, value) {
+      assertMethodAccess('setChanSettings', this.userId);
+
       let bc = BotChannels.findOne(chanid);
       if (bc === undefined)
         return;
@@ -457,6 +465,8 @@ Meteor.startup(() => {
 
     // Aggregation for counting # of people per country
     aggregateUserField: function (chan, field) {
+      assertMethodAccess('aggregateUserField', this.userId);
+
       if (!chan) return;
       // Check user is owner or admin
       // Chec 
@@ -495,7 +505,8 @@ Meteor.startup(() => {
       return res;
     },
     export_userloc: function (channame) {
-      if (this.userId) {
+      assertMethodAccess('export_userloc', this.userId);
+
         console.error('export', channame);
         let sel = {};
         sel[channame] = { $exists: 1 };
@@ -504,9 +515,10 @@ Meteor.startup(() => {
         });
         res.unshift('Name;Location;Latitude;Longitude;Country;Message');
         return res.join('\n');
-      }
     },
     export_live_events: function (from, to, team) {
+      assertMethodAccess('export_live_events', this.userId);
+
       let sel = {};
       if (team) sel.team = team;
       //Channel list

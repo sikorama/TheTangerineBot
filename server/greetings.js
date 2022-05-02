@@ -1,8 +1,8 @@
 import { GreetDate, GreetMessages } from '../imports/api/collections.js';
+import { regexan, regexf, regexi, regexn, regexnn } from '../imports/api/regex.js';
 import { emoticones, followtxts } from './const.js';
 import { randElement } from './tools.js';
-import { hasRole } from './user_management.js';
-import { regexan, regexf, regexi, regexn, regexnn, regext } from '../imports/api/regex.js';
+import { assertMethodAccess } from './user_management.js';
 
 
 export const pregexn = /@name/gi;
@@ -93,16 +93,12 @@ export function init_greetings() {
   Meteor.methods({
     'addGreetLine': function (u, t, chan) {
       // TODO Verifier les droits
-      if (hasRole(this.userId, ['admin', 'greet'])) {
-        addGreetLine(u, t, chan, this.userId);
-      }
-      else {
-        console.error('Adding line not allowed for user', this.userId);
-      }
+      assertMethodAccess('addGreetLine', this.userId, ['admin','greet']);
+      addGreetLine(u, t, chan, this.userId);
     },
     'removeGreetLine': function (id, index) {
       // TODO Verifier les droits
-      if (hasRole(this.userId, ['admin', 'greet'])) {
+      assertMethodAccess('removeGreetLine', this.userId, ['admin','greet']);
         // Virer une ligne et renumeroter
         let d = GreetMessages.findOne(id);
         if (d != undefined) {
@@ -119,12 +115,10 @@ export function init_greetings() {
           }
           else
             GreetMessages.remove(id);
-
         }
-      }
     },
     'updateGreetLine': function (id, index, v) {
-      if (hasRole(this.userId, ['admin', 'greet'])) {
+      assertMethodAccess('updateGreetLine', this.userId, ['admin','greet']);
         let d = GreetMessages.findOne(id);
         if (d != undefined) {
           let ov = d.texts[index];
@@ -144,7 +138,6 @@ export function init_greetings() {
           });
         }
       }
-    }
   });
 
 }
@@ -231,15 +224,10 @@ export function replaceKeywords(txt, options) {
 }
 
 
-
-
-
-
 Meteor.methods({
   'resetGreetTimer': function (uname) {
-    if (hasRole(this.userId, ['admin', 'greet'])) {
-      if (uname)
-        GreetDate.remove({ name: uname });
-    }
+    assertMethodAccess('resetGreetTimer', this.userId, ['admin','greet']);
+    if (uname)
+      GreetDate.remove({ name: uname });
   }
 });
