@@ -8,6 +8,7 @@ import './Settings.html';
 
 // ----------- Channel Management
 Template.Settings.onCreated(function () {
+
     this.subscribe("allUsers");
     this.subscribe("statistics");
     this.subscribe('botChannels');
@@ -17,6 +18,29 @@ Template.Settings.onCreated(function () {
     this.subscribe('userRoles');
     Session.set('curEditChan', '');
     Session.setDefault('settingsPage', 1);
+
+
+});
+
+Template.Settings.onRendered(()=> {
+
+    // When the user scrolls the page, execute myFunction
+window.onscroll = function() {myFunction();};
+
+// Get the header
+var header = document.getElementById("myHeader");
+
+// Get the offset position of the navbar
+var sticky = header.offsetTop;
+
+// Add the sticky class to the header when you reach its scroll position. Remove "sticky" when you leave the scroll position
+function myFunction() {
+  if (window.pageYOffset > sticky) {
+    header.classList.add("sticky");
+  } else {
+    header.classList.remove("sticky");
+  }
+} 
 });
 
 Template.Settings.helpers({

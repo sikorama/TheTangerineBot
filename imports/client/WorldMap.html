@@ -9,9 +9,14 @@
   </div>
 -->
   {{else}}  
+  
+  
   <table class="pure-table" style="width:100%;">
     <tbody>
       <tr>
+        <td>
+          {{>SelectChannel}}
+        </td>
         <td colspan="3"><input style="width:100%;" type="text" name="text" class="search" placeHolder="Search..." autocomplete="false"></td>
         <td colspan="1"><input type="checkbox" name="show" class="search">Nicknames</td>
         <td colspan="1"><input type="checkbox" name="msg" class="search">Messages</td>
@@ -26,7 +31,7 @@
       </tr>
     </tbody>
   </table>
-  {{/if}}
+{{/if}}
 
   <div id="map" style="height: 600px;"></div>
 

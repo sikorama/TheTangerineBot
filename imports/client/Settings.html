@@ -1,10 +1,15 @@
 <template name="Settings">
+
+<div class="header" id="myHeader"> 
+  {{>SelectChannel}}
+
   <button class="selStat pure-button {{#if submenu 1}}pure-button-primary{{/if}}" name="1">Channel</button>
   <button class="selStat pure-button {{#if submenu 6}}pure-button-primary{{/if}}" name="6">Accounts</button>
   <button class="selStat pure-button {{#if submenu 2}}pure-button-primary{{/if}}" name="2">Translation</button>
   <button class="selStat pure-button {{#if submenu 3}}pure-button-primary{{/if}}" name="3">Server</button>
   <button class="selStat pure-button {{#if submenu 5}}pure-button-primary{{/if}}" name="5">Emotes</button>
   <button class="selStat pure-button {{#if submenu 4}}pure-button-primary{{/if}}" name="4">Discord Hooks</button>
+</div>
 
   {{#if submenu 1}}
   <h2>Channel Management</h2>

@@ -1,14 +1,15 @@
 <template name="Stats">
 
-
-  
-  <button class="selStat pure-button {{#if showStat 1}}pure-button-primary{{/if}}" name="1">Countries</button>
-  <button class="selStat pure-button {{#if showStat 2}}pure-button-primary{{/if}}" name="2">Songs</button>
-  {{#if statsEnabled}}
-  <button class="selStat pure-button {{#if showStat 3}}pure-button-primary{{/if}}" name="3">Active Users</button>
-  {{/if}}
-  <button class="selStat pure-button {{#if showStat 4}}pure-button-primary{{/if}}" name="4">Raiders</button>
-  <button class="selStat pure-button {{#if showStat 5}}pure-button-primary{{/if}}" name="5">Raids</button>
+  <div class="header" id="myHeader"> 
+    {{>SelectChannel}}    
+    <button class="selStat pure-button {{#if showStat 1}}pure-button-primary{{/if}}" name="1">Countries</button>
+    <button class="selStat pure-button {{#if showStat 2}}pure-button-primary{{/if}}" name="2">Songs</button>
+    {{#if statsEnabled}}
+    <button class="selStat pure-button {{#if showStat 3}}pure-button-primary{{/if}}" name="3">Active Users</button>
+    {{/if}}
+    <button class="selStat pure-button {{#if showStat 4}}pure-button-primary{{/if}}" name="4">Raiders</button>
+    <button class="selStat pure-button {{#if showStat 5}}pure-button-primary{{/if}}" name="5">Raids</button>
+  </div>
 
   {{#if showStat 1}}
   <h2>Number of people per country</h2>
