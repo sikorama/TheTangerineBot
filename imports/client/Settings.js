@@ -1,4 +1,4 @@
-import { Images, BotChannels, Settings, Stats,BotCommands } from '../api/collections.js';
+import { Images, BotChannels, Settings, Stats, BotCommands } from '../api/collections.js';
 import { getParentId, genDataBlob } from './tools.js';
 import { checkUserRole } from '../api/roles.js';
 import { Session } from 'meteor/session';
@@ -22,31 +22,11 @@ Template.Settings.onCreated(function () {
 
 });
 
-Template.Settings.onRendered(()=> {
-
-    // When the user scrolls the page, execute myFunction
-window.onscroll = function() {myFunction();};
-
-// Get the header
-var header = document.getElementById("myHeader");
-
-// Get the offset position of the navbar
-var sticky = header.offsetTop;
-
-// Add the sticky class to the header when you reach its scroll position. Remove "sticky" when you leave the scroll position
-function myFunction() {
-  if (window.pageYOffset > sticky) {
-    header.classList.add("sticky");
-  } else {
-    header.classList.remove("sticky");
-  }
-} 
-});
 
 Template.Settings.helpers({
     getTeamParamVal(team) {
-        let param = 'team-'+team;
-        const p = Settings.findOne({ param: param});
+        let param = 'team-' + team;
+        const p = Settings.findOne({ param: param });
         //console.error(param,p)
         if (p)
             return p.val;
@@ -56,7 +36,7 @@ Template.Settings.helpers({
     },
     getChannel() {
         let sch = Session.get('sel_channel');
-        return BotChannels.findOne({channel:sch});
+        return BotChannels.findOne({ channel: sch });
     },
     getStatChannels() {
         return BotChannels.find({});
@@ -78,22 +58,22 @@ Template.Settings.helpers({
         return Images.link(o);
     },
     getIcon(name) {
-        if (name[0]==='/') return name;
-        let i = Images.findOne({name:name});
+        if (name[0] === '/') return name;
+        let i = Images.findOne({ name: name });
         return i.link();
     },
     iconnames() {
-        return Images.find().fetch().map((item)=>item.name);
+        return Images.find().fetch().map((item) => item.name);
 
     },
     submenu(v) {
-        return (Session.equals('settingsPage',v));
+        return (Session.equals('settingsPage', v));
     },
     commandList() {
         //
         return BotCommands.find();
     },
- 
+
 });
 
 
@@ -101,7 +81,7 @@ Template.Settings.events({
     "change .settings": function (event) {
         let v = event.currentTarget.value;
         let id = event.currentTarget.name;
-        console.info(id,'<-',v);
+        console.info(id, '<-', v);
         Meteor.call('parameter', id, v);
         return false;
     },
@@ -120,45 +100,45 @@ Template.Settings.events({
         console.error('delete', id);
         Meteor.call('removeChannel', id);
     },
-    'click button.exportDot': function(event) {
-        Meteor.call('export_raid_graph', function(err,res) {
-            if (err)
-                 console.error(err);
-            // To blob
-            genDataBlob(res,'dotlink','dot');
-        });        
-    },
-    'click button.exportCSV': function(event) {
-        let channel = Session.get('sel_channel');
-        Meteor.call('export_userloc', channel,function(err,res) {
+    'click button.exportDot': function (event) {
+        Meteor.call('export_raid_graph', function (err, res) {
             if (err)
                 console.error(err);
             // To blob
-            genDataBlob(res,'csvlink','csv');
-        });        
-    },  
-    'click button.export_live_events': function(event) {
+            genDataBlob(res, 'dotlink', 'dot');
+        });
+    },
+    'click button.exportCSV': function (event) {
+        let channel = Session.get('sel_channel');
+        Meteor.call('export_userloc', channel, function (err, res) {
+            if (err)
+                console.error(err);
+            // To blob
+            genDataBlob(res, 'csvlink', 'csv');
+        });
+    },
+    'click button.export_live_events': function (event) {
         let to = Date.now();
-        let from = to - 1000*3600*24*15;
+        let from = to - 1000 * 3600 * 24 * 15;
         let team = null;
-        
-        let fe=document.getElementById('liveFrom');
-        let te=document.getElementById('liveTo');
-        let teame=document.getElementById('liveTeam');
+
+        let fe = document.getElementById('liveFrom');
+        let te = document.getElementById('liveTo');
+        let teame = document.getElementById('liveTeam');
         if (fe.value) from = parseInt(fe.value);
         else fe.value = from;
         if (te.value) to = parseInt(te.value);
         else te.value = to;
         if (teame.value) team = teame.value;
-        
-      
-        Meteor.call('export_live_events',from,to,team ,function(err,res) {
+
+
+        Meteor.call('export_live_events', from, to, team, function (err, res) {
             if (err)
                 console.error(err);
             // To blob
-            genDataBlob(res,'livelink','csv');
-        });        
-    },  
+            genDataBlob(res, 'livelink', 'csv');
+        });
+    },
     'click .toggleCheck': function (event) {
         let id = getParentId(event.currentTarget);
         let f = event.currentTarget.name;
@@ -205,13 +185,13 @@ Template.Settings.events({
             Session.set('curEditChan', id);
 
     },
-    'click span[name="remove-picture"]': function(event) {
+    'click span[name="remove-picture"]': function (event) {
         let id = getParentId(event.target);
-        console.error('remove image',id);
+        console.error('remove image', id);
         let res = confirm('Are you sure?');
-        if (res===true) 
+        if (res === true)
             Images.collection.remove(id);
-        
+
     },
     'click .setrole': function (event) {
         let id = getParentId(event.currentTarget);
@@ -219,21 +199,21 @@ Template.Settings.events({
         console.error("toggleUserRole", id, f);
         Meteor.call("toggleUserRole", id, f);
     },
-    'click button[name="confirm_add_cmd"]': function(event) {
+    'click button[name="confirm_add_cmd"]': function (event) {
         const n = document.getElementsByName('addCmdName')[0].value;
         const r = document.getElementsByName('addCmdRegex')[0].value;
         const a = document.getElementsByName('addCmdAnswer')[0].value;
         let channel = Session.get('sel_channel');
-        console.error(n,r,a);
-        if (n.length > 0 && r.length > 0 && a.length>0) {
-          BotCommands.insert({channel: channel, name: n, regex: r, answers: [a] });
-          //Meteor.call('addGreetLine', channel, n, r, a);
-          document.getElementsByName('addCmdName')[0].value = "";
-          document.getElementsByName('addCmdRegex')[0].value = "";
-          document.getElementsByName('addCmdAnswer')[0].value = "";
+        console.error(n, r, a);
+        if (n.length > 0 && r.length > 0 && a.length > 0) {
+            BotCommands.insert({ channel: channel, name: n, regex: r, answers: [a] });
+            //Meteor.call('addGreetLine', channel, n, r, a);
+            document.getElementsByName('addCmdName')[0].value = "";
+            document.getElementsByName('addCmdRegex')[0].value = "";
+            document.getElementsByName('addCmdAnswer')[0].value = "";
         }
         return;
-    } 
+    }
 });
 
 
@@ -260,8 +240,8 @@ Template.UploadForm.events({
                 onStart() {
                     template.currentUpload.set(this);
                 },
-                onUploaded(error,fileObj) {
-                    if (error ) {
+                onUploaded(error, fileObj) {
+                    if (error) {
                         console.error(error);
                     }
                     else {
@@ -273,7 +253,7 @@ Template.UploadForm.events({
                 chunkSize: 'dynamic'
             });
         }
-    } 
+    }
 });
 
 
@@ -294,35 +274,35 @@ Template.ServerConfig.helpers({
         return val;
     },
     settings() {
-        return Settings.find({},{sort: {param:1}});
+        return Settings.find({}, { sort: { param: 1 } });
     },
 
 });
 
 Template.ServerConfig.events({
- /*   "change .settings": function (event) {
-      let v = event.currentTarget.value;
-      let id = event.currentTarget.name;
-      console.info(id,'<-',v);
-      Meteor.call('parameter', id, v);
-      return false;
-  },
-*/
-  "click .renamebtn": function(event) {
-    let id = event.currentTarget.name;
-    let before = document.getElementById('before').value.trim();
-    let after = document.getElementById('after').value.trim();
-    console.error(id,before, after);
-    if ((before.length>0) && (after.length>0))
-    Meteor.call('rename', before, after, id==='btapply', function(err,res) {
-        
-        if (err) console.error(err);
-        else 
-        alert(res);
+    /*   "change .settings": function (event) {
+         let v = event.currentTarget.value;
+         let id = event.currentTarget.name;
+         console.info(id,'<-',v);
+         Meteor.call('parameter', id, v);
+         return false;
+     },
+   */
+    "click .renamebtn": function (event) {
+        let id = event.currentTarget.name;
+        let before = document.getElementById('before').value.trim();
+        let after = document.getElementById('after').value.trim();
+        console.error(id, before, after);
+        if ((before.length > 0) && (after.length > 0))
+            Meteor.call('rename', before, after, id === 'btapply', function (err, res) {
 
-    });
+                if (err) console.error(err);
+                else
+                    alert(res);
 
-  }
+            });
+
+    }
 
 });
 
@@ -331,7 +311,7 @@ Template.ServerConfig.events({
 Template.CommandSetting.helpers({
     indexed(a) {
         if (a)
-        return a.map((item,index) => { item.index=index; return item;});
+            return a.map((item, index) => { item.index = index; return item; });
         return [];
     }
 });
@@ -345,25 +325,25 @@ Template.CommandSetting.events({
         let o = {};
         o[f] = event.currentTarget.value;
         //Meteor.call('updateGreetLine', id, r, o);
-      },
-      'click button': function (event) {
+    },
+    'click button': function (event) {
         const id = getParentId(event.currentTarget); //.parentElement.id;
-        const name = event.currentTarget.name;  
+        const name = event.currentTarget.name;
         const cl = event.currentTarget.className;
         if (cl.indexOf('toggleCheck') >= 0) {
-          const b = (cl.indexOf('ok') < 0);
-          console.error("toggle", id, name,b);
-          Meteor.call('updateCommand', id, parseInt(name), { enabled: b });
-          return;
+            const b = (cl.indexOf('ok') < 0);
+            console.error("toggle", id, name, b);
+            Meteor.call('updateCommand', id, parseInt(name), { enabled: b });
+            return;
         }
         if (name.indexOf('remove') === 0) {
-          if (confirm('Are you sure you want to permanently delete this Greetings line?') === true) {
-            const r = name.split('_')[1];
-            console.error('remove', id, r);
-            Meteor.call('removeCommand', id, r);
-          }
-          return;
+            if (confirm('Are you sure you want to permanently delete this Greetings line?') === true) {
+                const r = name.split('_')[1];
+                console.error('remove', id, r);
+                Meteor.call('removeCommand', id, r);
+            }
+            return;
         }
-    
+
     },
 });

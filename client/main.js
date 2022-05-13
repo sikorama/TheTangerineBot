@@ -20,6 +20,7 @@ import '../imports/client/RadioControl.js';
 import '../imports/client/overlays.js';
 
 import { Accounts } from 'meteor/accounts-base';
+import { tr_commands } from '../imports/api/languages.js';
 
 Accounts.ui.config({
   //  passwordSignupFields: 'USERNAME_ONLY'
@@ -76,6 +77,28 @@ Template.registerHelper(
   }
 );
 
+Template.MainPage.onRendered(() => {
+
+  // When the user scrolls the page, execute myFunction
+  window.onscroll = function () { scrollFunction(); };
+
+  // Add the sticky class to the header when you reach its scroll position. Remove "sticky" when you leave the scroll position
+  function scrollFunction() {
+      // Get the header
+      var header = document.getElementById("myHeader");
+      if (header) {
+          // Get the offset position of the navbar
+          var sticky = header.offsetTop;
+
+          if (window.pageYOffset > sticky) {
+              header.classList.add("sticky");
+          } else {
+              header.classList.remove("sticky");
+          }
+      }
+  }
+});
+
 
 Template.PageTop.onRendered(function () {
   this.subscribe('botChannels', { enabled: true });
@@ -126,7 +149,6 @@ Template.ChannelPage.helpers({
 Template.LiveChannels.onCreated(function () {
   this.subscribe('EnabledChannels');
   this.subscribe('LiveChannels');
-
 });
 
 Template.ActiveChan.helpers({
@@ -142,6 +164,25 @@ Template.CommandsTable.helpers({
     let bc = BotChannels.findOne({ channel: sc });
     if (!bc) return false;
     return bc.team;
+  },
+  lang() {
+    let ocmd = tr_commands();
+    console.error(ocmd);    
+    let res = Object.keys(ocmd).sort().map((c)=> {
+      return { name: c , code: ocmd[c].map((l)=>'!'+l) };
+    });
+    console.error(res);
+    // Into 2 columns?
+    let rows=[];
+    const numcol = 2;
+    for (let i=0; i<res.length ; i+=numcol) {
+      let row=[];
+      for (j=0; j<numcol; j++) {
+          row.push(res[i+j]);
+      }
+      rows.push(row);
+    }  
+    return rows;
   }
 });
 

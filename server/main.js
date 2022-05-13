@@ -20,7 +20,7 @@ import { init_rss } from './rss.js';
 import { initRaidManagement } from './raids.js';
 import { randElement } from './tools.js';
 import { init_users,assertMethodAccess } from './user_management.js';
-
+import { tr_lang } from '../imports/api/languages.js';
 
 const tmi = require('tmi.js');
 const gtrans = require('googletrans').default;
@@ -177,41 +177,6 @@ function randSentence() {
   }
 }
 
-// see https://sites.google.com/site/opti365/translate_codes
-const tr_lang = {
-  'ar': ['ar', ''],
-  'br': ['pt', 'disse'],
-  'cn': ['zh', ''],
-  'co': ['ko', ''],
-  'de': ['de', 'sagt'],
-  'du': ['du', ''],
-  'en': ['en', 'says'],
-  'english': ['en', 'says'],
-  'eng': ['en', 'says'],
-  'el': ['el', ''], // greek
-  'es': ['es', ''],
-  'esp': ['es', ''],
-  'fi': ['fi', ''],
-  'fr': ['fr', 'dit'],
-  'ge': ['de', 'sagt'],
-  'gr': ['el', ''], // greek
-  'german': ['de', 'sagt'],
-  'hu': ['hu', ''],
-  'it': ['it', ''],
-  'jp': ['ja', ''],
-  'ko': ['ko', ''],
-  'kr': ['ko', ''],
-  'sp': ['es', ''],
-  'pl': ['pl', ''],
-  'pt': ['pt', 'disse'],
-  'ro': ['ro', ''],
-  'ru': ['ru', ''],
-  'sv': ['sv', ''], // swedishh
-  'sw': ['sv', ''],
-  'tu': ['tr', ''], // turkish
-  'tr': ['tr', ''], // turkish
-  'tw': ['zh', ''],
-};
 
 const selectQuestion = function () {
   let pipeline = [];

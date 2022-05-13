@@ -2,7 +2,7 @@
 
   <div class="header" id="myHeader"> 
     {{>SelectChannel}}
-)  </div>
+  </div>
   
 
   {{#if rh_featureEnabled "tr"}}
@@ -20,47 +20,14 @@
       </tr>
     </thead>
     <tbody>
+      {{#each r in lang}}
       <tr>
-        <td><code>!cn</code></td>
-        <td>Translate to Simplified Chinese</td>
-        <td><code>!en</code></td>
-        <td>Translate to English</td>
+        {{#each l in r}}
+        <td><code>{{l.code}}</code></td>
+        <td>Translate to {{l.name}}</td>    
+        {{/each}}
       </tr>
-
-      <tr>
-        <td><code>!fi</code></td>
-        <td>Translate to Finnish</td>
-        <td><code>!fr</code></td>
-        <td>Translate to French</td>
-      </tr>
-      <tr>
-        <td><code>!de</code> or <code>!ge</code></td>
-        <td>Translate to German</td>
-        <td><code>!it</code></td>
-        <td>Translate to Italian</td>
-      </tr>
-      <tr>
-        <td><code>!jp</code></td>
-        <td>Translate to Japanese</td>
-        <td><code>!ko</code></td>
-        <td>Translate to Korean</td>
-      </tr>
-      <tr>
-        <td><code>!pl</code></td>
-        <td>Translate to Polish</td>
-        <td><code>!pt</code> or <code>!br</code></td>
-        <td>Translate to Portuguese</td>
-      </tr>
-      <tr>
-        <td><code>!ro</code></td>
-        <td>Translate to Romanian</td>
-        <td><code>!tu</code></td>
-        <td>Translate to Turkish</td>
-      </tr>
-      <tr>
-        <td><code>!ru</code></td>
-        <td>Translate to Russian</td>
-      </tr>
+      {{/each}}
     </tbody>
   </table>
 
