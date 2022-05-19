@@ -177,7 +177,7 @@ Template.CommandsTable.helpers({
     const numcol = 2;
     for (let i=0; i<res.length ; i+=numcol) {
       let row=[];
-      for (j=0; j<numcol; j++) {
+      for (let j=0; j<numcol; j++) {
           row.push(res[i+j]);
       }
       rows.push(row);
@@ -469,7 +469,7 @@ Template.SkipResult.events({
   'click .setpage': function (event) {
     let d = Template.currentData();
     let sv = d.var + '_page';
-    v = parseInt(event.currentTarget.textContent);
+    let v = parseInt(event.currentTarget.textContent);
     Session.set(sv, v);
   }
 });
@@ -508,13 +508,15 @@ Template.SelectChannel.helpers({
     const g = Session.get('list_channel');
     const cg = Session.get('sel_channel');
     if (g)
-      if (g.length > 1)
+      if (g.length > 1) {
+        g.push('All Channels');
         return g.map((item) => {
           return {
             l: item,
             s: (item == cg)
           };
         });
+      }
     return undefined;
   },
   getSessionVar(s) {

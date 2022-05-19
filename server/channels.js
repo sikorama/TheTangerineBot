@@ -13,7 +13,7 @@ export function addChannel(chan, fields, guestAccount) {
 
     BotChannels.remove({ channel: chan });
 
-    doc = {
+    let doc = {
       channel: chan,
       guestAccount: guestAccount,
       map_icon_std: "/tang2.png",

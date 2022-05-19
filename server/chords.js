@@ -25,7 +25,7 @@ export function genChord(options) {
 
   let res = [];
 
-  for (i = 0; i < options.num; i++) {
+  for (let i = 0; i < options.num; i++) {
     let r = randElement(roots);
     if (!options.onlynotes)
       r += randElement(chordtype);
@@ -57,7 +57,7 @@ export function genProgression(options) {
 
     let prog = genChord(options);
 
-    res = note+' ( ';
+    let res = note+' ( ';
     res+=prog;
 
     res +=' )';

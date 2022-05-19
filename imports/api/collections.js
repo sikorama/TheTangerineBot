@@ -100,10 +100,11 @@ export const BotCommands = new Mongo.Collection('botcommands');
             // On utilise le champ sortby tel quel
             return (options.search.props.sortby);
         },
-
         fields: function (searchObject, options) {
             let fulldata = (options.search.props.map !== true);
             let admin = checkUserRole('admin streamer', options.userId);
+
+            // fulldata is not allowed for non admins
             if (admin === false) fulldata = false;
 
             if (fulldata === true) {
@@ -113,7 +114,8 @@ export const BotCommands = new Mongo.Collection('botcommands');
             else {
                 // Data for map
                 // If public map, only shows allowed names
-                // FIXME Also chan should be mandatory
+
+
                 let chan = options.search.props.channel;
 
                 let fobj =
@@ -121,16 +123,20 @@ export const BotCommands = new Mongo.Collection('botcommands');
                     allow: 1,
                     latitude: 1,
                     longitude: 1,
-                    steamer: 1
+                    steamer: 1              // is a streamer?
+                    //icon : 1              // Optim for removing names, and messages
                 };
 
                 if (chan) {
-                    fobj[chan + '-lastreq'] = 1;
+                    //fobj[chan + '-lastreq'] = 1;
+                    // OPTIM: message is only needed for selecting the right icon, so we don't need the content
                     fobj[chan + '-msg'] = 1;
                 }
+                
+                // Projection for having only one field with name, depending on user's role 
+                // not logged => only explicitely allowed nicknames
 
-                // Faire une projection pour n'avoir qu'un champ pour les noms, en fonction du flag 'allow'
-                // mapname = dname if() allow==true)
+                // OPTIM: only needed for picking the right icon
                 if (admin === true) {
                     fobj.dname = 1;
                     return fobj;

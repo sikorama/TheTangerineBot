@@ -29,7 +29,7 @@ export function addGreetLine(username, txt, chan, editor) {
   let pgl = GreetMessages.findOne({ username: username });
   // Fusionne si existe deja
 
-  li = { txt: txt, enabled: true };
+  let li = { txt: txt, enabled: true };
 
   // Pour limiter aux channels
   if (chan) {

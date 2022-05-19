@@ -152,9 +152,24 @@ export function init_publications() {
   });
 
 
-  // Custom Commands
-  //
+  // TODO: add channel parameter (mandatory)
+  Meteor.publish('userLocation', function (sel,opt) {
+    
+    // OPTIM: filter channels fields
 
+    // fields depends on role
+    if (hasRole(this.userId, 'admin')) 
+    {
+    }
+    else 
+    {
+      // FIXME: Check if opt already contains fields and merge content
+      opt.fields = {dname : 0};
+    }
+    return UserLocations.find(sel,opt);
+  });
+
+  // Custom Commands
 
   Meteor.publish('customcommands', function (sel) {
     if (hasRole(this.userId, ['admin'])) {
@@ -299,6 +314,10 @@ Meteor.methods({
     Settings.upsert({ param: param }, { $set: { val: val } });
   }
 });
+
+let WEBSITE_URL = "http://localhost";
+let wurl = process.env.WEBSITE_URL;
+if (wurl) WEBSITE_URL = wurl;
 
 // Default Settings
 if (Settings.findOne() === undefined) {

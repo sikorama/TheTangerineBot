@@ -29,8 +29,8 @@ export function getParentId(el) {
 
   export function manageSortEvent(event, field) {
     let n = event.currentTarget.getAttribute('name');
-    field_name = field + '_sort_field';
-    field_dir = field + '_sort_dir';
+    let field_name = field + '_sort_field';
+    let field_dir = field + '_sort_dir';
     if (Session.equals(field_name, n)) {
       let d = Session.get(field_dir);
       Session.set(field_dir, -d);

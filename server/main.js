@@ -18,7 +18,7 @@ import { init_quizz } from './quizz.js';
 //import { init_radio } from './radio.js';
 import { init_rss } from './rss.js';
 import { initRaidManagement } from './raids.js';
-import { randElement } from './tools.js';
+import { randElement, randSentence } from './tools.js';
 import { init_users,assertMethodAccess } from './user_management.js';
 import { tr_lang } from '../imports/api/languages.js';
 
@@ -52,8 +52,8 @@ var bot_discord_raid_url = Settings.findOne({ param: 'BOT_DISCORD_RAID_HOOK' })?
 var bot_discord_admincall_url = Settings.findOne({ param: 'BOT_DISCORD_ADMINCALL_HOOK' })?.val;
 var discord_autoban_url = Settings.findOne({ param: 'BOT_DISCORD_BAN_HOOK' })?.val;
 var discord_notgreeted_url = Settings.findOne({ param: 'BOT_DISCORD_NOTGREETED_HOOK' })?.val;
-client_id = process.env.CLIENT_ID;
-client_secret = process.env.CLIENT_SECRET;
+let client_id = process.env.CLIENT_ID;
+let client_secret = process.env.CLIENT_SECRET;
 
 if (client_id != undefined) {
   Meteor.setInterval(function () { checkLiveChannels(client_id, client_secret); }, 1000 * 60);
@@ -66,9 +66,6 @@ botpassword = 'oauth:' + botpassword;
 // Array to keep track of last active users (per channel)
 let last_active_users = {};
 
-let WEBSITE_URL = "http://localhost";
-let wurl = process.env.WEBSITE_URL;
-if (wurl) WEBSITE_URL = wurl;
 
 const randomWords = [
   'ACTION',
@@ -167,19 +164,11 @@ function findClosest(uid, chan, nb) {
 }
 
 
-function randSentence() {
-  try {
-    return PhraseIt.make(randElement(patterns));
-  }
-  catch (e) {
-    console.error(e.stack);
-    return "...";
-  }
-}
 
 
 const selectQuestion = function () {
   let pipeline = [];
+  let q;
   //    if (mhid != undefined)
   let p = Settings.findOne({ param: 'quizz_enabled_topics' });
   //  console.error(p);
@@ -210,7 +199,7 @@ const selectQuestion = function () {
     QuizzQuestions.update({}, { $set: { enabled: true } }, { multi: true });
     res = QuizzQuestions.aggregate(pipeline);
     if (res.length > 0) {
-      q = res[0];
+      let q = res[0];
       QuizzQuestions.update(q._id, { $set: { enabled: false } });
     }
   }
@@ -333,7 +322,7 @@ Meteor.startup(() => {
   function checkLocations() {
     let i = 60;
 
-    item = UserLocations.findOne({ longitude: { $exists: 0 } });
+    let item = UserLocations.findOne({ longitude: { $exists: 0 } });
 
     // Is there a location not converted to geo positions?
     if (item != undefined) {
@@ -413,7 +402,7 @@ Meteor.startup(() => {
         if (bc === undefined)
           return;
         let v = bc[field];
-        objset = {};
+        let objset = {};
         objset[field] = !v;
         BotChannels.update(chanid, { $set: objset });
     },
@@ -423,7 +412,7 @@ Meteor.startup(() => {
       let bc = BotChannels.findOne(chanid);
       if (bc === undefined)
         return;
-      objset = {};
+      let objset = {};
       objset[field] = value;
       BotChannels.update(chanid, { $set: objset });
     },
@@ -491,7 +480,7 @@ Meteor.startup(() => {
       chans.unshift('TimeStamp');
 
       // Live state
-      curState = chans.map(() => 0);
+      let curState = chans.map(() => 0);
 
       if (from || to) {
         sel.timestamp = {};
@@ -982,7 +971,7 @@ Meteor.startup(() => {
             options.chords = [];
             options.notes = [];
 
-            for (i = firstExtraIndex; i < cmdarray.length; i++) {
+            for (let i = firstExtraIndex; i < cmdarray.length; i++) {
               let ci = cmdarray[i];
               if (noteArray.indexOf(ci.toUpperCase()) < 0)
                 options.chords.push(ci);
@@ -1165,7 +1154,7 @@ Meteor.startup(() => {
       }
 
       if (cmd.indexOf('where') == 0) {
-        pdoc = UserLocations.findOne({ name: username });
+        let pdoc = UserLocations.findOne({ name: username });
         if (pdoc) {
           say(target, answername + " You've told me you were from " + pdoc.location + '. If you want me to forget your location, use !forget');
           return;
@@ -1177,7 +1166,7 @@ Meteor.startup(() => {
       }
 
       if (cmd.indexOf('show') == 0) {
-        pdoc = UserLocations.findOne({ name: username });
+        let pdoc = UserLocations.findOne({ name: username });
         if (pdoc === undefined) {
           say(target, "Sorry " + answername + " I don't have you location in my database. Please use '!from city,country' command first.");
           return;
@@ -1190,7 +1179,7 @@ Meteor.startup(() => {
       }
 
       if (cmd.indexOf('mask') == 0) {
-        pdoc = UserLocations.findOne({ name: username });
+        let pdoc = UserLocations.findOne({ name: username });
         if (pdoc === undefined) {
           say(target, "Sorry " + answername + " I don't have your location in my database. Please use '!from city,country' command first.");
           return;
@@ -1204,7 +1193,7 @@ Meteor.startup(() => {
       }
 
       if ((cmd.indexOf('msg') == 0) || (cmd.indexOf('message') == 0)) {
-        pdoc = UserLocations.findOne({ name: username });
+        let pdoc = UserLocations.findOne({ name: username });
         if (pdoc === undefined) {
           say(target, "Sorry " + answername + " I don't have you location in my database. Please use '!from city,country' command first.");
           return;
@@ -1215,7 +1204,7 @@ Meteor.startup(() => {
             say(target, "use '!msg +message' for adding a personalized message on the map");
           }
           else {
-            msgobj = {};
+            let msgobj = {};
             msgobj[chan + '-msg'] = msg;
             UserLocations.update(pdoc._id, { $set: msgobj });
             say(target, "Ok! " + answername);
@@ -1256,7 +1245,7 @@ Meteor.startup(() => {
       }
 
       if (cmd === 'from' || cmd == 'place') {
-        geoloc = commandName.substring(5).trim();
+        let geoloc = commandName.substring(5).trim();
         if (geoloc.length < 2) {
           say(target, answername + " Please tell me the country/state/city where you're from, for example: !from Paris,France or !from Japan.");
           return;
@@ -1286,7 +1275,7 @@ Meteor.startup(() => {
         let now = Date.now();
         let delta = 2 * 60 * 1000;
 
-        doc = {
+        let doc = {
           name: username,
           dname: dispname,
           location: geoloc.toLowerCase(),
@@ -1298,7 +1287,7 @@ Meteor.startup(() => {
         doc[chan] = now;
 
         // Check if user has already given its location
-        pdoc = UserLocations.findOne({ name: username });
+        let pdoc = UserLocations.findOne({ name: username });
         if (pdoc === undefined) {
           //Nouvel utilisateur
           UserLocations.insert(doc);
@@ -1309,7 +1298,7 @@ Meteor.startup(() => {
                             'Use !show to allow me to display your nickname on the map',
                             'Use !msg to add a personalized message on the map',
                           ]*/
-            txt = 'Use !show to allow me to display your nickname on the map'; //,randElement(addmess); //.[Math.floor(Math.random() * (addmess.length - 1))];
+            let txt = 'Use !show to allow me to display your nickname on the map'; //,randElement(addmess); //.[Math.floor(Math.random() * (addmess.length - 1))];
             say(target, answername + " Ok, thanks! " + txt, username);
             return;
           }
@@ -1406,7 +1395,7 @@ Meteor.startup(() => {
           let res = '';
           let nc = 0;
           let nl = curQuestion.expAnswers[0].length;
-          for (i = 0; i < nl; i++) {
+          for (let i = 0; i < nl; i++) {
             let l = curQuestion.expAnswers[0].charAt(i).toUpperCase();
             if ("AEIOUY ".indexOf(l) < 0) {
               res += '-';
@@ -1846,7 +1835,7 @@ Meteor.startup(() => {
 
         if ((lccn.indexOf('explain') >= 0) || (lccn.indexOf('can') >= 0)) {
           txts.push("For Sure!");
-          txtx.push("Of course!");
+          txts.push("Of course!");
         }
 
         txt = randElement(txts);

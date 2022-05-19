@@ -89,7 +89,7 @@ Template.Settings.events({
         Session.set('settingsPage', parseInt(ev.currentTarget.name));
     },
     'click button.addChannel': function (event) {
-        n = document.getElementById('newChannel').value.trim();
+        let n = document.getElementById('newChannel').value.trim();
         if (n.length > 0) {
             console.error('Add New Channel', n);
             Meteor.call('addChannel', n);

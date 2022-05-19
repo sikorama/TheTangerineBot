@@ -280,6 +280,18 @@ export function checkSubscriptionRole(publication, userId, role) {
     return checkResourceAccess('Souscription ' + publication, userId, role);
 }
 
+
+/**
+ * Renvoie une exception meteor
+ * @param {*} error 
+ * @param {*} reason 
+ * @param {*} detail 
+ */
+ export function throwError(error, reason, detail) {
+    console.error(error, ':', reason, detail);
+    throw new Meteor.Error(JSON.stringify(error), JSON.stringify(reason), JSON.stringify(detail));
+  }
+
 // Fonction pour verifier les roles pour l'appel à une méthode
 // Si l'acces est impossible, emet une exception
 export function assertMethodAccess(methodname, userId, role) {

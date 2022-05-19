@@ -51,8 +51,11 @@ Template.LatestLocations.helpers({
       prop.show = true;
     }
 
-    prop.channel = Session.get('sel_channel');
-    //console.error(prop);
+    let curchan = Session.get('sel_channel');
+    if (curchan!=="All Channels") {
+      prop.channel = curchan;
+    }
+            //console.error(prop);
 
     // sort:
     let sn = Session.get('locations_sort_field', 'username');

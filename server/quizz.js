@@ -25,7 +25,7 @@ function addQuestion(q, a, t, c) {
   a = filterAnswer(a);
   if (t === undefined) t = 'general';
   if (c === undefined) c = '';
-  doc = { question: q, answers: a, topics: t, comment: c, enabled: true, timestamp: new Date() };
+  let doc = { question: q, answers: a, topics: t, comment: c, enabled: true, timestamp: new Date() };
   QuizzQuestions.insert(doc);
 }
 

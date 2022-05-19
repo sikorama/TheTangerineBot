@@ -88,7 +88,7 @@ export function sendRaidChannelDiscord(text, channel, raider, discord_url) {
 
 export function getTwitchToken(client_id, client_secret) {
   console.error('Regenerate Twitch TOKEN');
-  body = {
+  let body = {
     'client_id': client_id,
     'client_secret': client_secret,
     "grant_type": 'client_credentials'
@@ -125,7 +125,6 @@ export function checkLiveChannels(client_id, client_private) {
     }
 
     let client_token = token_param.val;
-    streamer_name = 'sikorama';
     let channels = BotChannels.find().fetch().map((item) => item.channel);
     let headers = {
       'Client-ID': client_id,
