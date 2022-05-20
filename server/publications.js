@@ -12,19 +12,50 @@ export function init_publications() {
     let uid = this.userId;
     if (uid) {
       // If non admin, only publish enabled channels corresponding to groups associated to the user
+      // Also only send requred fields
+
 
       if (!hasRole(uid, ['admin'])) {
         //sel.channel = { $in: getUserGroups(uid) };
       }
-      else {
-        //opt.fields = { channel:1, live:1, 
-        //}
-      }
     }
-    else {
-      // Limited access for non logged users 
-      // Only required fields
-      //);
+
+      else {
+        // For public data
+        opt.fields = 
+        { 
+          // autoban
+          // autobancmd
+
+          //advertteam: 1,
+          channel: 1,
+          //discord: 1,
+          //discord_goinglive_url2: 1,
+          //discord_goinglive_url3: 1,
+          //discord_raid_url: 1,
+          enabled: 1,
+          //greet: 1,        
+          live: 1,
+          //live_notifdate: 1,
+          live_started: 1,
+          live_thumbnail_url: 1,
+          live_title: 1,
+          live_viewers: 1,
+          
+          map: 1,
+          map_icon_msg: 1,
+          map_icon_name: 1,
+          map_icon_std: 1,
+          
+          //me 1,
+          //muteGreet 1,
+          quizz: 1,
+          //raid_auto_so: 1,
+          //raids: 1,
+          //songrequest: 1,
+          team: 1,
+          tr: 1,
+        }
     }
 
     return BotChannels.find(sel, opt);
