@@ -61,6 +61,14 @@ export const BotCommands = new Mongo.Collection('botcommands');
                 };
             }
 
+            // strict name
+            if (options.search.props.hasOwnProperty('uname')) {
+                selector.name = {
+                    $eq: options.search.props.uname
+                };
+            }
+
+
             // Filters users if they are registered, and have interacte on one of the channels.
             // Soit par le dernier greet, quelque soit l'endroit ou on se soit inscrit
             // FIXME: check channel access
@@ -93,7 +101,7 @@ export const BotCommands = new Mongo.Collection('botcommands');
                 selector.team = options.search.props.team;
             }
 
-
+            //console.info(selector);
             return selector;
         },
         sort: function (searchObject, options) {
@@ -132,19 +140,10 @@ export const BotCommands = new Mongo.Collection('botcommands');
                     // OPTIM: message is only needed for selecting the right icon, so we don't need the content
                     fobj[chan + '-msg'] = 1;
                 }
-                
-                // Projection for having only one field with name, depending on user's role 
-                // not logged => only explicitely allowed nicknames
 
-                // OPTIM: only needed for picking the right icon
-                if (admin === true) {
-                    fobj.dname = 1;
-                    return fobj;
-                }
-                else {
-                    fobj.mapname = 1;
-                    return fobj;
-                }
+                fobj.mapname = 1;
+                
+
             }
         }
     })

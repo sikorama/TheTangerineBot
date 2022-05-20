@@ -156,7 +156,7 @@ export function init_publications() {
   Meteor.publish('userLocation', function (sel,opt) {
     
     // OPTIM: filter channels fields
-
+  
     // fields depends on role
     if (hasRole(this.userId, 'admin')) 
     {
