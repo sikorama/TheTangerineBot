@@ -35,7 +35,7 @@ export const BotCommands = new Mongo.Collection('botcommands');
 /// Index pour les localisations
 /*const*/ UserLocIndex = new Index({
     collection: UserLocations,
-    fields: ['name', 'msg', 'location', 'country', 'streamer'],
+    fields: ['name', 'location', 'country', 'streamer'],
     permission: function (options) {
         return true;
         //        return (options.userId);
@@ -131,7 +131,7 @@ export const BotCommands = new Mongo.Collection('botcommands');
                     allow: 1,
                     latitude: 1,
                     longitude: 1,
-                    steamer: 1              // is a streamer?
+                    //steamer: 1              // is a streamer?
                     //icon : 1              // Optim for removing names, and messages
                 };
 
@@ -141,9 +141,10 @@ export const BotCommands = new Mongo.Collection('botcommands');
                     fobj[chan + '-msg'] = 1;
                 }
 
-                fobj.mapname = 1;
+                //fobj.mapname = 1;
                 
-
+                console.error(fobj);
+                return fobj;
             }
         }
     })

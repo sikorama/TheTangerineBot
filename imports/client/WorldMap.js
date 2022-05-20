@@ -279,10 +279,20 @@ Template.WorldMap.onRendered(function () {
 
       // check there is a user (for non public maps only)
       // if (!Meteor.userId()) return;
+      let curchan = Session.get('sel_channel');
+      if (!curchan) return;
+      console.error(curchan);
+
+      this.subscribe('botChannels', { channel: curchan });   //function () {
+      console.error('subscribed');
+
+      let p = BotChannels.findOne( { channel: curchan });
+      console.error('p=', p);
+      if (!p) return;
 
       let searchData = Session.get("searchUsers");
 
-      let prop = {};
+      let prop = {map:true};
 
       // Selector
       if (searchData.msg === true) {
@@ -295,14 +305,12 @@ Template.WorldMap.onRendered(function () {
         prop.streamer = true;
       }
 
-      let curchan = Session.get('sel_channel');
-      if (curchan !== "All Channels") {
-        prop.channel = curchan;
+      prop.channel = curchan;
 
-        if (searchData.lastreq === true) {
-          prop.lastreq = curchan;
-        }
+      if (searchData.lastreq === true) {
+        prop.lastreq = curchan;
       }
+    
 
       // To generalize
       if (searchData.team === true) {
@@ -323,21 +331,27 @@ Template.WorldMap.onRendered(function () {
         curSearch = '';
 
       prop.map = true;
+      let opt = {};
 
       // Broadcaster  
       // we could also search in userloc collection, or make a strict search
-      let bcs = UserLocIndex.search(curchan, { limit: 1 }).mongoCursor;
-      console.error(bcs);
-      let opt = {};
-      if (bcs.count()) {
-        opt = { broadcaster: bcs.fetch()[0].__originalId };
-      }
+      let bcs = UserLocIndex.search(curchan, { limit: 1 , props: {map:true}});
+      if (bcs) {
+        bcs=bcs.mongoCursor;
+        console.error('search cursor=', bcs, bcs.count());
+        if (bcs.count()) {
+          opt = { broadcaster: bcs.fetch()[0].__originalId }; 
 
-      // Viewers
-      let cursor = UserLocIndex.search(curSearch, { limit: 2000, props: prop }).mongoCursor;
-      // ... Wait for cursor to be complete?
-      updateMap(cursor, curchan, opt);
-
+          // Too much fields :O
+          console.error('broadcaster=', bcs.fetch()[0]);
+        }
+        
+        // Viewers
+        let cursor = UserLocIndex.search(curSearch, { limit: 2000, props: prop }).mongoCursor;
+        // ... Wait for cursor to be complete?
+        updateMap(cursor, curchan, opt);
+        
+      } 
 
     }
     catch (e) {
