@@ -1963,24 +1963,27 @@ Meteor.startup(() => {
       if (bc?.manageban === true) {
 
         let notif = username + ' has been banned from ' + chan + ' channel.';
-        let bo = { chan: chan }; // we don't know the name of the mod who banned, even as a moderator
+        // we don't know the name of the mod who banned, even as a moderator, obviously for security reasons
+        let bo = { chan: chan , date: Date.now()};  // We keep track of dates, so we can remove users after a while (removes accounts...)
         let update_obj = { lang: false };
 
         // mark in greetings list
         let gu = GreetMessages.findOne({ username: username });
-        let ban = [bo];
+        let banlist = [bo];
+        // If user has already banned somewhere, then 
         if (gu) {
           if (gu.ban) {
-            ban = gu.ban;
-            let chans = ban.map((item) => item.chan);
+            banlist = gu.ban;
+            // Do we have to check if the user is not already banned in this channel?
+            let chans = banlist.map((item) => item.chan);
             if (chans.indexOf(chan) < 0) {
               notif += 'They have already been banned from the following channels:' + chans.join(',');
 
-              ban.push([bo]);
+              banlist.push(bo);
 
               // TODO: add an option for automatic trigger
 
-              if (bc.autoban === true && ban.length >= 3) {
+              if (bc.autoban === true && banlist.length >= 3) {
                 notif += ' Which means they will be added to ultimate ban list... Which means they will be automatically banned on every channel with ultimate ban feature enabled.';
                 update_obj.autoban = true;
               }
@@ -1988,7 +1991,7 @@ Meteor.startup(() => {
           }
         }
 
-        update_obj.ban = ban;
+        update_obj.ban = banlist;
         if (bc.notifban === true && discord_autoban_url)
           sendDiscord(notif, discord_autoban_url);
 
