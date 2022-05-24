@@ -108,10 +108,13 @@ export const BotCommands = new Mongo.Collection('botcommands');
             // On utilise le champ sortby tel quel
             return (options.search.props.sortby);
         },
+        /*beforePublish(event, donc) {
+            // Compute icon here?
+            return doc;
+        },*/
         fields: function (searchObject, options) {
             let fulldata = (options.search.props.map !== true);
             let admin = checkUserRole('admin streamer', options.userId);
-
             // fulldata is not allowed for non admins
             if (admin === false) fulldata = false;
 
@@ -132,16 +135,12 @@ export const BotCommands = new Mongo.Collection('botcommands');
                     latitude: 1,
                     longitude: 1,
                     //steamer: 1              // is a streamer?
-                    //icon : 1              // Optim for removing names, and messages
                 };
 
                 if (chan) {
-                    //fobj[chan + '-lastreq'] = 1;
                     // OPTIM: message is only needed for selecting the right icon, so we don't need the content
                     fobj[chan + '-msg'] = 1;
                 }
-
-                //fobj.mapname = 1;
                 
                 console.error(fobj);
                 return fobj;
@@ -221,7 +220,7 @@ export const BotCommands = new Mongo.Collection('botcommands');
 
             if (options.search.props.hasOwnProperty('ban')) {
                 selector.ban = {
-                    $eq: options.search.props.ban
+                    $exists: options.search.props.ban
                 };
             }
   

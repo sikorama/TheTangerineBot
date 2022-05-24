@@ -29,21 +29,23 @@ Template.Greetings.onCreated(function () {
       return txt;
 
     },
-    greetlines: function (lang) {
-      const v = (lang === 'true');
+    langlines: function() {
+      return GreetMessages.find({ lang: true}, { sort: { username: 1 } });
+    },
+    greetlines: function (ban) {
+      const v = (ban === 'true');
       //console.error(v, lang);
       //GreetMessages.find({ lang: v }).forEach((item) => { console.error(item); })
       // Special case: languages:
-      if (v)
-        return GreetMessages.find({ lang: v }, { sort: { username: 1 } });
-
+   
       let  greetSearch = Session.get('greets_search');
-      let prop={lang: false};
-
-      let l = Session.get('greets_limit');
+      let prop={lang: false, ban: v};
+      let pref="greets"
+      if (v) pref="bans" ;     
+      let l = Session.get(pref+'_limit');
       if (l === undefined) l = 50;
   
-      let s = parseInt(Session.get('greets_page') - 1);
+      let s = parseInt(Session.get(pref+'_page') - 1);
       s *= l;
   
       //console.error(greetSearch,l,s,prop);
@@ -55,7 +57,7 @@ Template.Greetings.onCreated(function () {
       });
   
       console.error(res.count());
-      Session.set('greets_count', res.count());
+      Session.set(pref+'_count', res.count());
       return res.mongoCursor;
 
 

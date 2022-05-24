@@ -211,7 +211,7 @@ Template.WorldMap.onRendered(function () {
           else {
 
             if (!isNaN(item.latitude)) {
-              let opt = {};
+              let opt= {};
         
               // broadcaster emotes is different
               if (options.broadcaster !== rid) {
@@ -284,7 +284,7 @@ Template.WorldMap.onRendered(function () {
       console.error(curchan);
 
       this.subscribe('botChannels', { channel: curchan });   //function () {
-      console.error('subscribed');
+      //console.error('subscribed');
 
       let p = BotChannels.findOne( { channel: curchan });
       console.error('p=', p);
@@ -338,12 +338,11 @@ Template.WorldMap.onRendered(function () {
       let bcs = UserLocIndex.search(curchan, { limit: 1 , props: {map:true}});
       if (bcs) {
         bcs=bcs.mongoCursor;
-        console.error('search cursor=', bcs, bcs.count());
         if (bcs.count()) {
           opt = { broadcaster: bcs.fetch()[0].__originalId }; 
 
           // Too much fields :O
-          console.error('broadcaster=', bcs.fetch()[0]);
+          //console.error('broadcaster=', bcs.fetch()[0]);
         }
         
         // Viewers

@@ -48,7 +48,6 @@
         <tr style="width:100%;">
           <th style="width:25%;">User's name</th>
           <th style="width:75%;">Message</th>
-          <th>Banned on</th>
         </tr>
       </thead>
       <tbody>
@@ -77,11 +76,7 @@
                 {{/if}}
               {{/each}}
             </td>
-            <td>
-              {{#each cb in c.ban}}
-              {{cb.chan}}
-              {{/each}}
-            </td>            
+           
           </tr>
 
           {{/each}}
@@ -93,6 +88,66 @@
     </p>
 
 
+
+
+    <h2>Banned People </h2>
+    <table class="pure-table">
+        <thead>
+          <tr style="width:100%;">
+            <th style="width:25%;">User's name</th>
+            <th>Banned on</th>
+<!--
+  <th style="width:75%;">Message</th>
+-->
+          </tr>
+        </thead>
+        <tbody>
+          {{#each c in (greetlines "true")}}
+            <tr class="{{#if c.autoban}}ko{{/if}}" style="width:100%;" id="{{c.__originalId}}">
+              <td class="username">
+                <a href="https://openstreetmap.org/search?query={{ul.location}}" target="_blank">&boxbox;</a>
+                <span class="uname">{{c.username}}</span>
+                <button class="resettimer" name={{c.username}}> &#8986; </button>
+              </td>
+              <td>
+                {{stringify c.ban}}
+<!--
+  {{#each cb in c.ban}}
+  {{cb.chan}}
+  {{/each}}
+-->
+              </td>            
+              <td style="width:100%;" id="{{c.__originalId}}">
+                {{#each l in c.texts}}
+                  {{#if edit_mode}}
+                  {{>CheckMark b=l.enabled n=l.index vcross="&nbsp;&nbsp;"}}
+                  <input class="greetline" style="width:80%;" type="text" value="{{l.txt}}" name="txt_{{l.index}}">
+  
+                  <input class="greetline" style="width:10%;" type="text" list="chanlist" value="{{l.channel}}" name="channel_{{l.index}}">
+                  <button class="ko" name="remove_{{l.index}}">&cross;</button>
+                  <br>
+                  {{else}}
+                  &bull; {{{formatLine l.txt}}}
+  
+                  {{#if l.channel}} <strong> [ {{l.channel}} ] </strong> {{/if}}
+  
+                  <br>
+                  {{/if}}
+                {{/each}}
+              </td>
+            </tr>
+  
+            {{/each}}
+        </tbody>
+      </table>
+  
+      <p class="centered">
+        {{>SkipResult var="bans"}}
+      </p>
+
+      
+
+
     <h2> Map based Greetings <a href="/greetings/{{#unless edit_mode}}edit{{/unless}}">&#9998;</a> </h2>
     <table class="pure-table">
       <thead>
@@ -102,7 +157,7 @@
         </tr>
       </thead>
       <tbody>
-        {{#each c in (greetlines "true")}}
+        {{#each c in langlines}}
           <tr style="width:100%;" id="{{c._id}}">
             <td class="username">
               <span class="capcase uname">{{c.username}}</span>
