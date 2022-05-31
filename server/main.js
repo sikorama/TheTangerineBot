@@ -72,6 +72,11 @@ const randomWords = [
   "BAH C'MON"
 ];
 
+// Answering in english by default
+// But we could use a language by default for a channel
+// Or depending on the command user (!map or !carte)
+// or using user's language if on the map (and resolved)
+
 
 // Stack for answering to greetings.
 // Greetings are not immediate in order to add a delay between multiple greetings
@@ -465,9 +470,9 @@ Meteor.startup(() => {
         let sel = {};
         sel[channame] = { $exists: 1 };
         let res = UserLocations.find(sel, { sort: { dname: 1 } }).fetch().map((item) => {
-          return ([item.dname, item.location, item.latitude, item.longitude, item.country, item.msg].join(';'));
+          return ([item.dname, item.location, item.latitude, item.longitude, item.country, item.msg, item.mail].join(';'));
         });
-        res.unshift('Name;Location;Latitude;Longitude;Country;Message');
+        res.unshift('Name;Location;Latitude;Longitude;Country;Message;Mail');
         return res.join('\n');
     },
     export_live_events: function (from, to, team) {
@@ -638,6 +643,7 @@ Meteor.startup(() => {
   const default_regsonglistreq2 = /@(.*), (.*)added to queue/;
   // FR:
   // @nickname [FR] Il y a ton sourire - Saez a été ajoutée à la file d'attente // [EN] Il y a ton sourire - Saez 
+   //-- SONG REQUEST: fofffie [FR] Nobody Knows me At All  - The Weepies a été ajoutée à la file d'attente // [EN] Nobody Knows me At All  - The Weepies 
   // or 
 
 
@@ -661,6 +667,21 @@ Meteor.startup(() => {
 
     if (isWhisper === true) {
       console.info(target, context);
+      //mailRegex=RegExp()
+      const regexmail=/^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
+      let mail = msg.split(' ').filter((s)=> regexmail.test(s));
+      if (mail.length>0) {        
+        console.error('Mail address whispered!', mail);
+        //    UserLocations.      
+        let doc = {
+          name: username,
+          dname: dispname,
+          timestamp: dnow,
+          mail: mail.join(',')
+        };
+        UserLocations.upsert({name:username}, {$set: doc});
+      }
+
       let title = 'Whisper ' + username + ' from ' + chan + ' : ' + msg;
       //console.info(title);
       if (bot_discord_admincall_url) {
@@ -716,7 +737,7 @@ Meteor.startup(() => {
 
 
 
-            console.info('-- SONG REQUEST:', req_user, req_song);
+            console.info('-- SONG REQUEST:', req_user, ":", req_song);
             if (rul) {
               let objupdate = {};
               objupdate[chan + '-lastreq'] = req_song;
@@ -1370,7 +1391,7 @@ Meteor.startup(() => {
         // Check if user has already given its location
         let pdoc = UserLocations.findOne({ name: username });
         if (pdoc === undefined) {
-          //Nouvel utilisateur
+          //New user
           UserLocations.insert(doc);
 
           if (delta > 60 * 1000) {
@@ -1382,12 +1403,11 @@ Meteor.startup(() => {
 
             if (botchan.lang==='FR') {
               let txt = "Utilisez !show pour m'autoriser à rendre visible votre pseudo sur la carte"; 
-              say(target, answername + " Ok, thanks! " + txt, username);
+              say(target, answername + " Ok, merci! " + txt, username);
             }
             else {
               let txt = 'Use !show to allow me to display your nickname on the map'; //,randElement(addmess); //.[Math.floor(Math.random() * (addmess.length - 1))];
               say(target, answername + " Ok, thanks! " + txt, username);
-
             }
             return;
           }
