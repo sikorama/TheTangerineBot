@@ -584,6 +584,8 @@ Meteor.startup(() => {
       if (gmline.length > 0) {
         //gmline = replaceKeywords(gmline, {dispname: soname});
 
+
+
         gmline = gmline.replace(regext, "https://twitch.tv/" + soname + ' ');
         say(target, gmline, { dispname: soname, me: botchan.me });
       }
@@ -631,9 +633,14 @@ Meteor.startup(() => {
   bclient.connect().catch(console.error);
   raid_bclient.connect().catch(console.error);
 
-  // Default regex for parsing requests
+  // Default regex for parsing requests (english)
   const default_regsonglistreq1 = /(.*) \brequested\s(.*)\s\bat position/;
   const default_regsonglistreq2 = /@(.*), (.*)added to queue/;
+  // FR:
+  // @nickname [FR] Il y a ton sourire - Saez a été ajoutée à la file d'attente // [EN] Il y a ton sourire - Saez 
+  // or 
+
+
 
   // Called every time a message comes in
   function onMessageHandler(target, context, msg, self) {
@@ -684,7 +691,7 @@ Meteor.startup(() => {
     let cmdarray = [];
 
     // Songlisbot requests
-    if (botchan.map === true && username == "songlistbot") {
+    if (botchan.map === true && username === "songlistbot") {
       try {
         if (botchan.songrequest) {
           // Try default regexs, as songlistbot has different messages for request      
@@ -706,11 +713,14 @@ Meteor.startup(() => {
             // Removes @
             if (req_user[0] === '@')
               req_user = req_user.substring(1);
+
+
+
             console.info('-- SONG REQUEST:', req_user, req_song);
             if (rul) {
               let objupdate = {};
               objupdate[chan + '-lastreq'] = req_song;
-              console.info(' => update map:', objupdate);
+              //console.info(' => update map:', objupdate);
 
               UserLocations.update(rul._id, { $set: objupdate });
             }
@@ -1138,28 +1148,46 @@ Meteor.startup(() => {
     // ------------------- MAP -------------------------
     if (botchan.map === true) {
       //  Depending on the channel, guest account differs.
-      if (cmd.indexOf('map') == 0) {
+      if ((cmd.indexOf('map') === 0) || (cmd.indexOf('carte') === 0)) {
         let url = Settings.findOne({ param: 'URL' });
         //console.error(url);
 
         if (url) {
-          say(target, "You can access our EarthDay map here: " + url.val + "/c/" + chan);
+          if (botchan.lang==='FR') {
+            say(target, "EarthDay Retrouvez la carte de la communauté ici: " + url.val + "/c/" + chan);
+          }
+          else 
+            say(target, "You can access our EarthDay map here: " + url.val + "/c/" + chan);
         }
         return;
       }
 
       if (cmd.indexOf('forget') == 0) {
         UserLocations.remove({ name: username });
+        if (botchan.lang==='FR') {
+          say(target, "c'est fait " + answername + " !");
+
+        }
+        else
         say(target, "it's done " + answername + " !");
       }
 
       if (cmd.indexOf('where') == 0) {
         let pdoc = UserLocations.findOne({ name: username });
         if (pdoc) {
+          if (botchan.lang==='FR') {
+            say(target, answername + " Vous m'avez indiqué cette localisation: " + pdoc.location + '. Si vous voulez retirer toutes les informations vous concernant, utilisez !forget');
+          }
+            else
           say(target, answername + " You've told me you were from " + pdoc.location + '. If you want me to forget your location, use !forget');
+
           return;
         }
         else {
+          if (botchan.lang==='FR') {
+            say(target, "Désolé " + answername + " je ne connais pas votre localisation. Veuillez utiliser la commande !from au préalable!");
+          }
+          else 
           say(target, "Sorry " + answername + " I don't know where you're from. Please use !from command to tell me!");
           return;
         }
@@ -1168,11 +1196,20 @@ Meteor.startup(() => {
       if (cmd.indexOf('show') == 0) {
         let pdoc = UserLocations.findOne({ name: username });
         if (pdoc === undefined) {
+          if (botchan.lang==='FR') {
+            say(target, "Désolé " + answername + " je ne connais pas votre localisation. Veuillez utiliser la commande !from au préalable!");
+
+          }
+          else
           say(target, "Sorry " + answername + " I don't have you location in my database. Please use '!from city,country' command first.");
           return;
         }
         else {
           UserLocations.update(pdoc._id, { $set: { allow: true } });
+          if (botchan.lang==='FR') {
+            say(target, "Ca marche, votre pseudo sera visible sur la carte! " + answername + ' Avec !msg vous pouvez ajouter un message personnalisé');
+          }
+          else
           say(target, "Ok, your nickname will be displayed on the map! " + answername + ' Use !msg to add a personalized message on the map');
           return;
         }
@@ -1181,7 +1218,11 @@ Meteor.startup(() => {
       if (cmd.indexOf('mask') == 0) {
         let pdoc = UserLocations.findOne({ name: username });
         if (pdoc === undefined) {
-          say(target, "Sorry " + answername + " I don't have your location in my database. Please use '!from city,country' command first.");
+          if (botchan.lang==='FR') {
+            say(target, "Désolé " + answername + " je ne connais pas votre localisation. Veuillez utiliser la commande !from au préalable!");
+          }
+          else
+            say(target, "Sorry " + answername + " I don't have your location in my database. Please use '!from city,country' command first.");
           return;
         }
         else {
@@ -1195,12 +1236,20 @@ Meteor.startup(() => {
       if ((cmd.indexOf('msg') == 0) || (cmd.indexOf('message') == 0)) {
         let pdoc = UserLocations.findOne({ name: username });
         if (pdoc === undefined) {
-          say(target, "Sorry " + answername + " I don't have you location in my database. Please use '!from city,country' command first.");
+          if (botchan.lang==='FR') {
+            say(target, "Désolé " + answername + " je n'ai pas votre position dans ma base. Veuillez utiliser la commande !from au préalable!");
+          }
+          else
+            say(target, "Sorry " + answername + " I don't have you location in my database. Please use '!from city,country' command first.");
           return;
         }
         else {
           msg = commandName.substring(cmd.length + 1).trim();
           if (msg.length == 0) {
+            if (botchan.lang==='FR') {
+              say(target, "Utilisez '!msg +message' pour ajouter un petit mot sur la carte");
+            }
+            else
             say(target, "use '!msg +message' for adding a personalized message on the map");
           }
           else {
@@ -1218,17 +1267,29 @@ Meteor.startup(() => {
         let me = UserLocations.findOne({ name: username });
 
         if (me === undefined) {
-          say(target, answername + ", i couldn't find you on my map... Use !from command to tell me your location");
+          if (botchan.lang==='FR') {
+            say(target, answername + ", Je ne vous trouve pas sur la carte...Veuillez utiliser !from dans un premier temps");
+          }
+          else
+            say(target, answername + ", i couldn't find you on my map... Use !from command to tell me your location");
           return;
         }
 
         if (me.latitude === undefined) {
+          if (botchan.lang==='FR') {
+            say(target, answername + ",encore un peu de patience, j'ai un plat sur le feu , veuillez réessayer dans quelques minutes...");
+          }
+          else
           say(target, answername + ",sorry i still need to process some data... please try again in a few minutes...");
           return;
         }
 
         let ares = findClosest(me._id, chan, 5);
         if (ares.length === 0) {
+          if (botchan.lang==='FR') {
+            say(target, answername + ",Désolé je n'ai trouvé personne de proche...");
+          }
+          else
           say(target, answername + ",sorry i couldn't find someone close to your place...");
           return;
         }
@@ -1236,10 +1297,22 @@ Meteor.startup(() => {
           let arestr = ares[0];
           for (let i = 1; i < ares.length; i += 1)
             arestr += ', ' + ares[i];
-          if (ares.length > 1)
+          if (ares.length > 1) {
+            if (botchan.lang==='FR') {
+              say(target, answername + ',vos voisins les plus proches sont ' + arestr);
+            }
+            else
+            
             say(target, answername + ',your closest neighbours are ' + arestr);
-          else
+          }
+          else {
+            if (botchan.lang==='FR') {
+              say(target, answername + ',votre voisin le plus proche est ' + arestr);
+            }
+            else
+            
             say(target, answername + ',your closest neighbour is ' + arestr);
+          }
         }
         return;
       }
@@ -1247,6 +1320,10 @@ Meteor.startup(() => {
       if (cmd === 'from' || cmd == 'place') {
         let geoloc = commandName.substring(5).trim();
         if (geoloc.length < 2) {
+          if (botchan.lang==='FR') {
+            say(target, answername + " Veuillez m'indiquer la ville et le pays ou vous vous trouvez. Par exemple !from Paris,France ou !from New York.");
+          }
+          else
           say(target, answername + " Please tell me the country/state/city where you're from, for example: !from Paris,France or !from Japan.");
           return;
         }
@@ -1263,7 +1340,11 @@ Meteor.startup(() => {
                 geoloc = geoloc.replace(w, '');
               }
               else {
-                say(target, "Please tell me the country/state/city where you're from, for example: !from Paris,France or !from Japan. Although please do not provide too much information");
+                if (botchan.lang==='FR') {
+                  say(target, answername + " Veuillez m'indiquer la ville et le pays ou vous vous trouvez. Par exemple !from Paris,France ou !from New York.");
+                }
+                else
+                    say(target, "Please tell me the country/state/city where you're from, for example: !from Paris,France or !from Japan. Although please do not provide too much information");
                 return;
                 //                say(target, answername + " Sorry you're not allowed to change the city of another viewer");
                 //                return;
@@ -1298,12 +1379,25 @@ Meteor.startup(() => {
                             'Use !show to allow me to display your nickname on the map',
                             'Use !msg to add a personalized message on the map',
                           ]*/
-            let txt = 'Use !show to allow me to display your nickname on the map'; //,randElement(addmess); //.[Math.floor(Math.random() * (addmess.length - 1))];
-            say(target, answername + " Ok, thanks! " + txt, username);
+
+            if (botchan.lang==='FR') {
+              let txt = "Utilisez !show pour m'autoriser à rendre visible votre pseudo sur la carte"; 
+              say(target, answername + " Ok, thanks! " + txt, username);
+            }
+            else {
+              let txt = 'Use !show to allow me to display your nickname on the map'; //,randElement(addmess); //.[Math.floor(Math.random() * (addmess.length - 1))];
+              say(target, answername + " Ok, thanks! " + txt, username);
+
+            }
             return;
           }
-          else
+          else {
+            if (botchan.lang==='FR') {
+              say(target, answername + " Ok, compris! ", username);
+            }
+            else
             say(target, answername + " Ok, got it! ", username);
+          }
           return;
         }
         else {
@@ -1320,7 +1414,11 @@ Meteor.startup(() => {
           // Timestamp for getting active on channel's map
           updateObj[chan] = now;
           UserLocations.update(pdoc._id, { $set: updateObj, $unset: { country: 1, latitude: 1, longitude: 1 } });
-          say(target, answername + " Ok, i've updated my database!");
+          if (botchan.lang==='FR') {
+            say(target, answername + " Ok, j'ai mis à jour ma mémoire!");
+          }
+          else
+            say(target, answername + " Ok, i've updated my database!");
           return;
         }
       }

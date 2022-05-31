@@ -40,7 +40,18 @@
         </th>
       </tr>
     </thead>
-
+    
+    {{#if c.enabled}}
+    <tbody>
+      <tr>        
+        <td>BOT Language</td>      
+        <td>
+          <input class="chanSettings" value="{{c.lang}}" name="lang">
+        </td>  
+      </tr>
+    </tbody>
+    {{/if}}
+   
     <thead>
       <tr>
         <th colspan="3">

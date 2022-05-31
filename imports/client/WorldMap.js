@@ -85,6 +85,72 @@ Template.WorldMap.onRendered(function () {
 */
 
 
+function onMouseOver(event) {
+  let marker = event.target;
+  //let position = marker.getLatLng();
+  let lp = event.layerPoint;
+  lp.y -= 16;
+  let nlp = mymap.layerPointToLatLng(lp);
+
+  const rid = marker.data;
+  //console.error("rid=",rid);
+
+  let chan = Session.get('sel_channel');
+  if (!chan) return;
+
+  const songreqfield = chan + '-lastreq';
+  const msgfield = chan + '-msg';
+
+  // add fields
+  template.subscribe('userLocation', { _id: rid }, { limit: 1 }, () => {
+
+    const ul = UserLocations.findOne({ _id: rid });
+    //console.error(ul);
+    if (!isNaN(ul.latitude)) {
+      let txt = '';
+
+      // either dname or mapname are available.
+      // dname if admin, mapname otherwise, if allow===true            
+      let uname = ul.dname;
+      if (!uname) uname=ul.mapname;
+
+      let badge = '';
+      if (ul.streamer) badge = " &#9732;";
+
+      if (uname !== undefined) {
+        txt = '<strong>' + badge + uname + '</strong>';
+
+        // Message?
+        if ((ul[msgfield] != undefined) && (ul[msgfield].length > 0)) {
+          if (txt.length > 0)
+            txt += '<br>';
+          txt += ul[msgfield];
+        }
+
+        // Song request
+        if (ul[songreqfield]) {
+          if (txt.length > 0)
+            txt += '<br>&#9835; "' + ul[songreqfield] + " &#9835;";
+        }
+
+        // ... add more info
+        
+        //let popup = 
+        L.popup()
+          .setLatLng(nlp, { draggable: 'false' })
+          .setContent(txt)
+          .openOn(mymap);
+      
+      }
+
+      // TODO OPTIM:unsubscribe?
+
+    }
+  });
+
+  // console.error(event,this);
+}
+
 
   const updateMap = ((cursor, chan, options) => {
     options = options || {};
@@ -111,7 +177,6 @@ Template.WorldMap.onRendered(function () {
       }
 
       //        return ul[chan+'-lastreq'];
-      const songreqfield = chan + '-lastreq';
       const msgfield = chan + '-msg';
 
       let ic;
@@ -136,68 +201,6 @@ Template.WorldMap.onRendered(function () {
           popupAnchor: [-3, -76],
         });
       });
-
-
-      function onMouseOver(event) {
-        let marker = event.target;
-        //let position = marker.getLatLng();
-        let lp = event.layerPoint;
-        lp.y -= 16;
-        let nlp = mymap.layerPointToLatLng(lp);
-
-        const rid = marker.data;
-        //console.error("rid=",rid);
-
-        // add fields
-        template.subscribe('userLocation', { _id: rid }, { limit: 1 }, () => {
-
-          const ul = UserLocations.findOne({ _id: rid });
-          //console.error(ul);
-          if (!isNaN(ul.latitude)) {
-            let txt = '';
-
-            // either dname or mapname are available.
-            // dname if admin, mapname otherwise, if allow===true            
-            let uname = ul.dname;
-            if (!uname) uname=ul.mapname;
-
-            let badge = '';
-            if (ul.streamer) badge = " &#9732;";
-
-            if (uname !== undefined) {
-              txt = '<strong>' + badge + uname + '</strong>';
-
-              // Message?
-              if ((ul[msgfield] != undefined) && (ul[msgfield].length > 0)) {
-                if (txt.length > 0)
-                  txt += '<br>';
-                txt += ul[msgfield];
-              }
-
-              // Song request
-              if (ul[songreqfield]) {
-                if (txt.length > 0)
-                  txt += '<br>"&#9835; "' + ul[songreqfield] + " &#9835;";
-              }
-
-              // ... add more info
-              
-              let popup = L.popup()
-                .setLatLng(nlp, { draggable: 'false' })
-                .setContent(txt)
-                .openOn(mymap);
-            
-            }
-
-            // TODO OPTIM:unsubscribe?
-
-          }
-        });
-
-        // console.error(event,this);
-      }
-
-      console.error(cursor.count());
 
       cursor.forEach(function (item) {
 
@@ -226,7 +229,6 @@ Template.WorldMap.onRendered(function () {
                 if ((item[msgfield] != undefined) && (item[msgfield].length > 0)) {
                   icon = 3;
                 }
-
 
                 if (icons[icon])
                   opt.icon = icons[icon];
@@ -281,13 +283,13 @@ Template.WorldMap.onRendered(function () {
       // if (!Meteor.userId()) return;
       let curchan = Session.get('sel_channel');
       if (!curchan) return;
-      console.error(curchan);
+      //console.error(curchan);
 
       this.subscribe('botChannels', { channel: curchan });   //function () {
       //console.error('subscribed');
 
       let p = BotChannels.findOne( { channel: curchan });
-      console.error('p=', p);
+      //console.error('p=', p);
       if (!p) return;
 
       let searchData = Session.get("searchUsers");
