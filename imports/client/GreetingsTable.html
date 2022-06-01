@@ -140,7 +140,7 @@
         </td>
         <td>
           <ul>
-            {{#each cb in c.ban}}
+            {{#each cb in (safize c.ban)}}
             <li>
               {{cb.chan}} {{FormatDate cb.date}}
             </li>

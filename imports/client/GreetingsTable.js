@@ -88,6 +88,10 @@ Template.Greetings.helpers({
   showGPage(p) {
     return Session.equals('greetPage', parseInt(p));
   },
+  safize(a) {
+    if (_.isArray(a)) return a;
+    console.error('Not an array', a);
+  }
 });
 
 Template.Greetings.events({
