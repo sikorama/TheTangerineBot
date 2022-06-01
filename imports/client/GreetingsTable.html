@@ -111,7 +111,7 @@
               </td>
               <td name="editBan">
                 {{#if edit_mode}}
-                <input type="text" value="{{stringify c.ban}}" name="banline">
+                <textarea name="banline">{{stringify c.ban}}</textarea>
                 {{else}}
                 {{stringify c.ban}}
                 {{/if}}

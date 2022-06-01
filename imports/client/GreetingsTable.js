@@ -17,6 +17,9 @@ Template.Greetings.onCreated(function () {
     Session.set('greets_search','');
     Session.set('greets_count',0);
     Session.set('bans_limit',50);
+    Session.set('bans_search','');
+    Session.set('bans_page',1);
+    Session.set('bans_count',0);
 
   });
   
@@ -39,11 +42,13 @@ Template.Greetings.onCreated(function () {
       //console.error(v, lang);
       //GreetMessages.find({ lang: v }).forEach((item) => { console.error(item); })
       // Special case: languages:
-   
-      let  greetSearch = Session.get('greets_search');
-      let prop={lang: false, ban: v};
-      let pref="greets"
+      
+      let pref="greets";
       if (v) pref="bans" ;     
+
+      let  greetSearch = Session.get('greets_search');
+
+      let prop={lang: false, ban: v};
       let l = Session.get(pref+'_limit');
       if (l === undefined) l = 50;
   
@@ -58,7 +63,7 @@ Template.Greetings.onCreated(function () {
         props: prop,
       });
   
-      console.error(res.count());
+      console.error(pref, res.count());
       Session.set(pref+'_count', res.count());
       return res.mongoCursor;
 
@@ -95,13 +100,17 @@ Template.Greetings.onCreated(function () {
     },
     'change [name="banline"]': function (event) {
       const id = getParentId(event.currentTarget); 
-      let v = event.currentTarget.value.trim();
+      const v = event.currentTarget.value.trim();
       if (v.length>0) {
-        v = JSON.parse(v);
-        GreetMessages.update(id, {$set: {ban: JSON.parse(v)}});
+        try {
+          let p = JSON.parse(v);
+          GreetMessages.update(id, {$set: {ban: p}});
+        } catch(e) {
+          alert('Error while parsing JSON expression:'+ v);
+        }
       }
       else
-        GreetMessages.update(id, {$unset: {ban: 1}});      
+        GreetMessages.update(id, {$unset: {ban: 1,autoban:1}});
     },
     'click button.resettimer': function (event) {
       let name = event.currentTarget.name;
