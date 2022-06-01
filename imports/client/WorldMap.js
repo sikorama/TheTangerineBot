@@ -316,7 +316,7 @@ function onMouseOver(event) {
 
       // To generalize
       if (searchData.team === true) {
-        prop.team = "vamoo"; // 
+        prop.team = p.team; // 
       }
 
 
@@ -377,6 +377,13 @@ function onMouseOver(event) {
 Template.WorldMap.helpers({
   chan_name() {
     return Session.get('sel_channel');
+  },
+  // Return true if the channel is par of a team
+  chanteam() {
+    let curchan = Session.get('sel_channel');
+    if (!curchan) return;
+    let p = BotChannels.findOne( { channel: curchan }, {fields: {team:1}});
+    return (!!p.team);
   }
 });
 
