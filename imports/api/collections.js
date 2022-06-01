@@ -114,7 +114,7 @@ export const BotCommands = new Mongo.Collection('botcommands');
         },*/
         fields: function (searchObject, options) {
             let fulldata = (options.search.props.map !== true);
-            let admin = checkUserRole('admin streamer', options.userId);
+            let admin = checkUserRole('admin', options.userId);
             // fulldata is not allowed for non admins
             if (admin === false) fulldata = false;
 
@@ -136,6 +136,9 @@ export const BotCommands = new Mongo.Collection('botcommands');
                     longitude: 1,
                     //steamer: 1              // is a streamer?
                 };
+
+                
+
 
                 if (chan) {
                     // OPTIM: message is only needed for selecting the right icon, so we don't need the content

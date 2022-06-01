@@ -186,16 +186,22 @@ export function init_publications() {
   // TODO: add channel parameter (mandatory)
   Meteor.publish('userLocation', function (sel,opt) {
     
-    // OPTIM: filter channels fields
-  
-    // fields depends on role
-    if (hasRole(this.userId, 'admin')) 
+    // TODO betterchannels field filter
+    opt = opt || {};
+
+    // fields depends on role, except for admin
+    if (!hasRole(this.userId, 'admin')) 
     {
-    }
-    else 
-    {
-      // FIXME: Check if opt already contains fields and merge content
-      opt.fields = {dname : 0};
+      if  (this.userId) {
+        // TODO: If a user is logged, should only allow full access to data from their map
+
+      }
+      else {
+        opt.fields = opt.fields || {};
+        // Some field are not allowed
+        opt.fields.dname = 0;
+        opt.field.mail = 0;
+        }
     }
     return UserLocations.find(sel,opt);
   });
