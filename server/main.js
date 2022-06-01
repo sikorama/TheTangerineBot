@@ -1893,9 +1893,7 @@ Meteor.startup(() => {
           say(target, "Only Mods are allowed to summon you-know-who");
         return;
       }
-
     }
-
 
     // Test command to retrieve infos
     if (cmd === 'test') {

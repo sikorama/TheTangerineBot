@@ -1,6 +1,7 @@
 import { Template } from 'meteor/templating';
 import { Session } from 'meteor/session';
 import { BotChannels, GreetMessages } from '../api/collections.js';
+import { getParentId, genDataBlob } from './tools.js';
 
 import './GreetingsTable.html';
 
@@ -83,13 +84,23 @@ Template.Greetings.onCreated(function () {
         Session.set('greets_search',v);
     },300),
     'change .greetline': function (event) {
-      const id = event.currentTarget.parentElement.id;
+      const id = getParentId(event.currentTarget); 
       const name = event.currentTarget.name;
       const f = name.split('_')[0];
       const r = name.split('_')[1];
       let o = {};
       o[f] = event.currentTarget.value;
       Meteor.call('updateGreetLine', id, r, o);
+    },
+    'change [name="banline"]': function (event) {
+      const id = getParentId(event.currentTarget); 
+      const v = event.currentTarget.value.trim();
+      if (v.length>0) {
+        v = JSON.parse(v);
+        GreetMessages.update(id, {$set: {ban: JSON.parse(v)}});
+      }
+      else
+        GreetMessages.update(id, {$unset: {ban: 1}});      
     },
     'click button.resettimer': function (event) {
       let name = event.currentTarget.name;
@@ -100,7 +111,7 @@ Template.Greetings.onCreated(function () {
       }
     },
     'click button': function (event) {
-      const id = event.currentTarget.parentElement.id;
+      const id = getParentId(event.currentTarget); 
       const name = event.currentTarget.name;  
       const cl = event.currentTarget.className;
       if (cl.indexOf('toggleCheck') >= 0) {
@@ -133,7 +144,7 @@ Template.Greetings.onCreated(function () {
     },
     // Si on clique sur le nom d'un user, ca remplt l'input 'username'
     'click .username': function (event) {
-      const id = event.currentTarget.parentElement.id;
+      const id = getParentId(event.currentTarget); 
       if (id != undefined) {
         const gl = GreetMessages.findOne(id);
         if (gl != undefined) {

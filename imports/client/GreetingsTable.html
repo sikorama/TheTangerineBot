@@ -110,13 +110,21 @@
                 <button class="resettimer" name={{c.username}}> &#8986; </button>
               </td>
               <td name="editBan">
+                {{#if edit_mode}}
+                <input type="text" value="{{stringify c.ban}}" name="banline">
+                {{else}}
                 {{stringify c.ban}}
-<!--
-  {{#each cb in c.ban}}
-  {{cb.chan}}
-  {{/each}}
--->
+                {{/if}}
               </td>            
+              <td>
+                <ul>
+                {{#each cb in c.ban}}
+                  <li>
+                    {{cb.chan}} {{FormatDate cb.date}}
+                  </li>
+                  {{/each}}
+                </ul>
+              </td>
               <td style="width:100%;" id="{{c.__originalId}}">
                 {{#each l in c.texts}}
                   {{#if edit_mode}}

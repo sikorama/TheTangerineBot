@@ -236,7 +236,20 @@ export function init_publications() {
     this.ready();
   });
 
-
+  GreetMessages.allow({
+    insert(userid, doc) {
+      if (hasRole(userid, 'admin'))
+        return true;
+    },
+    update(userid, doc) {
+      if (hasRole(userid, 'admin'))
+        return true;
+    },
+    remove(userid, doc) {
+      if (hasRole(userid, 'admin'))
+        return true;
+    }
+  });
 
   Meteor.publish('settings', function (sel) {
     if (hasRole(this.userId, 'admin')) {
