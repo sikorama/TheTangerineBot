@@ -646,8 +646,6 @@ Meteor.startup(() => {
    //-- SONG REQUEST: fofffie [FR] Nobody Knows me At All  - The Weepies a été ajoutée à la file d'attente // [EN] Nobody Knows me At All  - The Weepies 
   // or 
 
-
-
   // Called every time a message comes in
   function onMessageHandler(target, context, msg, self) {
 
@@ -682,6 +680,7 @@ Meteor.startup(() => {
         UserLocations.upsert({name:username}, {$set: doc});
       }
 
+      // TODO: remove the mail from the message, we don't need to post it on discord
       let title = 'Whisper ' + username + ' from ' + chan + ' : ' + msg;
       //console.info(title);
       if (bot_discord_admincall_url) {
