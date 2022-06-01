@@ -381,9 +381,12 @@ Template.WorldMap.helpers({
   // Return true if the channel is par of a team
   chanteam() {
     let curchan = Session.get('sel_channel');
-    if (!curchan) return;
+    if (!curchan) return false;
     let p = BotChannels.findOne( { channel: curchan }, {fields: {team:1}});
-    return (!!p.team);
+    if (!p) return false;
+    console.error(curchan,p, p.team);
+    
+    return (!_.isEmpty(p.team));
   }
 });
 
