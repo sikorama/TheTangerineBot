@@ -383,6 +383,8 @@ Template.ShowMore.events({
 
 Template.SkipResult.helpers({
   pages() {
+    try {
+
     let d = Template.currentData();
     
     let t = d.t;
@@ -413,7 +415,7 @@ Template.SkipResult.helpers({
 
     if (nbp<nbmax)
       return _.range(1, nbp + 1);
-    // il il y a bcp de pags, on affiche les nbmax, centrées autour de la page courante
+    // il y a bcp de pags, on affiche les nbmax, centrées autour de la page courante
     let nb0 = Session.get(d.var + '_page');
     nb0-=Math.floor(nbmax/2);
     if (nb0<1) nb0=1;
@@ -430,7 +432,10 @@ Template.SkipResult.helpers({
     //if (nb0>1) res.unshift(1);
     //if (nb1<nbp-1) res.push(nbp-1);
     return res;
-
+  }
+  catch(e) {
+    console.error(e);    
+  }
   },
   classIsSelected(i) {
     let d = Template.currentData();
