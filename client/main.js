@@ -323,9 +323,7 @@ Template.Stats.helpers({
     const bc = BotChannels.findOne({ channel: chan });
     if (!bc) return;
 
-    // c.active_since
     let since = parseInt(bc.active_since);
-    //d-= sch.active_since;
     let d = Date.now();
     if (since<1) since = 10;
     d-= 1000*60*since;
@@ -336,8 +334,6 @@ Template.Stats.helpers({
 
     console.error(res);
     return res;
-
-//    return au.filter((item) => {return (item.timestamp > d);});
   },
   getraiders() {
     let sch = Session.get('sel_channel');
@@ -356,8 +352,8 @@ Template.Stats.helpers({
       return bc.active_users;
     }
     return false;
-
-  }
+  },
+  divide(a,b) {return parseInt(a/b);}
 });
 
 Template.About.events({

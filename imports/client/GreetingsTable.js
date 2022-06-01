@@ -16,6 +16,7 @@ Template.Greetings.onCreated(function () {
     Session.set('greets_page',1);
     Session.set('greets_search','');
     Session.set('greets_count',0);
+    Session.set('bans_limit',50);
 
   });
   
@@ -94,7 +95,7 @@ Template.Greetings.onCreated(function () {
     },
     'change [name="banline"]': function (event) {
       const id = getParentId(event.currentTarget); 
-      const v = event.currentTarget.value.trim();
+      let v = event.currentTarget.value.trim();
       if (v.length>0) {
         v = JSON.parse(v);
         GreetMessages.update(id, {$set: {ban: JSON.parse(v)}});

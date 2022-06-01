@@ -139,7 +139,7 @@
 
   {{#if showStat 4}}
 
-  <h2>Channels raiding you</h2>
+  <h2>All-Time Channels raiding you</h2>
   {{#let raiders=getraiders}}
   <table class="pure-table">
     <thead>
@@ -147,6 +147,7 @@
         <th>Channel</th>
         <th>Number of raids</th>
         <th>Total viewers</th>
+        <th>Average viewers per raid</th>
       </tr>
     </thead>
     <tbody>
@@ -180,6 +181,10 @@
         <td>
           {{c.viewers}}
         </td>
+        <td>
+          {{divide c.viewers c.count}}
+        </td>
+
       </tr>
       {{/each}}
 
