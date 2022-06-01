@@ -55,7 +55,7 @@ Template.Greetings.onCreated(function () {
       let s = parseInt(Session.get(pref+'_page') - 1);
       s *= l;
   
-      //console.error(greetSearch,l,s,prop);
+      console.error(greetSearch,l,s,prop);
 
       let res = GreetIndex.search(greetSearch, {
         limit: l,
@@ -63,8 +63,7 @@ Template.Greetings.onCreated(function () {
         props: prop,
       });
   
-      console.error(pref, res.count());
-      Session.set(pref+'_count', res.count());
+      Session.set(pref+'_count', res.mongoCursor.count());
       return res.mongoCursor;
 
 
@@ -152,7 +151,7 @@ Template.Greetings.onCreated(function () {
         return;
       }
     },
-    // Si on clique sur le nom d'un user, ca remplt l'input 'username'
+    // If we click on the name of a user, it autofills 'username' input
     'click .username': function (event) {
       const id = getParentId(event.currentTarget); 
       if (id != undefined) {

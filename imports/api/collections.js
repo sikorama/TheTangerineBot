@@ -223,7 +223,8 @@ export const BotCommands = new Mongo.Collection('botcommands');
                     $exists: options.search.props.ban
                 };
             }
-  
+            
+            //console.error(selector);
             //Verifier les roles (admin) options.search.userId
             return selector;
         },
