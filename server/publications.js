@@ -200,7 +200,7 @@ export function init_publications() {
         opt.fields = opt.fields || {};
         // Some field are not allowed
         opt.fields.dname = 0;
-        opt.field.mail = 0;
+        opt.fields.mail = 0;
         }
     }
     return UserLocations.find(sel,opt);
