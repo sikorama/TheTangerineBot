@@ -5,7 +5,8 @@ import { BotChannels, Images, UserLocations } from '../api/collections.js';
 import { getParentId, manageSearchEvents } from './tools.js';
 
 const L = require('leaflet');
-
+let circle;
+let circledrag;
 
 // ---------------------------
 
@@ -13,6 +14,7 @@ const L = require('leaflet');
 Template.WorldMap.onCreated(function () {
 
 });
+
 
 Template.WorldMap.onRendered(function () {
 
@@ -38,6 +40,10 @@ Template.WorldMap.onRendered(function () {
 
   // Create Map
   let mymap = L.map('map').setView([51.505, -0.09], 2);
+//  mymap.on('click', onMapClick);
+  mymap.on('mousedown', onMapMouseDown);
+  mymap.on('mouseup', onMapMouseUp);
+  mymap.on('mousemove', onMapMouseMove);
 
   let layer;
 
@@ -84,6 +90,54 @@ Template.WorldMap.onRendered(function () {
       }
 */
 
+function onMapMouseUp(event) {
+
+  mymap.dragging.enable();
+  circledrag=false;
+
+  // get users in area
+  //let center = circle._latlng
+  //let radius= circle._latlng.distanceTo(event.latlng);
+  
+  let clat = circle._latlng.lat;
+  let clng = circle._latlng.lng;
+
+  let dlat = event.latlng.lat - clat;
+  let dlng = event.latlng.lng - clng;
+  if ((dlat==0) && (dlng==0)) {
+    // initial circle
+  }
+  
+  let radius = Math.sqrt(dlat *dlat + dlng * dlng)
+
+
+  // bounding box:
+  //(clat-radius, clng-radius, clat+radius, clng+radius) 
+  console.error(radius);
+}
+
+
+
+function onMapMouseMove(event)  {
+  if (circledrag) 
+  if (circle) {
+    // Center
+  let d = circle._latlng.distanceTo(event.latlng);
+      circle.setRadius(d);
+  }
+}
+
+function onMapMouseDown(event) {
+  if (event.originalEvent.ctrlKey) {
+    if (circle)
+      circle.removeFrom(mymap);
+
+    circledrag = true;
+    circle = L.circle(event.latlng,{radius: 80000}).addTo(mymap);
+
+    mymap.dragging.disable();
+  } 
+}
 
 function onMouseOver(event) {
   let marker = event.target;
