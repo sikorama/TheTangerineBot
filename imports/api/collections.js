@@ -25,12 +25,14 @@ export const Raiders = new Mongo.Collection('raiders');
 export const ShoutOuts = new Mongo.Collection('shoutout');
 // Collection for storing discord hooks in a handy way
 export const DiscordHooks = new Mongo.Collection('dhooks');
-
+// Collection for storing latest data about live channels
 export const LiveEvents = new Mongo.Collection('liveevents');
 // Last bot message, used for overlays
 export const BotMessage = new Mongo.Collection('botmessage');
 // Custom command, can be edited per channel
 export const BotCommands = new Mongo.Collection('botcommands');
+// Collection for storing ILR gig events (for notifying users)
+export const IRLEvents = new Mongo.Collection('irlevents');
 
 /// Index pour les localisations
 /*const*/ UserLocIndex = new Index({

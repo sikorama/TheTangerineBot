@@ -106,23 +106,42 @@ AccountsTemplates.configure({
   showForgotPasswordLink: false,
 });
 
-
-/**
- * Find closest person on map,per channel
- */
-function findClosest(uid, chan, nb) {
-
-  if (!nb) nb = 5;
-
+function userfindClosest(uid, chan, opt) {
+  opt = opt || {};
+  opt.uid = uid;  // Self exclusion
   let udata = UserLocations.findOne(uid);
   if (!udata) return [];
-
-  let t0 = new Date();
   //Computes  Hamming distance, then sort and keeps n first results
-  const l0 = udata.latitude;
-  const l1 = udata.longitude;
+  const lat = udata.latitude;
+  const lng = udata.longitude;
+  return findClosest(chan, lat,lng,opt);
+}
 
-  if ((l0 === undefined) || (l1 === undefined)) {
+
+
+/**
+ * Find closest person on map, from lat,lng coordinates, 
+ * for a given channel
+ * Uses hamming distance, not euclidian
+ * (abs(dx)+abs(dy))
+ * 
+ * @param {*} chan 
+ * @param {*} lat 
+ * @param {*} lng 
+ * @param {*} opt:options:
+ *  - nbmax : nb max of people (0 to disable)
+ *  - distmax: max dist (expressed in lat/lng)  
+ * @returns 
+ */
+function findClosest(chan, lat,lng, opt) {
+  opt = opt || {};
+  let nbmax = opt.nbmax;
+  let distmax = opt.distmax; 
+  if (nbmax===undefined) nbmax = 5;
+  if (distmax===undefined) distmax = 5;
+  let t0 = new Date();
+
+  if ((lat === undefined) || (lng === undefined)) {
     return [];
   }
 
@@ -140,36 +159,36 @@ function findClosest(uid, chan, nb) {
 
   pipeline.push({
     $project: {
-      dist: { $add: [{ $abs: { $subtract: ["$latitude", l0] } }, { $abs: { $subtract: ["$longitude", l1] } }] }
+      dist: { $add: [{ $abs: { $subtract: ["$latitude", lat] } }, { $abs: { $subtract: ["$longitude", lng] } }] }
     }
   });
   pipeline.push({
     $sort: { dist: 1 }
   });
-  pipeline.push({
-    $limit: nb
-  });
+
+  if (nbmax>0) {
+    pipeline.push({
+      $limit: nbmax
+    });
+  }
 
   let res = UserLocations.aggregate(pipeline);
   let nc = [];
   let rl = res.length;
-  if (rl > 5) rl = 5;
+  if (nbmax>0 && rl > nbmax) rl = nbmax;
   for (let i = 0; i < rl; i++) {
     let cc = res[i];
-    if ((cc.dist < 20) && (uid != cc._id)) {
+    if ((cc.dist < distmax) && (opt.uid != cc._id)) {
       let u = UserLocations.findOne(cc._id);
       if (u != undefined)
         nc.push('@' + u.dname);
     }
   }
-
+  console.error(chan,lat,lng,opt,nbmax,distmax,nc);
   // Store / cache
   //  UserLocations.update(uid, { $set: { timestamp: t0, proximity: nc } });
   return nc;
 }
-
-
-
 
 const selectQuestion = function () {
   let pipeline = [];
@@ -268,6 +287,11 @@ Meteor.startup(() => {
       assertMethodAccess('removeActiveUser', this.userId);
 
         removeActiveUser(chan, name);
+    },
+    getClosestUsers(chan, lat,lng,opt) {
+      assertMethodAccess('getClosestUsers', this.userId);
+      // We could check the used logger has access to the channel in parameter
+      return findClosest(chan,lat,lng,opt);
     }
   });
 
@@ -1304,7 +1328,7 @@ Meteor.startup(() => {
           return;
         }
 
-        let ares = findClosest(me._id, chan, 5);
+        let ares = userfindClosest(me._id, chan, {nbmax: 5, distmax: 20});
         if (ares.length === 0) {
           if (botchan.lang==='FR') {
             say(target, answername + ",Désolé je n'ai trouvé personne de proche...");

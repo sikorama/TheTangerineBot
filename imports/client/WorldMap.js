@@ -93,27 +93,45 @@ Template.WorldMap.onRendered(function () {
 function onMapMouseUp(event) {
 
   mymap.dragging.enable();
+  
+  if (circledrag!==true)
+    return;
+
   circledrag=false;
+  
+  
+  const chan = Session.get('sel_channel');
+  if (!chan) return;
+
+  if (!circle) return;
+  //console.error(circle);
 
   // get users in area
   //let center = circle._latlng
   //let radius= circle._latlng.distanceTo(event.latlng);
   
-  let clat = circle._latlng.lat;
-  let clng = circle._latlng.lng;
-
-  let dlat = event.latlng.lat - clat;
-  let dlng = event.latlng.lng - clng;
+  const clat = circle._latlng.lat;
+  const clng = circle._latlng.lng;
+  const dlat = event.latlng.lat - clat;
+  const dlng = event.latlng.lng - clng;
+  let radius;
   if ((dlat==0) && (dlng==0)) {
     // initial circle
+    radius= 0.8;  // Approx 80km
   }
-  
-  let radius = Math.sqrt(dlat *dlat + dlng * dlng)
-
-
-  // bounding box:
-  //(clat-radius, clng-radius, clat+radius, clng+radius) 
+  else {
+    // Euclidian distance
+    //radius = Math.sqrt(dlat *dlat + dlng * dlng);
+    radius = Math.abs(dlat) + Math.abs(dlng);
+  }
   console.error(radius);
+
+  Meteor.call('getClosestUsers', chan, clat,clng, {nbmax:0, distmax:radius}, function(err,res){
+    console.error(res);
+    // Popup
+    if (!_.isEmpty(res))
+      alert('Utilisateurs trouvés: '+ res.join(','));
+  });
 }
 
 

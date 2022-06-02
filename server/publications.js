@@ -1,5 +1,6 @@
 import { BotChannels, BotCommands, BotMessage, GreetMessages, Images, QuizzQuestions, QuizzScores, Raiders, Settings, ShoutOuts, Stats, UserLocations } from '../imports/api/collections.js';
 import { assertMethodAccess, getUserGroups, hasRole } from './user_management.js';
+import 'irlEvents';
 
 export function init_publications() {
   //
@@ -55,7 +56,7 @@ export function init_publications() {
           //songrequest: 1,
           team: 1,
           tr: 1,
-        }
+        };
     }
 
     return BotChannels.find(sel, opt);
@@ -379,7 +380,6 @@ if (Settings.findOne() === undefined) {
   Settings.insert({ param: 'ffmpeg_server_url', val: '127.0.0.1' });
   Settings.insert({ param: 'ffmpeg_server_port', val: 8126 });
 }
-
 
 Settings.allow({
   update(userid, doc) {

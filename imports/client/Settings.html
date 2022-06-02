@@ -140,6 +140,9 @@
       {{/if}}
     </tbody>
 
+
+
+    <!------ Greetings section ------>
     <thead>
       <tr>
         <th colspan="3">
@@ -162,6 +165,23 @@
       {{/if}}
     </tbody>
 
+    <!------ IRL events -->
+    <thead>
+      <tr>
+        <th colspan="3">
+          {{>CheckMark b=c.irlevents n="irlevents"}}
+          IRL Events Management
+        </th>
+      </tr>
+    </thead>
+
+    {{#if c.irlevents}}
+    <tbody>
+
+    </tbody>
+    {{/if}}
+
+    <!------  Song Request detection -->
     <thead>
       <tr>
         <th colspan="3">
@@ -171,12 +191,11 @@
       </tr>
     </thead>
 
+ 
 
 
+    {{#if c.songrequest}}
     <tbody>
-
-
-      {{#if c.songrequest}}
       <tr>
         <td> 
           <div class="settings_item">
@@ -193,8 +212,8 @@
         </td>
         <td colspan="2"> <input type="text" value="{{c.requestregex2}}" class="chanSettings" name="requestregex2"> </td>
       </tr>
-      {{/if}}
     </tbody>
+      {{/if}}
 
 
     <thead>
@@ -421,6 +440,8 @@
     {{/if}}
 
 
+    <!------ Custom commands -->
+    <!------- could be edited in a dedicated panel -->
     <thead>
       <tr>
         <th colspan="3">
@@ -444,21 +465,13 @@
         <td class="AddNewCommand">
             <button class="ok" name="confirm_add_cmd">&plus;</button>
         </td>
-      </tr>
-
-   
+      </tr> 
     
       {{#each co in (commandList)}}
       {{>CommandSetting chan=c cmd=cmd}}
       {{/each}}
     </tbody>
-
-
-
     {{/if}}
-
-
-
 
     <thead>
       <tr>

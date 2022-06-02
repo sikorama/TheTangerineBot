@@ -63,7 +63,7 @@ FlowRouter.route('/live-embed', {
 });
 
 
-
+/*
 FlowRouter.route('/radio', {
   name: 'radio',
   action: function (params, queryParams) {
@@ -72,6 +72,8 @@ FlowRouter.route('/radio', {
     });
   }
 });
+*/
+
 
 
 FlowRouter.route('/from', {
@@ -93,6 +95,28 @@ FlowRouter.route('/from/edit', {
     });
   }
 });
+
+FlowRouter.route('/customcommands', {
+  name: 'customcommands',
+  action: function (params, queryParams) {
+    Session.set('edit_mode', false);
+    BlazeLayout.render('MainPage', {
+      main: 'CustomCommands',
+    });
+  }
+});
+
+FlowRouter.route('/irlevents', {
+  name: 'irlevents',
+  action: function (params, queryParams) {
+    Session.set('edit_mode', false);
+    BlazeLayout.render('MainPage', {
+      main: 'IRLEvents',
+    });
+  }
+});
+
+
 
 FlowRouter.route('/greetings', {
   name: 'greetings',
