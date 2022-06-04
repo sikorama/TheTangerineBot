@@ -1,6 +1,6 @@
 import { BotChannels, BotCommands, BotMessage, GreetMessages, Images, QuizzQuestions, QuizzScores, Raiders, Settings, ShoutOuts, Stats, UserLocations } from '../imports/api/collections.js';
 import { assertMethodAccess, getUserGroups, hasRole } from './user_management.js';
-import 'irlEvents';
+//import 'irlEvents';
 
 export function init_publications() {
   //

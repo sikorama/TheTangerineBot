@@ -47,7 +47,7 @@ Template.registerHelper('numPeopleLoc', function () {
 });
 
 Template.registerHelper('stringify', function (el) {
-  return JSON.stringify(el);
+  return JSON.stringify(el,null,' ');
 });
 
 

@@ -5,10 +5,15 @@ import { Session } from 'meteor/session';
 import { ReactiveVar } from 'meteor/reactive-var';
 
 import './Settings.html';
+import './Settings/general.html';
+import './Settings/accounts.html';
+import './Settings/server.html';
+import './Settings/translation.html';
+import './Settings/common.html';
+import './Settings/emotes.html';
 
 // ----------- Channel Management
 Template.Settings.onCreated(function () {
-
     this.subscribe("allUsers");
     this.subscribe("statistics");
     this.subscribe('botChannels');
@@ -18,19 +23,28 @@ Template.Settings.onCreated(function () {
     this.subscribe('userRoles');
     Session.set('curEditChan', '');
     Session.setDefault('settingsPage', 1);
-
-
 });
 
+Template.TranslationSettings.helpers({
+    stats(c) {
+        return Stats.find({ chan: '#' + c }, { sort: { month: -1 } });
+    },
+    getStatChannels() {
+        return BotChannels.find({});
+    },
+});
+Template.AccountsConfig.helpers({
+    users() {
+        return Meteor.users.find();
+    },
+});
+
+Template.registerHelper('userHasRole', function (uid, role) {
+    return checkUserRole(role, uid);
+});
 
 Template.Settings.helpers({
-    getTeamParamVal(team) {
-        let param = 'team-' + team;
-        const p = Settings.findOne({ param: param });
-        //console.error(param,p)
-        if (p)
-            return p.val;
-    },
+
     isCurEditChan(chan) {
         return Session.equals('curEditChan', chan);
     },
@@ -38,34 +52,16 @@ Template.Settings.helpers({
         let sch = Session.get('sel_channel');
         return BotChannels.findOne({ channel: sch });
     },
-    getStatChannels() {
-        return BotChannels.find({});
-    },
-    users() {
-        return Meteor.users.find();
-    },
-    stats(c) {
-        return Stats.find({ chan: '#' + c }, { sort: { month: -1 } });
-    },
-    userHasRole(uid, role) {
-        return checkUserRole(role, uid);
-    },
-    stringify(o) { return JSON.stringify(o); },
+    //stringify(o) { return JSON.stringify(o); },
     pictures() {
         return Images.find();
     },
     link(o) {
         return Images.link(o);
     },
-    getIcon(name) {
-        if (name[0] === '/') return name;
-        let i = Images.findOne({ name: name });
-        return i.link();
-    },
-    iconnames() {
-        return Images.find().fetch().map((item) => item.name);
 
-    },
+
+
     submenu(v) {
         return (Session.equals('settingsPage', v));
     },
@@ -73,7 +69,41 @@ Template.Settings.helpers({
         //
         return BotCommands.find();
     },
+  
+});
 
+
+Template.GeneralSettings.helpers({
+    getChannel() {
+        let sch = Session.get('sel_channel');
+        if (sch)
+            return BotChannels.findOne({ channel: sch });
+    },
+    iconnames() {
+        return Images.find().fetch().map((item) => item.name);
+    },
+    getIcon(name) {
+        if (name[0] === '/') return name;
+        let i = Images.findOne({ name: name });
+        if (i)
+            return i.link();
+    },
+    getlink(c,cat) {
+        try{
+        if (c) {
+            //console.error(c,cat,c.channel);
+            return '/c/'+c.channel;
+        }
+        }
+        catch(e) {console.error(e);}
+    },
+    getTeamParamVal(team) {
+        let param = 'team-' + team;
+        const p = Settings.findOne({ param: param });
+        //console.error(param,p)
+        if (p)
+            return p.val;
+    },
 });
 
 
@@ -276,18 +306,17 @@ Template.ServerConfig.helpers({
     settings() {
         return Settings.find({}, { sort: { param: 1 } });
     },
-
 });
 
 Template.ServerConfig.events({
-    /*   "change .settings": function (event) {
+       "change .settings": function (event) {
          let v = event.currentTarget.value;
          let id = event.currentTarget.name;
          console.info(id,'<-',v);
          Meteor.call('parameter', id, v);
          return false;
      },
-   */
+   
     "click .renamebtn": function (event) {
         let id = event.currentTarget.name;
         let before = document.getElementById('before').value.trim();
@@ -295,19 +324,16 @@ Template.ServerConfig.events({
         console.error(id, before, after);
         if ((before.length > 0) && (after.length > 0))
             Meteor.call('rename', before, after, id === 'btapply', function (err, res) {
-
                 if (err) console.error(err);
                 else
                     alert(res);
-
             });
-
     }
-
 });
 
 
 
+/*
 Template.CommandSetting.helpers({
     indexed(a) {
         if (a)
@@ -346,4 +372,28 @@ Template.CommandSetting.events({
         }
 
     },
+});
+
+*/
+
+
+
+function getparamvalue(c,n) {
+    if (!c) return;
+    console.error('getparamvalue',n);
+    if (n)
+        return c[n];
+}
+
+Template.SettingsSection.helpers( {
+    getparamvalue:getparamvalue,
+});
+
+
+Template.SettingsTextParam.helpers( {
+    getparamvalue:getparamvalue,
+});
+
+Template.SettingsBoolParam.helpers( {
+    getparamvalue:getparamvalue,
 });
