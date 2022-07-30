@@ -1,0 +1,47 @@
+<template name="LyricsQuizzOverlay">
+
+    {{#if currentUser}}
+    <div class="header" id="myHeader">
+        <button class="selGPage pure-button" name="start">Start a new quizz</button>
+        <button class="selGPage pure-button" name="stop">Stop quizz</button>
+    </div>
+    {{/if}}
+
+    <table class="overlay-background">
+        {{#let s=(lyrics 2)}}
+        <tbody style="{{getTextStyle}}">
+            <tr>
+                <td colspan="2">
+                    <h1>
+                        {{s.title}}
+                    </h1>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    {{#if s.author}}
+                    <h2>
+                        by {{s.author}}
+                    </h2>
+                    {{/if}}
+                </td>
+            </tr>
+
+            <tr height="500px" class=""  name="lastMessageCaption">
+                {{#each col in s.text}}
+                <td>
+                    <div name="lastMessageText" class="lyricsquizz-textarea" style="{{getTextStyle}}">
+                            {{{col}}}
+                    </div>
+                </td>
+                {{/each}}
+            </tr>
+        </tbody>
+        {{/let}}
+    </table>
+
+    <td>
+        <img src="/bot_overlay.png">
+    </td>
+
+</template>

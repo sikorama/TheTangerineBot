@@ -1,0 +1,30 @@
+
+<template name="CommandSetting">
+    <tr style="width:100%;">
+      <td class="username">
+        <span class="uname">{{cmd.name}}</span>
+      </td>
+      <td style="width:100%;">
+        <input class="commandline" style="width:80%;" type="text" value="{{cmd.regex}}" name="regex">
+        <br>
+        {{#each l in (indexed cmd.answers)}}
+        {{#if edit_mode}}
+        {{>CheckMark b=l.enabled n=l.index vcross="&nbsp;&nbsp;"}}
+        <input class="commandline" style="width:80%;" type="text" value="{{l.txt}}" name="txt_{{l.index}}">
+        <button class="ko" name="remove_{{l.index}}">&cross;</button>
+        <br>
+        {{else}}
+        &bull; {{l.txt}}
+        <br>
+        {{/if}}
+        {{/each}}
+        {{#if edit_mode}}
+        {{>CheckMark b=l.enabled n=l.index vcross="&nbsp;&nbsp;"}}
+        <input class="newanswer" style="width:80%;" type="text">
+        <button class="+" name="addline">&cross;</button>
+        {{/if}}
+      </td>
+    </tr>
+  </template>
+
+  

@@ -1,0 +1,10 @@
+
+<template name="ShowMore">
+    Show <select>
+      {{#each l in limits}}
+      <option class="limit" {{selected l}}>{{l}}</option>
+      {{/each}}
+  
+    </select>
+    Items per page
+  </template>

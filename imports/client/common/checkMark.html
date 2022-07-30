@@ -1,0 +1,10 @@
+<template name="CheckMark">
+    <button class="{{#if class}} {{class}} {{else}}  toggleCheck  {{/if}}{{#if b}} ok {{else}} ko {{/if}}" name="{{n}}">
+      {{#if b}}
+      &check;
+      {{else}}
+      {{#if vcross}} {{{vcross}}} {{else}} &cross; {{/if}}
+      {{/if}}
+    </button>
+  </template>
+  

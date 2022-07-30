@@ -1,0 +1,9 @@
+<!-- Prend les params t (nb total) et p (nb par page) et v pour le prefixe des variables suffixés par _page et _skip -->
+<template name="SkipResult">
+    <span class="{{#unless first}} prevpage {{/unless}}"> &lt; </span>
+    {{#each i in pages}}
+    <span class="setpage {{classIsSelected i}}">{{i}}</span>
+    {{/each}}
+    <span class="{{#unless last}} nextpage {{/unless}}"> &gt; </span>
+  </template>
+  

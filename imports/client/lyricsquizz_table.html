@@ -1,0 +1,194 @@
+<template name="LyricsTopicsList">
+    {{#each t in lyricstopics}}
+    <option value="{{t}}">{{t}}</option>
+    {{/each}}
+</template>
+
+<template name="LyricsTopic">
+    <select name={{n}} class="{{c}}">
+        <option value="">Choose a Category...</option>
+        {{>LyricsTopicsList}}
+    </select>
+</template>
+
+
+<template name="LyricsQuizzScores">
+    <h2>Quizz Leaderboard
+        {{#if isUserRole "admin"}}
+        <a href="/lyricsquizz">&#9998;</a>
+        <a href="/lyricsquizz/settings">&#x2699;</a>
+        <a href="{{linktoovl}}">Overlay</a>
+        {{/if}}
+    </h2>
+    <table class="pure-table">
+        <thead>
+            <tr>
+                <th>User name</th>
+                <th>Score</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each s in scores}}
+            <tr>
+                <td>{{s.user}}</td>
+                <td>{{s.score}}</td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+    {{#if isUserRole "admin"}}
+    <button name="reset"> Reset Scores </button>
+    {{/if}}
+
+</template>
+
+
+<template name="LyricsQuizzSettings">
+    {{#if Template.subscriptionsReady}}
+    {{#if isUserRole "admin"}}
+    <h2>Lyrics Quizz Settings
+        <a href="/lyricsquizz">&#9998;</a>
+    </h2>
+    <h4 class="home-title">Select Topics</h4>
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th> </th>
+                <th> Category </th>
+                <th> </th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each t in topicsList}}
+            <tr>
+                <td>{{t.n}}</td>
+                <td class="{{#if t.e}} ok {{/if}}">
+                    <button name="{{t.n}}" class="togglectx {{#if t.e}} ok {{/if}}">
+                        {{#if t.e}}Enabled{{else}}Disabled{{/if}}
+                    </button>
+                </td>
+            </tr>
+            {{/each}}
+        </tbody>
+    </table>
+    {{/if}}
+    {{/if}}
+
+</template>
+
+
+
+
+<template name="LyricsTable">
+    {{#if isUserRole "admin"}}
+
+    <datalist id="lyricstopicslist">
+        {{>LyricsTopicsList}}
+    </datalist>
+
+
+    <h2>Quizz Songs <a href="/lyricsquizz/{{#unless edit_mode}}edit{{/unless}}">&#9998;</a>
+        <a href="/lyricsquizz/settings">&#x2699;</a>
+    </h2>
+    {{#let songs = getsongs}}
+    <p>
+        <a href="/lyricsquizz/scores">&diams;</a>
+        {{songs.count}}/{{numLyrics}} songs,
+        {{>ShowMore v="lyrics"}}
+    </p>
+
+    <table class="pure-table">
+        <thead>
+            <tr>
+                <th colspan="6">Search</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td colspan="1"><input type="checkbox" name="enabled" class="search"></td>
+                <td colspan="3"><input style="width:100%;" type="text" name="text" class="search"></td>
+                <td colspan="2">{{>SelectTopic n="lyrics" c="search"}}</td>
+            </tr>
+        </tbody>
+
+
+        <thead>
+            <tr>
+                <th class="sort" name="enabled"></th>
+                <th class="sort" name="title">Title</th>
+                <th class="sort" name="author">Author</th>
+                <th class="sort" name="text">Text</th>
+                <th class="sort" name="topics">Category</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {{#each c in songs}}
+            <tr style="width:100%;" id="{{c.__originalId}}">
+                <td>
+                    {{>CheckMark b=c.enabled n="enabled"}}
+                </td>
+                <td>
+                    {{#if edit_mode}}
+                    <textarea class="songline" name="title">{{c.title}}</textarea>
+                    {{else}}
+                    {{c.title}}
+                    {{/if}}
+                </td>
+                <td>
+                    {{#if edit_mode}}
+                    <textarea class="songline" name="author">{{c.author}}</textarea>
+                    {{else}}
+                    {{c.author}}
+                    {{/if}}
+                </td>
+                <td>
+                    {{#if edit_mode}}
+                    <textarea class="songline" name="text" type="text">{{c.text}}</textarea>
+                    {{else}}
+                    {{c.text}}
+                    {{/if}}
+                </td>
+                <td>
+                    {{#if edit_mode}}
+                    <input class="songline" name="topics" list="lyricstopicslist" value="{{c.topics}}">
+                    {{else}}
+                    {{c.topics}}
+                    {{/if}}
+                </td>
+                <td>
+                    {{#if edit_mode}}
+                    <button class="ko remove">&cross;</button>
+                    {{/if}}
+                </td>
+
+            </tr>
+            {{/each}}
+        </tbody>
+        <thead>
+            <tr>
+                <th></th>
+                <th colspan="4">Add a Song</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                </td>
+                <td class="AddNewSong"><input name="addTitle" type="text" value=""></td>
+                <td><input name="addAuthor" type="text" value=""></td>
+                <td><textarea name="addText"></textarea></td>
+                <td>
+                    {{>SelectTopic n="addTopics" c=""}}
+                </td>
+                <td><button class="ok confirm" name="confirm_song">&plus;</button></td>
+            </tr>
+        </tbody>
+    </table>
+    <p class="centered">
+        {{>SkipResult var="lyrics"}}
+    </p>
+
+    {{/let}}
+    {{/if}}
+</template>

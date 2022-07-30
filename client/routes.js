@@ -25,7 +25,6 @@ FlowRouter.route('/commands', {
   }
 });
 
-
 FlowRouter.route('/about', {
   name: 'about',
   action: function (params, queryParams) {
@@ -212,10 +211,51 @@ FlowRouter.route('/quizz/edit', {
   action: function (params, queryParams) {
     Session.set('edit_mode', true);
     BlazeLayout.render('MainPage', {
-      main: 'QuizzTable',
+      main: 'LyrucsTable',
     });
   }
 });
+
+FlowRouter.route('/lyricsquizz', {
+  name: 'lyricsquizz',
+  action: function (params, queryParams) {
+    Session.set('edit_mode', false);
+    BlazeLayout.render('MainPage', {
+      main: 'LyricsTable',
+    });
+  }
+});
+
+FlowRouter.route('/lyricsquizz/scores', {
+  name: 'lyricsquizz',
+  action: function (params, queryParams) {
+    BlazeLayout.render('MainPage', {
+      main: 'LyricsQuizzScores',
+    });
+  }
+});
+
+FlowRouter.route('/lyricsquizz/settings', {
+  name: 'lyricsquizz',
+  action: function (params, queryParams) {
+    BlazeLayout.render('MainPage', {
+      main: 'LyricsQuizzSettings',
+    });
+  }
+});
+
+
+FlowRouter.route('/lyricsquizz/edit', {
+  name: 'lyricsquizz',
+  action: function (params, queryParams) {
+    Session.set('edit_mode', true);
+    BlazeLayout.render('MainPage', {
+      main: 'LyricsTable',
+    });
+  }
+});
+
+
 
 
 FlowRouter.route('/disconnect', {
@@ -256,6 +296,16 @@ FlowRouter.route('/c/:chan/overlay', {
     });
   }
 });
+
+
+FlowRouter.route('/c/:chan/lyricsquizz', {
+  name: 'channel',
+  action: function (params, queryParams) {
+    BlazeLayout.render('LyricsQuizzOverlay', {
+    });
+  }
+});
+
 
 FlowRouter.route('/c/:chan/commands', {
   name: 'channel',
