@@ -129,16 +129,11 @@
         <td class="username">
           <a href="https://openstreetmap.org/search?query={{ul.location}}" target="_blank">&boxbox;</a>
           <span class="uname">{{c.username}}</span>
-          <button class="resettimer" name={{c.username}}> &#8986; </button>
-        </td>
+         </td>
         <td name="editBan">
           {{#if edit_mode}}
           <textarea name="banline">{{stringify c.ban}}</textarea>
           {{else}}
-          {{stringify c.ban}}
-          {{/if}}
-        </td>
-        <td>
           <ul>
             {{#each cb in (safize c.ban)}}
             <li>
@@ -146,7 +141,9 @@
             </li>
             {{/each}}
           </ul>
+          {{/if}}
         </td>
+
         <td style="width:100%;" id="{{c.__originalId}}">
           {{#each l in c.texts}}
           {{#if edit_mode}}

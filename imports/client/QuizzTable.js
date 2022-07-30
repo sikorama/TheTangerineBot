@@ -131,19 +131,19 @@ const topics = [
 
 
   Template.QuizzScores.onCreated(function () {
-    this.subscribe("quizzScores");
+    this.subscribe("quizzScores", {type: 'quizz'});
   });
 
   Template.QuizzScores.helpers({
     scores() {
-      return QuizzScores.find({}, { sort: { score: -1 } });
+      return QuizzScores.find({type :'quizz'}, { sort: { score: -1 } });
     }
   });
 
   Template.QuizzScores.events({
     'click button': function (event) {
       if (confirm('Are you sure?') === true)
-        Meteor.call('clearScores');
+        Meteor.call('clearScores', {type: 'quizz'});
     }
   });
 

@@ -1,0 +1,50 @@
+
+<template name="SettingsSection">
+    <thead>
+      <tr>
+        <th colspan="{{#if cs}}{{cs}}{{else}}3{{/if}}"> 
+          {{#if n}}
+            {{>CheckMark b=(getparamvalue c n) n=n c=c}} 
+          {{/if}}
+          {{label}} 
+          {{#if link}} <a href="{{link}}"> {{{ linklabel }}} </a>{{/if}}
+        </th>
+      </tr>
+    </thead>
+  </template>
+  
+  
+  <template name="SettingsTextParam">
+    <tr>
+      <td>
+        <div class="settings_item"> {{name}} </div>
+      </td>
+      <td colspan="2">
+        <textarea rows="{{rows}}" class="chanSettings" name="{{param}}">{{getparamvalue c param}}</textarea>
+      </td>
+    </tr>
+  </template>
+
+  <template name="SettingsParam">
+    <tr>
+      <td>
+        <div class="settings_item"> {{name}} </div>
+      </td>
+      <td colspan="2">
+        <input class="chanSettings" name="{{param}}" value="{{getparamvalue c param}}">
+      </td>
+    </tr>
+  </template>
+  
+  
+  <template name="SettingsBoolParam">
+    <tr>
+      <td>
+        <div class="settings_item"> {{name}} </div>
+      </td>
+      <td colspan="2">
+        {{>CheckMark b=(getparamvalue c param) n=param }}
+      </td>
+    </tr>
+  </template>
+  

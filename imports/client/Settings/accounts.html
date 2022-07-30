@@ -1,0 +1,79 @@
+
+<template name="AccountsConfig">
+    <h2>Accounts</h2>
+    <table class="pure-table">
+      <thead>
+        <tr>
+          <th>User</th>
+          <th>Groups</th>
+          <th>Admin</th>
+          <th>Editor</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{#each u in users}}
+        <tr id="{{u._id}}">
+          <td>
+            {{u.username}}
+            {{#if (userHasRole u._id "superadmin")}}&#9752;{{/if}}
+          </td>
+          <td>
+            <input class="profile" value="{{u.profile.groups}}" name="groups">
+          </td>
+          <td>
+            {{>CheckMark class="setrole" n="admin" b=(userHasRole u._id "admin")}}
+          </td>
+          <td>
+            {{>CheckMark class="setrole" n="greet" b=(userHasRole u._id "greet")}}
+          </td>
+        </tr>
+        {{/each}}
+      </tbody>
+  <br>
+      {{>SettingsSection label="Create Account" cs=4 }}
+  
+      <tbody>
+        <tr>
+          <td>Name:</td>
+          <td> <input id="accountName"> </td>
+        </tr>
+        <tr>
+          <td>Password:</td>
+          <td> <input id="accountPass"> </td>
+        </tr>
+        <tr>
+          <td>Channel:</td>
+          <td> <input id="accountChan"> </td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>
+            <button class="pure-button pure-button-primary" name="addAccount">Create Account</button>
+          </td>
+        </tr>      
+      </tbody>
+      {{>SettingsSection label="Remove Channel" cs=4 }}
+      <tbody>
+  
+        <tr>
+          <td></td>
+          <td>
+            <button id="{{c._id}}" class="delete">Remove Channel</button>
+          </td>
+        </tr>
+      </tbody>
+      
+     {{>SettingsSection label="Add Channel" cs=4 }}
+      <tbody>
+        <tr>
+          <td> <input id="newChannel"> </td>
+          <td> <button class="addChannel">Add Channel </button> </td>
+        </tr>
+      </tbody>
+    </table>
+  
+    <h4>Export</h4>
+    <button class='exportCSV pure-button pure-button-primary'>Export User Locations (CSV)</button> <a id="csvlink"></a>
+  
+  
+  </template>

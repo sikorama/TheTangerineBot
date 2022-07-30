@@ -1,4 +1,5 @@
-import { BotChannels, BotCommands, BotMessage, GreetMessages, Images, QuizzQuestions, QuizzScores, Raiders, Settings, ShoutOuts, Stats, UserLocations } from '../imports/api/collections.js';
+import { BotChannels, BotCommands, BotMessage, GreetMessages, Images, Lyrics, LyricsQuizz, QuizzQuestions, QuizzScores, Raiders, Settings, ShoutOuts, Stats, UserLocations } from '../imports/api/collections.js';
+import { addSong } from './lyricsquizz.js';
 import { assertMethodAccess, getUserGroups, hasRole } from './user_management.js';
 //import 'irlEvents';
 
@@ -21,42 +22,43 @@ export function init_publications() {
       }
     }
 
-      else {
-        // For public data
-        opt.fields = 
-        { 
-          // autoban
-          // autobancmd
+    else {
+      // For public data
+      opt.fields =
+      {
+        // autoban
+        // autobancmd
 
-          //advertteam: 1,
-          channel: 1,
-          //discord: 1,
-          //discord_goinglive_url2: 1,
-          //discord_goinglive_url3: 1,
-          //discord_raid_url: 1,
-          enabled: 1,
-          //greet: 1,        
-          live: 1,
-          //live_notifdate: 1,
-          live_started: 1,
-          live_thumbnail_url: 1,
-          live_title: 1,
-          live_viewers: 1,
-          
-          map: 1,
-          map_icon_msg: 1,
-          map_icon_name: 1,
-          map_icon_std: 1,
-          
-          //me 1,
-          //muteGreet 1,
-          quizz: 1,
-          //raid_auto_so: 1,
-          //raids: 1,
-          //songrequest: 1,
-          team: 1,
-          tr: 1,
-        };
+        //advertteam: 1,
+        channel: 1,
+        //discord: 1,
+        //discord_goinglive_url2: 1,
+        //discord_goinglive_url3: 1,
+        //discord_raid_url: 1,
+        enabled: 1,
+        //greet: 1,        
+        live: 1,
+        //live_notifdate: 1,
+        live_started: 1,
+        live_thumbnail_url: 1,
+        live_title: 1,
+        live_viewers: 1,
+
+        map: 1,
+        map_icon_msg: 1,
+        map_icon_name: 1,
+        map_icon_std: 1,
+
+        //me 1,
+        //muteGreet 1,
+        quizz: 1,
+        lyricsquizz: 1,
+        //raid_auto_so: 1,
+        //raids: 1,
+        //songrequest: 1,
+        team: 1,
+        tr: 1,
+      };
     }
 
     return BotChannels.find(sel, opt);
@@ -129,7 +131,7 @@ export function init_publications() {
 
 
   //
-  // ---------------------- QUIZZ -------------------------------
+  // ---------------------- QUIZZ QUESTIONS  -------------------------------
   //
 
   Meteor.publish('quizzQuestions', function (sel) {
@@ -141,13 +143,14 @@ export function init_publications() {
   });
 
 
+  //
+  // ---------------------- SCORES -------------------------------
+  //
 
   Meteor.publish('quizzScores', function (sel) {
     //if (this.userId) {
     if (!sel) sel = {};
     return QuizzScores.find(sel, { sort: { score: -1 }, limit: 50 });
-    //}
-    //this.ready();
   });
 
   //
@@ -185,15 +188,14 @@ export function init_publications() {
 
 
   // TODO: add channel parameter (mandatory)
-  Meteor.publish('userLocation', function (sel,opt) {
-    
+  Meteor.publish('userLocation', function (sel, opt) {
+
     // TODO betterchannels field filter
     opt = opt || {};
 
     // fields depends on role, except for admin
-    if (!hasRole(this.userId, 'admin')) 
-    {
-      if  (this.userId) {
+    if (!hasRole(this.userId, 'admin')) {
+      if (this.userId) {
         // TODO: If a user is logged, should only allow full access to data from their map
 
       }
@@ -202,9 +204,9 @@ export function init_publications() {
         // Some field are not allowed
         opt.fields.dname = 0;
         opt.fields.mail = 0;
-        }
+      }
     }
-    return UserLocations.find(sel,opt);
+    return UserLocations.find(sel, opt);
   });
 
   // Custom Commands
@@ -324,7 +326,7 @@ export function init_publications() {
 
   Meteor.methods({
     getGroups: function () {
-      if (!this.userId) return ;
+      if (!this.userId) return;
 
       //assertMethodAccess('getGroups', this.userId);
 
@@ -377,6 +379,7 @@ if (Settings.findOne() === undefined) {
   Settings.insert({ param: 'URL', val: WEBSITE_URL });
   Settings.insert({ param: 'location_interval', val: 60 });
   Settings.insert({ param: 'quizz_enabled_topics', val: [] });
+  Settings.insert({ param: 'lyricsquizz_enabled_topics', val: [] });
   Settings.insert({ param: 'ffmpeg_server_url', val: '127.0.0.1' });
   Settings.insert({ param: 'ffmpeg_server_port', val: 8126 });
 }
@@ -384,5 +387,115 @@ if (Settings.findOne() === undefined) {
 Settings.allow({
   update(userid, doc) {
     if (hasRole(userid, 'admin')) return true;
+  }
+});
+
+
+
+
+Meteor.publish('lyrics', function (sel) {
+  sel = sel || {};
+  //    return (Images.find(sel).cursor);
+  return (Images.collection.find(sel));
+});
+
+Lyrics.allow({
+  insert(userid, doc) {
+    if (userid) return true;
+  },
+  update(userid, doc) {
+    if (userid) return true;
+  },
+  remove(userid, doc) {
+    //      if (userid) return true;
+    if (hasRole(userid, 'admin'))
+      return true;
+  }
+});
+
+
+//Lyrics.remove({});
+
+if (Lyrics.find().count() === 0) {
+
+  addSong(
+    "Englishman In New York",
+    "Sting",
+    "I don't drink coffee I take tea my dear\n" +
+    "I like my toast done on one side\n" +
+    "And you can hear it in my accent when I talk\n" +
+    "I'm an Englishman in New York\n" +
+    "\n" +
+    "See me walking down Fifth Avenue\n" +
+    "A walking cane here at my side\n" +
+    "I take it everywhere I walk\n" +
+    "I'm an Englishman in New York\n" +
+    "\n" +
+    "I'm an alien, I'm a legal alien\n" +
+    "I'm an Englishman in New York\n" +
+    "I'm an alien, I'm a legal alien\n" +
+    "I'm an Englishman in New York\n" +
+    "\n" +
+    "If \"Manners maketh man\" as someone said\n" +
+    "Then he's the hero of the day\n" +
+    "It takes a man to suffer ignorance and smile\n" +
+    "Be yourself no matter what they say\n" +
+    "\n" +
+    "I'm an alien, I'm a legal alien\n" +
+    "I'm an Englishman in New York\n" +
+    "I'm an alien, I'm a legal alien\n" +
+    "I'm an Englishman in New York\n" +
+    "\n" +
+    "Modesty, propriety can lead to notoriety\n" +
+    "You could end up as the only one\n" +
+    "Gentleness, sobriety are rare in this society\n" +
+    "At night a candle's brighter than the sun\n" +
+    " \n" +
+    "Takes more than combat gear to make a man\n" +
+    "Takes more than a license for a gun\n" +
+    "Confront your enemies, avoid them when you can\n" +
+    "A gentleman will walk but never run\n" +
+    " \n" +
+    "If \"Manners maketh man\" as someone said\n" +
+    "Then he's the hero of the day\n" +
+    "It takes a man to suffer ignorance and smile\n" +
+    "Be yourself no matter what they say\n" +
+    "Be yourself no matter what they say\n" +
+    "Be yourself no matter what they say\n" +
+    "Be yourself no matter what they say\n" +
+    "Be yourself no matter what they say...\n" +
+    "\n" +
+    "I'm an alien, I'm a legal alien\n" +
+    "I'm an Englishman in New York\n" +
+    "I'm an alien, I'm a legal alien\n" +
+    "I'm an Englishman in New York\n" +
+    "\n" +
+    "I'm an alien, I'm a legal alien\n" +
+    "I'm an Englishman in New York\n" +
+    "I'm an alien, I'm a legal alien\n" +
+    "I'm an Englishman in New York\n", +
+  ['en']);
+
+}
+
+
+// ----------- Quizz Lyrics  -----------------
+
+Meteor.publish('lyricsquizz', function (sel) {
+  sel = sel || {};
+  return LyricsQuizz.find(sel);
+});
+
+LyricsQuizz.allow({
+  insert(userid, doc) {
+    if (userid) return true;
+  },
+  update(userid, doc) {
+    if (userid) return true;
+  },
+  remove(userid, doc) {
+    //      if (userid) return true;
+    if (hasRole(userid, 'admin'))
+      return true;
   }
 });

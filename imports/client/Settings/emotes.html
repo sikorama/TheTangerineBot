@@ -1,0 +1,41 @@
+<template name="EmoteSettings">
+
+  <h2>Map Badges Files</h2>
+  <div>
+    Add a picture: {{>UploadForm}}
+  </div>
+
+  <table class="pure-table">
+    <tbody>
+      {{#each p in pictures}}
+      {{#if p}}
+      <tr id={{p._id}}>
+        <td>
+          <img class="pure-img" src="{{link p}}">
+        </td>
+        <td>
+          <a href="{{link p}}" target="_blank" rel="noopener noreferrer">
+            {{p.name}}
+          </a>
+          ({{p.size}} bytes)
+          <span name="remove-picture" class="autohide delete">&#9746;</span>
+
+        </td>
+      </tr>
+      {{/if}}
+      {{/each}}
+    </tbody>
+  </table>
+
+</template>
+
+<template name="UploadForm">
+    {{#with currentUpload}}
+    {{stringify file}}
+    Uploading <b>{{file.name}}</b>:
+  
+    {{else}}
+    <input id="fileInput" type="file">
+    {{/with}}
+  </template>
+  

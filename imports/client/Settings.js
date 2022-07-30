@@ -5,12 +5,14 @@ import { Session } from 'meteor/session';
 import { ReactiveVar } from 'meteor/reactive-var';
 
 import './Settings.html';
-import './Settings/general.html';
-import './Settings/accounts.html';
-import './Settings/server.html';
-import './Settings/translation.html';
-import './Settings/common.html';
-import './Settings/emotes.html';
+import './Settings/general';
+import './Settings/accounts';
+import './Settings/server';
+import './Settings/translation';
+import './Settings/common';
+import './Settings/emotes';
+import './Settings/discord';
+import './Settings/customCommands';
 
 // ----------- Channel Management
 Template.Settings.onCreated(function () {
@@ -25,19 +27,7 @@ Template.Settings.onCreated(function () {
     Session.setDefault('settingsPage', 1);
 });
 
-Template.TranslationSettings.helpers({
-    stats(c) {
-        return Stats.find({ chan: '#' + c }, { sort: { month: -1 } });
-    },
-    getStatChannels() {
-        return BotChannels.find({});
-    },
-});
-Template.AccountsConfig.helpers({
-    users() {
-        return Meteor.users.find();
-    },
-});
+
 
 Template.registerHelper('userHasRole', function (uid, role) {
     return checkUserRole(role, uid);
@@ -53,9 +43,7 @@ Template.Settings.helpers({
         return BotChannels.findOne({ channel: sch });
     },
     //stringify(o) { return JSON.stringify(o); },
-    pictures() {
-        return Images.find();
-    },
+
     link(o) {
         return Images.link(o);
     },
@@ -71,41 +59,6 @@ Template.Settings.helpers({
     },
   
 });
-
-
-Template.GeneralSettings.helpers({
-    getChannel() {
-        let sch = Session.get('sel_channel');
-        if (sch)
-            return BotChannels.findOne({ channel: sch });
-    },
-    iconnames() {
-        return Images.find().fetch().map((item) => item.name);
-    },
-    getIcon(name) {
-        if (name[0] === '/') return name;
-        let i = Images.findOne({ name: name });
-        if (i)
-            return i.link();
-    },
-    getlink(c,cat) {
-        try{
-        if (c) {
-            //console.error(c,cat,c.channel);
-            return '/c/'+c.channel;
-        }
-        }
-        catch(e) {console.error(e);}
-    },
-    getTeamParamVal(team) {
-        let param = 'team-' + team;
-        const p = Settings.findOne({ param: param });
-        //console.error(param,p)
-        if (p)
-            return p.val;
-    },
-});
-
 
 Template.Settings.events({
     "change .settings": function (event) {
@@ -247,153 +200,3 @@ Template.Settings.events({
 });
 
 
-
-Template.UploadForm.onCreated(function () {
-    this.currentUpload = new ReactiveVar(false);
-});
-
-Template.UploadForm.helpers({
-    currentUpload: function () {
-        return Template.instance().currentUpload.get();
-    },
-});
-
-Template.UploadForm.events({
-    'change #fileInput': function (e, template) {
-        if (e.currentTarget.files && e.currentTarget.files[0]) {
-            // We upload only one file, in case
-            // multiple files were selected
-            console.error(e.currentTarget.files);
-
-            Images.insert({
-                file: e.currentTarget.files[0],
-                onStart() {
-                    template.currentUpload.set(this);
-                },
-                onUploaded(error, fileObj) {
-                    if (error) {
-                        console.error(error);
-                    }
-                    else {
-                        console.error('OK', fileObj.name);
-                    }
-                    template.currentUpload.set(false);
-
-                },
-                chunkSize: 'dynamic'
-            });
-        }
-    }
-});
-
-
-
-
-// ------------ Server Parameters
-
-Template.ServerConfig.helpers({
-    getParamVal(param) {
-        let p = Settings.findOne({ param: param });
-        //console.error(p);
-        if (p)
-            return p.val;
-    },
-    getVal(val) {
-        if (_.isString(val)) return val;
-        if (_.isObject(val)) return JSON.stringify(val);
-        return val;
-    },
-    settings() {
-        return Settings.find({}, { sort: { param: 1 } });
-    },
-});
-
-Template.ServerConfig.events({
-       "change .settings": function (event) {
-         let v = event.currentTarget.value;
-         let id = event.currentTarget.name;
-         console.info(id,'<-',v);
-         Meteor.call('parameter', id, v);
-         return false;
-     },
-   
-    "click .renamebtn": function (event) {
-        let id = event.currentTarget.name;
-        let before = document.getElementById('before').value.trim();
-        let after = document.getElementById('after').value.trim();
-        console.error(id, before, after);
-        if ((before.length > 0) && (after.length > 0))
-            Meteor.call('rename', before, after, id === 'btapply', function (err, res) {
-                if (err) console.error(err);
-                else
-                    alert(res);
-            });
-    }
-});
-
-
-
-/*
-Template.CommandSetting.helpers({
-    indexed(a) {
-        if (a)
-            return a.map((item, index) => { item.index = index; return item; });
-        return [];
-    }
-});
-
-Template.CommandSetting.events({
-    'change .greetline': function (event) {
-        const id = event.currentTarget.parentElement.id;
-        const name = event.currentTarget.name;
-        const f = name.split('_')[0];
-        const r = name.split('_')[1];
-        let o = {};
-        o[f] = event.currentTarget.value;
-        //Meteor.call('updateGreetLine', id, r, o);
-    },
-    'click button': function (event) {
-        const id = getParentId(event.currentTarget); //.parentElement.id;
-        const name = event.currentTarget.name;
-        const cl = event.currentTarget.className;
-        if (cl.indexOf('toggleCheck') >= 0) {
-            const b = (cl.indexOf('ok') < 0);
-            console.error("toggle", id, name, b);
-            Meteor.call('updateCommand', id, parseInt(name), { enabled: b });
-            return;
-        }
-        if (name.indexOf('remove') === 0) {
-            if (confirm('Are you sure you want to permanently delete this Greetings line?') === true) {
-                const r = name.split('_')[1];
-                console.error('remove', id, r);
-                Meteor.call('removeCommand', id, r);
-            }
-            return;
-        }
-
-    },
-});
-
-*/
-
-
-
-function getparamvalue(c,n) {
-    if (!c) return;
-    console.error('getparamvalue',n);
-    if (n)
-        return c[n];
-}
-
-Template.SettingsSection.helpers( {
-    getparamvalue:getparamvalue,
-});
-
-
-Template.SettingsTextParam.helpers( {
-    getparamvalue:getparamvalue,
-});
-
-Template.SettingsBoolParam.helpers( {
-    getparamvalue:getparamvalue,
-});

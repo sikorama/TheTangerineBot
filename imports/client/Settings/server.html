@@ -1,0 +1,62 @@
+
+<template name="ServerConfig">
+
+    <h2>Server Configuration</h2>
+    <table class="pure-table">
+      <tbody>
+        {{#each s in settings}}
+        <tr>
+          <td>
+            {{s.param}}
+          </td>
+          <td>
+            <textarea cols="40" rows="4"  class="settings" name={{s.param}} value="{{getVal s.val}}"></textarea>
+          </td>
+        </tr>
+        {{/each}}
+  
+      </tbody>
+    </table>
+  
+    <h2>Exports</h2>
+    <button class='exportDot pure-button pure-button-primary'>Export Raid Graph (dot) </button> <a id="dotlink">...</a>
+  
+    <p>Live events</p>
+    From: <input id="liveFrom">
+    To: <input id="liveTo">
+    Team: <input id="liveTeam">
+    <button class='export_live_events pure-button pure-button-primary'>Export Live Events </button> <a
+      id="livelink">...</a>
+  
+    <h2>Rename a user</h2>
+  
+  
+    <table class="pure-table">
+      <tbody>
+        <tr>
+          <td>
+            Before:
+          </td>
+          <td>
+            <input class="rename" id="before">
+          </td>
+        </tr>
+        <tr>
+          <td>
+            After:
+          </td>
+          <td>
+            <input class="rename" id="after">
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  
+    <button name="dryrun" class='renamebtn pure-button pure-button-primary'>Dry Run </button>
+    <button name="btapply" class='renamebtn pure-button pure-button-primary'>Apply</button>
+  
+  
+  
+  </template>
+  
+  

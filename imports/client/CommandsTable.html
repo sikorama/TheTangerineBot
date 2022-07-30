@@ -108,6 +108,10 @@
   {{/if}}
 
 
+  {{#if rh_featureEnabled "lyricsquizz"}}
+  
+  {{/if}}
+
   {{#if rh_featureEnabled "quizz"}}
 
   <h2>Quizz/Trivia</h2>
@@ -177,7 +181,7 @@
 </tr>
 <tr>
   <td><code>!{{team}}-raid</code></td>
-  <td>Initiate a raid to a channel of team {{team}} - but must be allowed to conduct a raid</td>
+  <td>Initiate a raid to a channel of team {{team}} - must be allowed to conduct a raid (i.e. use /raid)</td>
 </tr>
 {{/if}}
 

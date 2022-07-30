@@ -34,6 +34,12 @@ export const BotCommands = new Mongo.Collection('botcommands');
 // Collection for storing ILR gig events (for notifying users)
 export const IRLEvents = new Mongo.Collection('irlevents');
 
+// Collection for storing Lyrics for quizz
+export const Lyrics = new Mongo.Collection('lyrics');
+// Collection for storing lyrics quizz game state
+export const LyricsQuizz = new Mongo.Collection('lyricsquizz');
+
+
 /// Index pour les localisations
 /*const*/ UserLocIndex = new Index({
     collection: UserLocations,
@@ -147,7 +153,7 @@ export const IRLEvents = new Mongo.Collection('irlevents');
                     fobj[chan + '-msg'] = 1;
                 }
                 
-                console.error(fobj);
+                //console.error(fobj);
                 return fobj;
             }
         }
@@ -254,11 +260,55 @@ export const Images = new FilesCollection({
     allowClientCode: false,
     onBeforeUpload: function (file) {
         // Allow upload files under 100Kb, and only in png/jpg/jpeg formats
-        console.error('before upload', file);
+        //console.error('before upload', file);
         if ((file.size <= 100 * 1024) && /png|jpg/i.test(file.extension)) {
             return true;
         } else {
             return 'File too big or wrong extension !';
         }
     }
+});
+
+
+
+
+// Index pour les questions, uniquemnt pour les admins
+/*const*/ LyricsIndex = new Index({
+    collection: Lyrics,
+    fields: ['title', 'text', 'author', 'topics'],
+    permission: function (options) {
+        return checkUserRole('admin', options.userId);
+    },
+    // Options de recherche par défaut
+    defaultSearchOptions: {
+        sortBy: { timestamp: 1 }
+    },
+    engine: new MongoDBEngine({
+        selector: function (searchObject, options, aggregation) {
+            // retrieve the default selector
+            let selector = this.defaultConfiguration().selector(searchObject, options, aggregation);
+
+            if (options.search.props.hasOwnProperty('topics')) {
+                selector.topics = {
+                    $eq: options.search.props.topics
+                };
+            }
+
+            if (options.search.props.hasOwnProperty('enabled')) {
+                selector.enabled = {
+                    $eq: options.search.props.enabled
+                };
+            }
+            //Verifier les roles (admin) options.search.userId
+            //console.error('Lyrics index', selector);
+            return selector;
+        },
+        sort: function (searchObject, options) {
+            // On utilise le champ sortby tel quel
+            return (options.search.props.sortby);
+        },
+        //        fields: function(searchObject, options) {
+        //            return {dname:1, allow:1, msg:1, latitude:1, longitude:1};
+        //        }
+    })
 });

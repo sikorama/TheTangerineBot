@@ -64,6 +64,14 @@
       </li>
       {{/if}}
 
+
+
+      {{#if rh_featureEnabled "lyricsquizz"}}
+      <li class="pure-menu-item {{active "lyricsquizz"}}">
+        <a href="/lyricsquizz/scores" class="pure-menu-link ">Lyrics Quizz</a>
+      </li>
+      {{/if}}
+
       {{#if isUserRole "admin greet"}}
 
       <li class="pure-menu-item {{active "greetings"}}">
@@ -155,35 +163,9 @@
   {{> Template.dynamic template=main}}
 </template>
 
-<template name="CheckMark">
-  <button class="{{#if class}} {{class}} {{else}}  toggleCheck  {{/if}}{{#if b}} ok {{else}} ko {{/if}}" name="{{n}}">
-    {{#if b}}
-    &check;
-    {{else}}
-    {{#if vcross}} {{{vcross}}} {{else}} &cross; {{/if}}
-    {{/if}}
-  </button>
-</template>
 
 
-<template name="ShowMore">
-  Show <select>
-    {{#each l in limits}}
-    <option class="limit" {{selected l}}>{{l}}</option>
-    {{/each}}
 
-  </select>
-  Items per page
-</template>
-
-<!-- Prend les params t (nb total) et p (nb par page) et v pour le prefixe des variables suffixés par _page et _skip -->
-<template name="SkipResult">
-  <span class="{{#unless first}} prevpage {{/unless}}"> &lt; </span>
-  {{#each i in pages}}
-  <span class="setpage {{classIsSelected i}}">{{i}}</span>
-  {{/each}}
-  <span class="{{#unless last}} nextpage {{/unless}}"> &gt; </span>
-</template>
 
 
 <template name="DirectMap">

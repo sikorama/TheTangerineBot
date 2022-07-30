@@ -19,6 +19,9 @@ a {
   color: red;
 }
 
+
+  
+
 .strong {
 	font-weight: bold;
 
@@ -233,6 +236,8 @@ div.overlay-textarea{
 	animation-duration: 8s;
 }
 
+
+
 @keyframes anim2 {
 	0% {
 		opacity:0.0;
@@ -296,3 +301,13 @@ div.overlay-textarea{
   .sticky + .content {
 	padding-top: 102px;
   } 
+
+  .lyricsquizz-textarea{
+	padding-left: 15px;
+	padding-right: 20px;
+	padding-top: 50px;
+	padding-bottom: 30px;
+	color: rgba(0,0,0,255);
+	font-size: 30px;
+
+}

@@ -1,0 +1,29 @@
+
+<template name="TranslationSettings">
+    <h2>Translation stats</h2>
+    
+    <table class="pure-table">
+      <thead>
+        <th>Channel</th>
+      </thead>
+      <tbody>
+        {{#each c in getStatChannels}}
+        <tr>
+          <td>
+            {{c.channel}}
+          </td>
+          {{#each s in (stats c.channel)}}
+          <td>
+            {{s.count}}
+            Month={{s.month}}
+          </td>
+          {{/each}}
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+    
+    </template>
+    
+    
+    

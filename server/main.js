@@ -14,7 +14,7 @@ import { country_lang, patterns } from './const.js';
 import { getGreetMessages, init_greetings, replaceKeywords } from './greetings.js';
 import { checkLiveChannels, sendDiscord } from './notifications.js';
 import { init_publications } from './publications.js';
-import { init_quizz } from './quizz.js';
+import { getCurQuestion, init_quizz, selectQuestion } from './quizz.js';
 //import { init_radio } from './radio.js';
 import { init_rss } from './rss.js';
 import { initRaidManagement } from './raids.js';
@@ -22,22 +22,15 @@ import { randElement, randSentence } from './tools.js';
 import { init_users,assertMethodAccess } from './user_management.js';
 import { tr_lang } from '../imports/api/languages.js';
 
-const tmi = require('tmi.js');
+import { processWordLyricsQuizz, startLyricsQuizz, stopLyricsQuizz } from './lyricsquizz';
+import { say, connect_chat, init_client, connect_raid } from './client.js';
+import { findClosest, init_geocoding, userfindClosest } from './geocoding.js';
+import { manageScoreCommands } from './scores.js';
 const gtrans = require('googletrans').default;
-const gc = require('node-geocoder');
-const PhraseIt = require('phraseit');
+//const gc = require('node-geocoder');
 
-let botname = process.env.CHANNEL_NAME;
-let botpassword = process.env.CHANNEL_PASSWORD;
 
-// TODO: If no channel & password, then exit...
-if ((botname == undefined) || (botpassword == undefined)) {
-  console.error('No CHANNEL_NAME or CHANNEL_PASSWORD environment variable found. Exiting.');
-  process.exit(-1);
-}
-botname = botname.toLowerCase();
-
-// global Hooks 
+// global Hooks => get from env variable
 ['BOT_DISCORD_RAID_HOOK',
   'BOT_DISCORD_ADMINCALL_HOOK',
   'BOT_DISCORD_LIVE_HOOK',
@@ -56,16 +49,16 @@ let client_id = process.env.CLIENT_ID;
 let client_secret = process.env.CLIENT_SECRET;
 
 if (client_id != undefined) {
+  console.error('Start Live Timer...');
   Meteor.setInterval(function () { checkLiveChannels(client_id, client_secret); }, 1000 * 60);
 }
 
-botpassword = 'oauth:' + botpassword;
-
-//  UserLocations.update(u._id, {$unset: {msg:1}});
+let botname = init_client();
+let bclient = connect_chat();
+let raid_bclient = connect_raid();
 
 // Array to keep track of last active users (per channel)
 let last_active_users = {};
-
 
 const randomWords = [
   'ACTION',
@@ -88,16 +81,7 @@ let greetingsStack = [];
 // Autotranslate feature
 let autotranslate = {};
 
-// Current Question (contains full object)
-var curQuestion;
-var numQuestions = 0;
 
-// FIXME: Add referer, user-agent...
-let gcoptions = {
-  provider: 'openstreetmap',
-};
-
-let geoCoder = gc(gcoptions);
 
 
 AccountsTemplates.configure({
@@ -106,142 +90,10 @@ AccountsTemplates.configure({
   showForgotPasswordLink: false,
 });
 
-function userfindClosest(uid, chan, opt) {
-  opt = opt || {};
-  opt.uid = uid;  // Self exclusion
-  let udata = UserLocations.findOne(uid);
-  if (!udata) return [];
-  //Computes  Hamming distance, then sort and keeps n first results
-  const lat = udata.latitude;
-  const lng = udata.longitude;
-  return findClosest(chan, lat,lng,opt);
-}
-
-
-
-/**
- * Find closest person on map, from lat,lng coordinates, 
- * for a given channel
- * Uses hamming distance, not euclidian
- * (abs(dx)+abs(dy))
- * 
- * @param {*} chan 
- * @param {*} lat 
- * @param {*} lng 
- * @param {*} opt:options:
- *  - nbmax : nb max of people (0 to disable)
- *  - distmax: max dist (expressed in lat/lng)  
- * @returns 
- */
-function findClosest(chan, lat,lng, opt) {
-  opt = opt || {};
-  let nbmax = opt.nbmax;
-  let distmax = opt.distmax; 
-  if (nbmax===undefined) nbmax = 5;
-  if (distmax===undefined) distmax = 5;
-  let t0 = new Date();
-
-  if ((lat === undefined) || (lng === undefined)) {
-    return [];
-  }
-
-  let pipeline = [];
-  let matchobj = {
-    latitude: { $exists: 1 },
-    longitude: { $exists: 1 },
-    country: { $exists: 1 },
-  };
-  matchobj[chan] = { $exists: 1 };
-
-  pipeline.push({
-    $match: matchobj
-  });
-
-  pipeline.push({
-    $project: {
-      dist: { $add: [{ $abs: { $subtract: ["$latitude", lat] } }, { $abs: { $subtract: ["$longitude", lng] } }] }
-    }
-  });
-  pipeline.push({
-    $sort: { dist: 1 }
-  });
-
-  if (nbmax>0) {
-    pipeline.push({
-      $limit: nbmax
-    });
-  }
-
-  let res = UserLocations.aggregate(pipeline);
-  let nc = [];
-  let rl = res.length;
-  if (nbmax>0 && rl > nbmax) rl = nbmax;
-  for (let i = 0; i < rl; i++) {
-    let cc = res[i];
-    if ((cc.dist < distmax) && (opt.uid != cc._id)) {
-      let u = UserLocations.findOne(cc._id);
-      if (u != undefined)
-        nc.push('@' + u.dname);
-    }
-  }
-  console.error(chan,lat,lng,opt,nbmax,distmax,nc);
-  // Store / cache
-  //  UserLocations.update(uid, { $set: { timestamp: t0, proximity: nc } });
-  return nc;
-}
-
-const selectQuestion = function () {
-  let pipeline = [];
-  let q;
-  //    if (mhid != undefined)
-  let p = Settings.findOne({ param: 'quizz_enabled_topics' });
-  //  console.error(p);
-  let sel = {
-    enabled: true
-  };
-
-  if ((p != undefined) && (p.val.length > 0))
-    sel.topics = { $in: p.val };
-  //  console.error(sel);
-  pipeline.push({
-    $match: sel
-  });
-  pipeline.push({
-    $sample: {
-      size: 1
-    }
-  });
-  let res = QuizzQuestions.aggregate(pipeline);
-  if (res.length > 0) {
-    q = res[0];
-    QuizzQuestions.update(q._id, { $set: { enabled: false } });
-  }
-  else {
-    console.warn("Quizz : Questions reset!");
-
-    // On réactive toutes les questions et on en reprend une au pif
-    QuizzQuestions.update({}, { $set: { enabled: true } }, { multi: true });
-    res = QuizzQuestions.aggregate(pipeline);
-    if (res.length > 0) {
-      let q = res[0];
-      QuizzQuestions.update(q._id, { $set: { enabled: false } });
-    }
-  }
-  curQuestion = q;
-  curQuestion.expAnswers = q.answers.split(';');
-  curQuestion.date = Date.now();
-  curQuestion.clue = 0;
-
-};
-
 
 
 
 Meteor.startup(() => {
-  // Add default bot channel with some options enabled
-  if (BotChannels.find().count() == 0) {
-    addChannel(botname, ["tr", "quizz", "map", "greet"]);
-  }
 
   init_users();
   init_quizz();
@@ -250,7 +102,7 @@ Meteor.startup(() => {
   initRaidManagement();
 //  init_radio();
   init_rss();
-
+  init_geocoding();
   /**
    * 
    * @param {*} chan : name of channel (low cases, without heading '#')
@@ -313,11 +165,6 @@ Meteor.startup(() => {
     }
   }, 10 * 1000);
 
-  // Counts questions
-  QuizzQuestions.find().observe({
-    added: function (doc) { numQuestions += 1; },
-    removed: function (doc) { numQuestions -= 1; }
-  });
 
   // ---------------- Methods ------------------
 
@@ -331,12 +178,6 @@ Meteor.startup(() => {
       sobj[ch] = { $exists: true };
       return UserLocations.find(sobj).count();
     },
-    'getNumQuestions': function () {
-      assertMethodAccess('getNumQuestions', this.userId);
-
-      return numQuestions;
-    },
-
   });
 
 
@@ -347,75 +188,6 @@ Meteor.startup(() => {
       return randSentence();
     }
   });
-
-  function checkLocations() {
-    let i = 60;
-
-    let item = UserLocations.findOne({ longitude: { $exists: 0 } });
-
-    // Is there a location not converted to geo positions?
-    if (item != undefined) {
-
-      // Check if there is already someone with the same location
-      let sameLoc = UserLocations.findOne({ location: item.location, latitude: { $exists: 1 } });
-      if (sameLoc) {
-        //        console.info('Found someone with same location: ', item.location, sameLoc);
-        // If it's the same, then do nothing :)
-        if (sameLoc._id != item._id) {
-          UserLocations.update(item._id, {
-            $set: {
-              latitude: sameLoc.latitude,
-              longitude: sameLoc.longitude,
-              country: sameLoc.country,
-            }
-          });
-        }
-        // We can check again very quickly
-        setTimeout(Meteor.bindEnvironment(checkLocations), 1000);
-      }
-      else {
-        // Use geoCoder API for convrerting
-        geoCoder.geocode(item.location).then(Meteor.bindEnvironment(function (res) {
-          let fres = { longitude: "NA" };
-          if (res.length > 0)
-            fres = res[0];
-
-          let upobj = {
-            latitude: parseFloat(fres.latitude),
-            longitude: parseFloat(fres.longitude),
-            country: fres.countryCode
-          };
-          UserLocations.update(item._id, { $set: upobj });
-
-          let p = Settings.findOne({ param: 'location_interval' });
-          if (p !== undefined) i = p.val;
-          if (i === undefined) i = 60;
-          // On limite le min/max
-          if (i > 60) i = 60;
-          if (i < 5) i = 5;
-          //        console.info('Next check in', i, 'seconds');
-          setTimeout(Meteor.bindEnvironment(checkLocations), i * 1000);
-
-        })).catch(Meteor.bindEnvironment(function (err) {
-          console.log(err);
-          i = 3600 * 5;
-          console.info('Error occured, next Verification in', Math.floor(i / 60), 'minutes');
-          setTimeout(Meteor.bindEnvironment(checkLocations), i * 1000);
-        }));
-      }
-
-    } else {
-      // Nothing to do, next Verification in 60 seconds;
-      setTimeout(Meteor.bindEnvironment(checkLocations), 60 * 1000);
-    }
-  }
-
-  //  Settings.remove({});
-
-
-
-  setTimeout(Meteor.bindEnvironment(checkLocations), 60 * 1000);
-
 
 
   // Channels management
@@ -535,62 +307,6 @@ Meteor.startup(() => {
   });
 
 
-  let bot_channels = BotChannels.find({ enabled: true }).fetch().map(i => i.channel);
-  console.info('Connecting to channels:', bot_channels);
-
-  let raid_bot_channels = BotChannels.find({ enabled: false, raids: true }).fetch().map(i => i.channel);
-  console.info('Connecting to channels for raid monitoring only:', raid_bot_channels);
-
-  // Connection to TWITCH CHAT
-  // Define configuration options
-  const opts = {
-    identity: {
-      username: botname,
-      password: botpassword,
-    },
-    channels: bot_channels,
-    connection: { reconnect: true }
-  };
-  // Create a client with our options
-  const bclient = new tmi.client(opts);
-
-  const opts_raid = {
-    identity: {
-      username: botname,
-      password: botpassword,
-    },
-    channels: raid_bot_channels,
-    connection: { reconnect: true }
-  };
-  //  opts.channels = raid_bot_channels;
-  const raid_bclient = new tmi.client(opts_raid);
-
-  // options
-  // dispname: name of the user to answer to
-  function say(target, txt, options) {
-    try {
-      options = options || {};
-
-      // Check if there is a {{ }} for Phrase it
-      if (txt.indexOf('{{') >= 0) {
-        txt = PhraseIt.make(txt);
-      }
-
-      let chat_txt = ((options.me === true) ? "/me " : "") + replaceKeywords(txt, options);
-      bclient.say(target, chat_txt);
-      console.info(target, '>', chat_txt, options);
-
-      if (options.store) {
-        // Overlay text doesn't contain twitch emotes
-        options.removeIcons = true;
-        let overlay_txt = replaceKeywords(txt, options);
-        BotMessage.upsert({ channel: target }, { $set: { txt: overlay_txt } });
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  }
-
   function sendSOGreetings(botchan, target, soname) {
     try {
 
@@ -674,22 +390,27 @@ Meteor.startup(() => {
   function onMessageHandler(target, context, msg, self) {
 
     if (self) { return; } // Ignore messages from the bot itself
+    /** Incoming message */
     let commandName = msg.trim();
-    // chan is the channel's name (without #)
+    /** chan is the channel's name (without #) */
     let chan = target.substring(1).toLowerCase();
-    // username uses lower cases only
+    /** username uses lower cases only */
     let username = context.username.toLowerCase();
-    // Displayed name
+    /** Displayed name */
     let dispname = context['display-name'].trim();
-
-    let isWhisper = (context['message-type'] === 'whisper');
-
+    /** is message a whisper? */
+    const isWhisper = (context['message-type'] === 'whisper');
+    /** Timestamp */
     let dnow = new Date();
+    // Log Message received
     console.info(dnow.toLocaleDateString(), dnow.toLocaleTimeString(), '#' + chan, '< [' + username + ']', commandName, isWhisper ? '[WHISPER]' : '');
 
+    // Check if it's a whisper
     if (isWhisper === true) {
-      console.info(target, context);
+      console.info('whisper', target, context);
       //mailRegex=RegExp()
+
+      // Detect one ore more mail addresses
       const regexmail=/^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
       let mail = msg.split(' ').filter((s)=> regexmail.test(s));
       if (mail.length>0) {        
@@ -706,16 +427,14 @@ Meteor.startup(() => {
 
       // TODO: remove the mail from the message, we don't need to post it on discord
       let title = 'Whisper ' + username + ' from ' + chan + ' : ' + msg;
-      //console.info(title);
       if (bot_discord_admincall_url) {
         sendDiscord(title, bot_discord_admincall_url);
         say(target, '#icon');
-        //bclient.whisper(username, "Ok, done");
       }
       return;
     }
 
-    // Name used for answering
+    /** Name used for answering (witt @ */
     let answername = '@' + dispname; //context['display-name'].trim();
 
     // get botchan object in DB
@@ -790,6 +509,7 @@ Meteor.startup(() => {
 
     let lccn = commandName.toLowerCase();
 
+    /** cmd, in low case, without "!" */
     let cmd = '';
 
     // Filter commands (options)
@@ -896,6 +616,32 @@ Meteor.startup(() => {
        }
      }
  */
+
+     // enable/disable features commands
+     if (isModerator) {
+       if ((cmd.indexOf('enable-')==0) ||  (cmd.indexOf('disable-')==0)) {
+          const encmd=cmd.split('-');
+          //console.error(chan, encmd);
+          if (encmd.length==2) {
+            
+            const feature = encmd[1];
+
+
+
+          if (['quizz', 'lyricsquizz', 'hug', 'map','greetings','so','tr'].indexOf(feature)<0) {
+            say(target,'Unknown feature '+ feature);
+            return;
+          }
+          
+          const en = (encmd[0]==='enable');
+          let set = {};
+          set[feature]=en;
+          console.error(chan, ': Setting ',set);
+          BotChannels.update(botchan._id,{$set:set});
+          say(target,en?'Enabling ':'Disabling "'+ feature+'" feature');
+        }
+      }
+    }
 
     // -------------HUG -----------------
     if (botchan.hug === true) {
@@ -1242,7 +988,6 @@ Meteor.startup(() => {
         if (pdoc === undefined) {
           if (botchan.lang==='FR') {
             say(target, "Désolé " + answername + " je ne connais pas votre localisation. Veuillez utiliser la commande !from au préalable!");
-
           }
           else
           say(target, "Sorry " + answername + " I don't have you location in my database. Please use '!from city,country' command first.");
@@ -1361,7 +1106,7 @@ Meteor.startup(() => {
         return;
       }
 
-      if (cmd === 'from' || cmd == 'place') {
+      if (cmd === 'from' ) {
         let geoloc = commandName.substring(5).trim();
         if (geoloc.length < 2) {
           if (botchan.lang==='FR') {
@@ -1467,33 +1212,43 @@ Meteor.startup(() => {
       }
     }
 
+    if (botchan.lyricsquizz === true) {
+      if (manageScoreCommands('lyricsquizz',chan, cmd,username, target, answername)===true) 
+        return;
+
+      if ((cmd.indexOf('start-quizz') == 0) || (cmd.indexOf('startquizz') == 0)) {
+        if (isModerator)
+          startLyricsQuizz(chan);
+      }
+
+      if ((cmd.indexOf('stop-quizz') == 0) || (cmd.indexOf('stopquizz') == 0)) {
+        if (isModerator)
+          stopLyricsQuizz(chan);
+      }
+
+      // clues...
+
+      const res =processWordLyricsQuizz(chan, commandName.toLowerCase(), username); 
+      if (res) {
+        if (res.titleFound===true) {
+            say(target, username+' has found the title!! Congrats!' );
+            
+            return;
+        }
+        else {
+            say(target, username+' has found "'+commandName+'" word, scoring '+res.points+' points! #icon' );
+            return;
+        }
+      }
+    }
+
+    // lyricsquizz and quizz should not be enabled at the same time
 
     if (botchan.quizz === true) {
+      let curQuestion = getCurQuestion(chan);
+      
+      if (manageScoreCommands('quizz',chan, cmd,username, target, answername)) return;
 
-      if (cmd.indexOf('scores') === 0) {
-        let s = QuizzScores.find({}, { limit: 3, sort: { score: -1 } });
-        if (s.count() < 3) return;
-        let sc = 'TTC Quizz Leaderboard: ';
-        s = s.fetch();
-        let a = ['1st', '2nd', '3rd'];
-        for (let i = 0; i < 3; i++) {
-          sc += a[i] + ': ' + s[i].user + ' (' + s[i].score + ' points) ';
-        }
-        say(target, sc);
-        return;
-      }
-
-      if (cmd.indexOf('score') === 0) {
-        let s = QuizzScores.findOne({ user: username });
-        let sc = 0;
-        if (s !== undefined) sc = s.score;
-
-        if (sc > 1)
-          say(target, answername + ', you have correctly answered to ' + sc + ' questions');
-        else
-          say(target, answername + ', you have correctly answered to ' + sc + ' question');
-        return;
-      }
 
       if ((cmd.indexOf('clue') == 0) || (cmd.indexOf('help') == 0)) {
         if (curQuestion === undefined) {
@@ -1615,7 +1370,7 @@ Meteor.startup(() => {
           curQuestion = undefined;
           // Incrémente le score
           try {
-            QuizzScores.upsert({ user: username }, { $inc: { score: 1 } });
+            QuizzScores.upsert({ chan:chan, type:'quizz', user: username }, { $inc: { score: 1 } });
           }
           catch (e) {
             console.error(e);
@@ -1738,7 +1493,7 @@ Meteor.startup(() => {
           if (isModerator) {
 
             if (res.count() === 0) {
-              say(target, "There's nobody from team  '+t +' we could raid right now...");
+              say(target, "There's nobody from team '+t +' we could raid right now...");
               return;
             }
 
@@ -1791,27 +1546,39 @@ Meteor.startup(() => {
         if (botchan.muteGreet === true)
           return;
 
-        let gmtext = getGreetMessages(username, chan);
+        // Special case if username==chan
+        if (username===chan) {
+          greetingsStack.push({
+            target: target,
+            txt: 'hey boss #atname! #icon',
+            me: (botchan.me === true),
+            dispname: dispname
+          });
+          return;
 
+
+        }
+       let gmtext= getGreetMessages(username, chan);
+ 
         let r = -1;
         // Check if user in in greet database or in the map
         // Pick up randomly a message
         // If user is in both databases, 
         // - select generic message in 20% of the cases, and a personalized message in 80% of the cases
 
-        let selGenSentence = true;
+        let useMapSentence = true;
         if (gmtext.length > 0) {
           if (u != undefined) {
             r = Math.random();
             if (r < 0.8)
-              selGenSentence = false;
+              useMapSentence = false;
           }
           else
-            selGenSentence = false;
+            useMapSentence = false;
         }
 
         // Generic Sentence (based on map)
-        if (selGenSentence === true) {
+        if (useMapSentence === true) {
           if (u) {
             // default language
             let lang = 'EN';
@@ -1855,14 +1622,16 @@ Meteor.startup(() => {
           }
         }
 
+        console.info('socmd=', botchan.socmd, 'useMapSentence=', useMapSentence, 'gmtext=', gmtext);
+
         if (gmtext.length > 0) {
-          // TODO: Filtrer les textes désactivés (enabled)
+          // TODO: Filter out disables texts 
           let txt = randElement(gmtext).txt;
           //console.error(gm.texts,txt);
 
           //txt = replaceKeywords(txt, {dispname:dispname});
 
-          if ((selGenSentence == false) && botchan.socmd) {
+          if ((useMapSentence == false) && !_.isEmpty(botchan.socmd)) {
             // Vérifier qu'il y a un #twitch dans la phrase? permet de filtrer ce qui n'est pas !so
             // Sinon on ne fait rien
             if (txt.indexOf('#twitch') >= 0) {
@@ -1873,10 +1642,11 @@ Meteor.startup(() => {
           else
             txt = txt.replace(regext, "https://twitch.tv/" + username + ' ');
 
+
           greetingsStack.push({
             target: target,
             txt: txt,
-            me: (botchan.me === true && selGenSentence === false),
+            me: (botchan.me === true && useMapSentence === false),
             dispname: dispname
           });
           return;
@@ -1924,6 +1694,9 @@ Meteor.startup(() => {
       console.info(target, context);
     }
 
+
+
+
     // Check if the message is for the bot     
     if ((lccn.indexOf('@' + botname) >= 0)) //|| ((lccn.indexOf('tangerinebot') >= 0)) ((lccn.indexOf('ttcbot') >= 0)) || ((lccn.indexOf('tangerine bot') >= 0))) {
     {
@@ -1960,7 +1733,9 @@ Meteor.startup(() => {
         ':D :D :D ',
         ':) :) :) ',
         '#icon #icon #icon',
-        'I try to do my best :D'
+//        'I try to do my best :D'
+        'beep beep boop ',
+        'beep boop! beep beep boop'
       ];
 
       if (lccn.indexOf('?') >= 0) {
@@ -2101,7 +1876,7 @@ Meteor.startup(() => {
       let bc = BotChannels.findOne({ channel: chan });
       if (bc?.manageban === true) {
 
-        let notif = username + ' has been banned from ' + chan + ' channel.';
+        let notif = '**' + username + '** has been banned from **' + chan + '** channel.';
         // we don't know the name of the mod who banned, even as a moderator, obviously for security reasons
         let bo = { chan: chan , date: Date.now()};  // We keep track of dates, so we can remove users after a while (removes accounts...)
         let update_obj = { lang: false };
@@ -2113,17 +1888,15 @@ Meteor.startup(() => {
         if (gu) {
           if (gu.ban) {
             banlist = gu.ban;
-            // Do we have to check if the user is not already banned in this channel?
             let chans = banlist.map((item) => item.chan);
             if (chans.indexOf(chan) < 0) {
-              notif += 'They have already been banned from the following channels:' + chans.join(',');
-
+              notif += 'They have already been banned from ' + chans.length+ ' channels';
               banlist.push(bo);
 
               // TODO: add an option for automatic trigger
 
               if (bc.autoban === true && banlist.length >= 3) {
-                notif += ' Which means they will be added to ultimate ban list... Which means they will be automatically banned on every channel with ultimate ban feature enabled.';
+                notif += ' : they will be added to ultimate ban list.';
                 update_obj.autoban = true;
               }
             }

@@ -1,24 +1,11 @@
 import './overlays.html';
 import { BotMessage } from '../api/collections';
 import { ReactiveVar } from 'meteor/reactive-var';
+import { decodecolor } from './tools';
 
 // http://nicolasgallagher.com/pure-css-speech-bubbles/demo/
 
-// Decode color query param. If no param, use default color
-// r,g,b   => rgb(r,g,b)
-// r,g,b,a => rgba(r,g,b,a)
-// otherwise accepts a stadard color name (white,...)  
-function decodecolor(param, defaultcol) {
-    const col = FlowRouter.getQueryParam(param);
-    if (!col) return defaultcol;
 
-    const nv = col.split(',').length;
-    if (nv===3)
-        return "rgb(" + col + ")";
-    if (nv===4)
-        return "rgba(" + col + ")";
-    return col;
-}
 
 Template.GreetingsOverlay.onCreated(function () {
     let c = '#' + FlowRouter.getParam('chan');
@@ -37,11 +24,9 @@ Template.GreetingsOverlay.helpers({
         let c = '#' + FlowRouter.getParam('chan');
         const msg = BotMessage.findOne({ channel: c });
 
-        let text = "Hello!";
-        if (msg && msg.txt) {
-            text = msg.txt;
-        }
-
+        let text = "?";
+        text = msg?.txt;
+        
         let els = document.getElementsByName('lastMessageCaption');
         els.forEach((el) => {
             el.classList = " overlay overlay-fade ";

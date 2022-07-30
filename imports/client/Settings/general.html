@@ -1,0 +1,294 @@
+<template name="GeneralSettings">
+  {{#let c=getChannel}}
+
+  <datalist id="imagelist">
+    {{#each i in iconnames}}
+    <option value="{{i}}"></option>
+    {{/each}}
+    <option value="/default.png"></option>
+    <option value="/favicon-32.png"></option>
+  </datalist>
+  
+  <h2>General Settings</h2>
+    
+    {{#if c.live}}
+    Currently LIVE - {{c.title}} - {{c.started_at}}
+    {{/if}}
+  
+    <table class="pure-table" id="{{c._id}}">
+      {{#unless c.suspended}}
+    
+        {{>SettingsSection n="enabled" c=c label="Bot Active in Chat"}}
+  
+        {{#if c.enabled}}
+        <tbody>
+        {{>SettingsParam param="lang" name="BOT Language" c=c}}
+        </tbody>
+        {{/if}}
+  
+        {{>SettingsSection n="tr" c=c label="Translation"}}
+        {{>SettingsSection n="hug" c=c label="Hugs"}}
+        <tbody>
+          {{#if c.hug}}
+          <tr>
+            <td>
+              <div class="settings_item">
+                Comma separated Keyword list
+                <br>(optional, keywords must be prefixed by 'a' or 'an')
+              </div>
+            </td>
+            <td colspan="2">
+              <textarea rows="4" class="chanSettings" name="hug_adjectives">{{c.hug_adjectives}}</textarea>
+            </td>
+          </tr>
+          {{/if}}
+        </tbody>
+  
+        {{>SettingsSection n="map" c=c label="Map" link=(getlink c "map") linklabel="&#9732;"}}
+      <tbody>
+  
+        {{#if c.map}}
+        <tr>
+          <td>
+            <div class="settings_item">
+              Standard icon:
+            </div>
+          </td>
+          <td>
+            <input class="chanSettings" value="{{c.map_icon_std}}" list="imagelist" name="map_icon_std">
+          </td>
+          <td>
+            <img src="{{getIcon c.map_icon_std}}">
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div class="settings_item">
+              Name icon:
+            </div>
+          </td>
+          <td>
+            <input class="chanSettings" value="{{c.map_icon_name}}" list="imagelist" name="map_icon_name">
+          </td>
+          <td>
+            <img src="{{getIcon c.map_icon_name}}">
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <div class="settings_item">
+              Message icon:
+            </div>
+          </td>
+          <td>
+            <input class="chanSettings" value="{{c.map_icon_msg}}" list="imagelist" name="map_icon_msg">
+          </td>
+          <td>
+            <img src="{{getIcon c.map_icon_msg}}">
+          </td>
+        </tr>
+        {{/if}}
+      </tbody>
+  
+  
+  
+      {{>SettingsSection n="greet" c=c label="Greetings"}}
+      <tbody>
+        {{#if c.greet}}
+        {{>SettingsBoolParam name="use /me prefix" param="me" c=c}} 
+
+        <tr>
+          <td>Mute</td>
+          <td colspan="2">{{>CheckMark b=c.muteGreet n="muteGreet"}}</td>
+        </tr>
+        {{/if}}
+      </tbody>
+  
+      {{>SettingsSection n="irlevents" c=c label="IRL Events Management"}}
+  
+      {{#if c.irlevents}}
+      <tbody>
+  
+      </tbody>
+      {{/if}}
+  
+  
+      {{>SettingsSection n="songrequest" c=c label="Song Requests Detection"}}
+      {{#if c.songrequest}}
+      <tbody>
+        <tr>
+          <td> 
+            <div class="settings_item">
+              RegExp 1 
+            </div>
+          </td>
+          <td colspan="2"> <input type="text" value="{{c.requestregex1}}" class="chanSettings" name="requestregex1"> </td>
+        </tr>
+  
+        <tr>
+          <td> 
+            <div class="settings_item">
+              RegExp 2 
+            </div>
+          </td>
+          <td colspan="2"> <input type="text" value="{{c.requestregex2}}" class="chanSettings" name="requestregex2"> </td>
+        </tr>
+      </tbody>
+      {{/if}}
+  
+  
+      {{>SettingsSection n="discord" c=c label="Going Live Notifications"}}
+      {{#if c.discord}}
+      <tbody>
+        {{>SettingsTextParam c=c name="Going LIVE Hook Channel URL (@everyone})" param="discord_goinglive_url1" }}
+        {{>SettingsTextParam c=c name="Going LIVE Hook Team URL" param="discord_goinglive_url2" }}
+        {{>SettingsTextParam c=c name="Going LIVE Hook SO URL" param="discord_goinglive_url3" }}
+      </tbody>
+      {{/if}}
+   
+  
+      {{>SettingsSection n="raids" c=c label="Monitor Raids"}}   
+      {{#if c.raids}}
+      <tbody>
+      {{>SettingsTextParam name="RAID Channel Hook URL" param="discord_raid_url" c=c}}
+      {{>SettingsBoolParam name="Auto SO after raid" param="raid_auto_so" c=c}}
+      </tbody>
+      {{/if}}
+  
+      {{>SettingsSection n="generator" c=c label="Chord generator"}}   
+      {{>SettingsSection n="detectso" c=c label="Monitor !SO"}}   
+      
+      {{#if c.detectso}}
+      <tbody>
+        <tr>
+          <td>
+            Discord Notification
+          </td>
+          <td colspan="2">
+            <textarea rows="4" class="chanSettings" name="discord_so_url">{{c.discord_so_url}}</textarea>
+          </td>
+        </tr>
+      
+        <tr>
+          <td>
+            Store !so Commands:
+          </td>
+          <td colspan="2">
+            {{>CheckMark b=c.storeso n="storeso"}}
+            <input type="text" value="{{c.storeso_label}}" class="chanSettings" name="storeso_label">
+          </td>
+        </tr>
+
+        {{>SettingsBoolParam name="Catch !so Cmd:" param="so" c=c}}
+         <tr>
+          <td>
+            Send Shoutout Cmd:
+          </td>
+          <td colspan="2">
+            <input type="text" value="{{c.socmd}}" class="chanSettings" name="socmd">
+          </td>
+        </tr>
+        {{>SettingsBoolParam name="Not Greeted:" param="notgreeted" c=c}} 
+      </tbody>
+      {{/if}}
+  
+      {{>SettingsSection n="manageban" c=c label="Manage Ban"}}     
+      {{#if c.manageban}}
+      <tbody>
+        {{>SettingsBoolParam name="Discord Notification" param="notifban" c=c}} 
+        {{>SettingsBoolParam name="Allow Ultimate Ban Command" param="autobancmd" c=c}} 
+        {{>SettingsBoolParam name="Enable Ultimate Ban" param="autoban" c=c}} 
+      </tbody>
+      {{/if}}
+
+      {{>SettingsSection n="lyricsquizz" c=c label="Lyrics Quizz"}}     
+
+
+      {{>SettingsSection n="quizz" c=c label="Quizz"}}     
+     
+      {{>SettingsSection n="active_users" c=c label="Active Users"}}     
+      {{#if c.active_users}}
+      <tbody>
+        <tr>
+          <td>
+            Active since (minutes)
+          </td>
+          <td colspan="2">
+            <input class="chanSettings" type="number" value="{{c.active_since}}" name="active_since">
+          </td>
+        </tr>
+        <tr>
+          <td>
+            Max number of people displayed
+          </td>
+          <td colspan="2">
+            <input class="chanSettings" type="number" value="{{c.active_max}}" name="active_max">
+          </td>
+        </tr>      
+        {{>SettingsBoolParam name="Only Mods" param="active_mods" c=c}} 
+      </tbody>
+      {{/if}}
+  
+      {{>SettingsSection n="commands" c=c label="Commands" link="commands"}}     
+      <a href="/c/{{c.commands}}">&#9732; </a>
+
+  
+      {{>SettingsSection label="Team"}}
+      <tbody>
+        <tr>
+          <td>
+            Main Team
+          </td>
+          <td colspan="2">
+            <input type="text" value="{{c.team}}" class="chanSettings" name="team">
+          </td>
+  
+        </tr>
+
+        {{>SettingsBoolParam name="Advert team" param="advertteam" c=c}}   
+
+        <tr>
+          <td>
+            Team message (shared on every channel)
+          </td>
+          <td colspan="2">
+            <textarea cols="40" rows="4" class="settings" name="team-{{c.team}}">{{getTeamParamVal c.team}}</textarea>
+          </td>        
+        </tr>
+  
+      </tbody>
+  
+      {{/unless}} <!-- suspended -->
+  
+
+      {{>SettingsSection n="suspended" label="Suspend Account" c=c}}  
+      {{#if c.suspended}}
+      <tr>
+        <td>
+          <div class="settings_item">
+            Reason why account has been suspended:
+          </div>
+        </td>
+        <td colspan="2">
+          <textarea rows="4" class="chanSettings" name="suspended_reason">{{c.suspended_reason}}</textarea>
+        </td>
+      </tr>
+      {{/if}} <!-- suspended-->
+   
+      <br>
+      <tr>
+        <td>
+          <div class="settings_item">
+            Debug</div>
+        </td>
+        <td colspan="2">
+          <textarea rows="16" >{{stringify c}}</textarea>
+        </td>
+      </tr>
+
+    </table>
+    {{/let}}
+
+  </template>
+  
+  
