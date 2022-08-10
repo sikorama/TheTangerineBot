@@ -13,7 +13,7 @@ export function buildRSSFeed(chan) {
     if (!lastso)
         return;
 
-    console.info('lastso=', lastso);
+    //console.info('lastso=', lastso);
 
     let feed = new RSS({
         title: 'Twitch-Finds',

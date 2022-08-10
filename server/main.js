@@ -6,26 +6,26 @@
 
 import { Meteor } from 'meteor/meteor';
 import { AccountsTemplates } from 'meteor/useraccounts:core';
-import { BotChannels, GreetDate, GreetMessages, QuizzQuestions, QuizzScores, Raiders, Settings, ShoutOuts, Stats, UserLocations, LiveEvents, BotMessage } from '../imports/api/collections.js';
+import { BotChannels, GreetDate, GreetMessages, LiveEvents, QuizzScores, Raiders, Settings, ShoutOuts, Stats, UserLocations } from '../imports/api/collections.js';
 import { regext } from '../imports/api/regex.js';
-import { addChannel } from './channels.js';
 import { genChord, genProgression, noteArray } from './chords.js';
-import { country_lang, patterns } from './const.js';
-import { getGreetMessages, init_greetings, replaceKeywords } from './greetings.js';
+import { country_lang } from './const.js';
+import { getGreetMessages, init_greetings } from './greetings.js';
 import { checkLiveChannels, sendDiscord } from './notifications.js';
 import { init_publications } from './publications.js';
 import { getCurQuestion, init_quizz, selectQuestion } from './quizz.js';
 //import { init_radio } from './radio.js';
-import { init_rss } from './rss.js';
+import { tr_lang_alias,tr_lang_desc } from '../imports/api/languages.js';
 import { initRaidManagement } from './raids.js';
+import { init_rss } from './rss.js';
 import { randElement, randSentence } from './tools.js';
-import { init_users,assertMethodAccess } from './user_management.js';
-import { tr_lang } from '../imports/api/languages.js';
+import { assertMethodAccess, init_users } from './user_management.js';
 
-import { processWordLyricsQuizz, startLyricsQuizz, stopLyricsQuizz } from './lyricsquizz';
-import { say, connect_chat, init_client, connect_raid } from './client.js';
+import { connect_chat, connect_raid, init_client, say } from './client.js';
 import { findClosest, init_geocoding, userfindClosest } from './geocoding.js';
+import { processWordLyricsQuizz, startLyricsQuizz, stopLyricsQuizz } from './lyricsquizz';
 import { manageScoreCommands } from './scores.js';
+import { twitch_finds_on,twitch_finds_off } from './twitchfinds.js';
 const gtrans = require('googletrans').default;
 //const gc = require('node-geocoder');
 
@@ -862,18 +862,27 @@ Meteor.startup(() => {
 
       //console.error(username, autotr);
 
-      if (cmd in tr_lang || autotr) {
+      if (cmd in tr_lang_alias || cmd in tr_lang_desc || autotr) {
+        // default land code
+        let lc = 'en';
 
-        let ll = tr_lang.en;
+        //alias        
+        if (cmd in tr_lang_alias) 
+        lc  = tr_lang_alias[cmd];
+        
+        if (cmd in tr_lang_desc) 
+          lc  = cmd;
+
+        let ll=tr_lang_desc[lc];
+        
         // Remove some words (emotes for example)
         let txt = commandName.replace(/ LUL/g, '');
-
+        
+        // Remove command if not auto translating
         if (!autotr) {
-          ll = tr_lang[cmd];
-          // Remove command
           txt = txt.substring(1 + cmd.length);
         }
-
+        
         //console.error(ll);
 
         // TODO: remove Urls too
@@ -895,7 +904,7 @@ Meteor.startup(() => {
           }
 
           // Translate text
-          gtrans(txt, { to: ll[0] }).then(res => {
+          gtrans(txt, { to: lc }).then(res => {
             if (lazy === true) {
               // Lazy message in english & target language
               say(target, context['display-name'] + ', ' + txt + '/' + res.text);
@@ -917,7 +926,7 @@ Meteor.startup(() => {
                 return;
               }
 
-              say(target, context['display-name'] + ' ' + ll[1] + ': ' + res.text);
+              say(target, context['display-name'] + ' ' + ll.says + ': ' + res.text);
             }
           }).catch(err => {
             console.error('Translation Error:', err);
@@ -1380,6 +1389,8 @@ Meteor.startup(() => {
       }
     }
 
+
+
     // ---------- catch !so command by moderators
     // For sending a discord notification, and storing in database or simply greet
     if (isModerator === true && (botchan.detectso === true)) {
@@ -1394,25 +1405,18 @@ Meteor.startup(() => {
         }
 
         if (label.toLowerCase() === 'off') {
+          twitch_finds_off(chan);
           say(target, 'Shoutout monitoring is now off');
-          try {
-
-            // Sending a discord notification with all so with the current label
-            if (botchan.discord_so_url) {
-              let l = botchan.storeso_label;
-              const sos = ShoutOuts.find({ label: l }, { sort: { timestamp: 1 } }).fetch().map(element => element.so);
-              const title = 'Twitch Finds ' + l;
-              let msg = title + '\n```\n' + sos.join('\n') + '```';
-              console.info(msg);
-              sendDiscord(msg, botchan.discord_so_url);
-            }
-          } catch (e) {
-            console.error(e);
-          }
         }
         else {
+          // ON
+          // Check if already 'on', then start a new one
           say(target, 'Shoutout monitoring is now enabled, using label ' + label + '. Use "!' + cmd + ' off" to disable it.');
+          twitch_finds_on(chan,label);
+          // Timeout
+          //tfofftimer[chan] = Meteor.setTimeout(twitchfinds_off.bind(), 1000*60*70);
         }
+
         BotChannels.update(botchan._id, { $set: { storeso_label: label } });
         return;
       }
@@ -1870,13 +1874,18 @@ Meteor.startup(() => {
   }
 
   function onBanHandler(channel, username, reason, userstate) {
+    let notif='';
     try {
       // TODO: only available if manageban is enabled?
       let chan = channel.substring(1).toLowerCase();
       let bc = BotChannels.findOne({ channel: chan });
       if (bc?.manageban === true) {
 
-        let notif = '**' + username + '** has been banned from **' + chan + '** channel.';
+        // Only if channel is live?
+        if (bc.live) {
+
+
+        notif = '**' + username + '** has been banned from **' + chan + '** channel.';
         // we don't know the name of the mod who banned, even as a moderator, obviously for security reasons
         let bo = { chan: chan , date: Date.now()};  // We keep track of dates, so we can remove users after a while (removes accounts...)
         let update_obj = { lang: false };
@@ -1894,7 +1903,6 @@ Meteor.startup(() => {
               banlist.push(bo);
 
               // TODO: add an option for automatic trigger
-
               if (bc.autoban === true && banlist.length >= 3) {
                 notif += ' : they will be added to ultimate ban list.';
                 update_obj.autoban = true;
@@ -1907,9 +1915,10 @@ Meteor.startup(() => {
         if (bc.notifban === true && discord_autoban_url)
           sendDiscord(notif, discord_autoban_url);
 
-        console.log('[BAN]', notif, JSON.stringify(userstate), reason);
+          GreetMessages.upsert({ username: username }, { $set: update_obj });
+        }
 
-        GreetMessages.upsert({ username: username }, { $set: update_obj });
+        console.log('['+(bc.live?'LIVE':'')+'BAN]', notif, JSON.stringify(userstate), reason);
 
       }
 

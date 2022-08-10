@@ -1,4 +1,4 @@
-import { BotChannels, Settings, LiveEvents } from '../imports/api/collections';
+import { BotChannels, Settings, LiveEvents, ShoutOuts } from '../imports/api/collections';
 
 let httpreq = require('httpreq');
 
@@ -275,3 +275,5 @@ function sendRocket: function (title, text, icon, title_link, channel, additiona
     }
   },
 */
+
+

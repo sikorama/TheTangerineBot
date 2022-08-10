@@ -150,10 +150,11 @@ export function init_greetings() {
  * 
  * Get greet message, for !so commands, or when a viewers enters the chat
  * User must not be banned anywhere
+ * special case if chan==username
  * 
  * @param {*} username : low case name
  * @param {*} chan : channel (without heading #)
- * @returns 
+ * @returns an array of strings
  */
 export function getGreetMessages(username, chan) {
   try {
@@ -164,7 +165,7 @@ export function getGreetMessages(username, chan) {
     //  console.info('getGreetMessage - username=', username, 'chan=', chan);
     //  console.info('getGreetMessage - gm=', gm);
 
-    // Keeps only enabled messaes for this channel
+    // Keeps only enabled messages for this channel
     if (gm != undefined && gm.texts!=undefined) {
       gmtext = gm.texts.filter((item) => {
         // console.info('getGreetMessage - item=', item);
