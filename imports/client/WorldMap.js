@@ -1,25 +1,26 @@
-import './WorldMap.html';
+import { options } from 'httpreq';
 import { Session } from 'meteor/session';
-import { checkUserRole } from '../api/roles.js';
 import { BotChannels, Images, UserLocations } from '../api/collections.js';
-import { getParentId, manageSearchEvents } from './tools.js';
+import { checkUserRole } from '../api/roles.js';
+import { manageSearchEvents } from './tools.js';
+import './WorldMap.html';
 
 const L = require('leaflet');
 let circle;
 let circledrag;
-
+let centeredOnBroadcaster = false;
 // ---------------------------
 
-
+/*
 Template.WorldMap.onCreated(function () {
 
 });
-
+*/
 
 Template.WorldMap.onRendered(function () {
 
   const template = this;
-
+  centeredOnBroadcaster = false; // non reactive
   // Get URL parameters
   let searchOptions = {
     activeSince: true,
@@ -39,11 +40,45 @@ Template.WorldMap.onRendered(function () {
   this.s1 = this.subscribe('images');
 
   // Create Map
-  let mymap = L.map('map').setView([51.505, -0.09], 2);
-//  mymap.on('click', onMapClick);
+  let mymap = L.map('map', {
+    //worldCopyJump: 1,  // No need, as we handle manually keeping markers on the map
+    minZoom: 1,
+  });
+
+  // TODO: start centered on broadcaster's location
+  mymap.setView([60, -0.09], 2);
+
+
+  let markers = {};
+  //  mymap.on('click', onMapClick);
   mymap.on('mousedown', onMapMouseDown);
   mymap.on('mouseup', onMapMouseUp);
   mymap.on('mousemove', onMapMouseMove);
+
+  // Keep markers on central & visible map when map is scrolled
+  mymap.on('moveend', (event) => {
+    let longshift = mymap.getCenter().lng - 180;
+    Object.keys(markers).forEach((m) => {
+      {
+        try {
+
+          const mk = markers[m];
+          const latlng = mk._latlng;
+          let lng = latlng.lng;
+          if (lng < longshift) lng += 360;
+          else {
+            if (lng > longshift + 360) lng -= 360;
+            else return;
+          }
+          latlng.lng = lng;
+          mk.setLatLng(latlng);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    });
+
+  });
 
   let layer;
 
@@ -62,18 +97,15 @@ Template.WorldMap.onRendered(function () {
   function onZoomstart(event) { mymap.closePopup(); }
   mymap.on('zoomstart', onZoomstart);
 
-  let markers = {};
+  //const isAdmin = checkUserRole(['admin', 'streamer']);
 
-  const isAdmin = checkUserRole(['admin', 'streamer']);
-  //this.subscribe('UserLocations', function () {
-  let now = Date.now();
+  const now = Date.now();
 
   function onClick(event) {
     let marker = event.target;
     const rid = marker.data;
 
     // ctrl+click => got to viewers page?
-
     template.subscribe('userLocation', { _id: rid }, { limit: 1 }, () => {
       const ul = UserLocations.findOne({ _id: rid });
       if (ul.allow && ul.streamer)
@@ -90,159 +122,155 @@ Template.WorldMap.onRendered(function () {
       }
 */
 
-function onMapMouseUp(event) {
+  function onMapMouseUp(event) {
 
-  mymap.dragging.enable();
-  
-  if (circledrag!==true)
-    return;
+    mymap.dragging.enable();
 
-  circledrag=false;
-  
-  
-  const chan = Session.get('sel_channel');
-  if (!chan) return;
+    if (circledrag !== true)
+      return;
 
-  if (!circle) return;
-  //console.error(circle);
-
-  // get users in area
-  //let center = circle._latlng
-  //let radius= circle._latlng.distanceTo(event.latlng);
-  
-  const clat = circle._latlng.lat;
-  const clng = circle._latlng.lng;
-  const dlat = event.latlng.lat - clat;
-  const dlng = event.latlng.lng - clng;
-  let radius;
-  if ((dlat==0) && (dlng==0)) {
-    // initial circle
-    radius= 0.8;  // Approx 80km
-  }
-  else {
-    // Euclidian distance
-    //radius = Math.sqrt(dlat *dlat + dlng * dlng);
-    radius = Math.abs(dlat) + Math.abs(dlng);
-  }
-  console.error(radius);
-
-  Meteor.call('getClosestUsers', chan, clat,clng, {nbmax:0, distmax:radius}, function(err,res){
-    console.error(res);
-    // Popup
-    if (!_.isEmpty(res))
-      alert('Utilisateurs trouvés: '+ res.join(','));
-  });
-}
+    circledrag = false;
 
 
+    const chan = Session.get('sel_channel');
+    if (!chan) return;
 
-function onMapMouseMove(event)  {
-  if (circledrag) 
-  if (circle) {
-    // Center
-  let d = circle._latlng.distanceTo(event.latlng);
-      circle.setRadius(d);
-  }
-}
+    if (!circle) return;
+    //console.error(circle);
 
-function onMapMouseDown(event) {
-  if (event.originalEvent.ctrlKey) {
-    if (circle)
-      circle.removeFrom(mymap);
+    // get users in area
+    //let center = circle._latlng
+    //let radius= circle._latlng.distanceTo(event.latlng);
 
-    circledrag = true;
-    circle = L.circle(event.latlng,{radius: 80000}).addTo(mymap);
-
-    mymap.dragging.disable();
-  } 
-}
-
-function onMouseOver(event) {
-  let marker = event.target;
-  //let position = marker.getLatLng();
-  let lp = event.layerPoint;
-  lp.y -= 16;
-  let nlp = mymap.layerPointToLatLng(lp);
-
-  const rid = marker.data;
-  //console.error("rid=",rid);
-
-  let chan = Session.get('sel_channel');
-  if (!chan) return;
-
-  const songreqfield = chan + '-lastreq';
-  const msgfield = chan + '-msg';
-
-  // add fields
-  template.subscribe('userLocation', { _id: rid }, { limit: 1 }, () => {
-
-    const ul = UserLocations.findOne({ _id: rid });
-    //console.error(ul);
-    if (!isNaN(ul.latitude)) {
-      let txt = '';
-
-      // either dname or mapname are available.
-      // dname if admin, mapname otherwise, if allow===true            
-      let uname = ul.dname;
-      if (!uname) uname=ul.mapname;
-
-      let badge = '';
-      if (ul.streamer) badge = " &#9732;";
-
-      if (uname !== undefined) {
-        txt = '<strong>' + badge + uname + '</strong>';
-
-        // Message?
-        if ((ul[msgfield] != undefined) && (ul[msgfield].length > 0)) {
-          if (txt.length > 0)
-            txt += '<br>';
-          txt += ul[msgfield];
-        }
-
-        // Song request
-        if (ul[songreqfield]) {
-          if (txt.length > 0)
-            txt += '<br>&#9835; "' + ul[songreqfield] + " &#9835;";
-        }
-
-        // ... add more info
-        
-        //let popup = 
-        L.popup()
-          .setLatLng(nlp, { draggable: 'false' })
-          .setContent(txt)
-          .openOn(mymap);
-      
-      }
-
-      // TODO OPTIM:unsubscribe?
-
+    const clat = circle._latlng.lat;
+    const clng = circle._latlng.lng;
+    const dlat = event.latlng.lat - clat;
+    const dlng = event.latlng.lng - clng;
+    let radius;
+    if ((dlat == 0) && (dlng == 0)) {
+      // initial circle
+      radius = 0.8;  // Approx 80km
     }
-  });
+    else {
+      // Euclidian distance
+      //radius = Math.sqrt(dlat *dlat + dlng * dlng);
+      radius = Math.abs(dlat) + Math.abs(dlng);
+    }
+    console.error(radius);
 
-  // console.error(event,this);
-}
+    Meteor.call('getClosestUsers', chan, clat, clng, { nbmax: 0, distmax: radius }, function (err, res) {
+      console.error(res);
+      // Popup
+      if (!_.isEmpty(res))
+        alert('Utilisateurs trouvés: ' + res.join(','));
+    });
+  }
 
+  function onMapMouseMove(event) {
+    if (circledrag)
+      if (circle) {
+        // Center
+        let d = circle._latlng.distanceTo(event.latlng);
+        circle.setRadius(d);
+      }
+  }
+
+  function onMapMouseDown(event) {
+    if (event.originalEvent.ctrlKey) {
+      if (circle)
+        circle.removeFrom(mymap);
+
+      circledrag = true;
+      circle = L.circle(event.latlng, { radius: 80000 }).addTo(mymap);
+
+      mymap.dragging.disable();
+    }
+  }
+
+  function onMouseOver(event) {
+    let marker = event.target;
+    //let position = marker.getLatLng();
+    let lp = event.layerPoint;
+    lp.y -= 16;
+    let nlp = mymap.layerPointToLatLng(lp);
+
+    const rid = marker.data;
+    //console.error("rid=",rid);
+
+    let chan = Session.get('sel_channel');
+    if (!chan) return;
+
+    const songreqfield = chan + '-lastreq';
+    const msgfield = chan + '-msg';
+
+    // add fields
+    template.subscribe('userLocation', { _id: rid }, { limit: 1 }, () => {
+
+      const ul = UserLocations.findOne({ _id: rid });
+      //console.error(ul);
+      if (!isNaN(ul.latitude)) {
+        let txt = '';
+
+        // either dname or mapname are available.
+        // dname if admin, mapname otherwise, if allow===true            
+        let uname = ul.dname;
+        if (!uname) uname = ul.mapname;
+
+        let badge = '';
+        if (ul.streamer) badge = " &#9732;";
+
+        if (uname !== undefined) {
+          txt = '<strong>' + badge + uname + '</strong>';
+
+          // Message?
+          if ((ul[msgfield] != undefined) && (ul[msgfield].length > 0)) {
+            if (txt.length > 0)
+              txt += '<br>';
+            txt += ul[msgfield];
+          }
+
+          // Song request
+          if (ul[songreqfield]) {
+            if (txt.length > 0)
+              txt += '<br>&#9835; "' + ul[songreqfield] + " &#9835;";
+          }
+
+          // ... add more info
+
+          //let popup = 
+          L.popup()
+            .setLatLng(nlp, { draggable: 'false' })
+            .setContent(txt)
+            .openOn(mymap);
+
+        }
+
+        // TODO OPTIM:unsubscribe?
+
+      }
+    });
+
+    // console.error(event,this);
+  }
 
   const updateMap = ((cursor, chan, options) => {
     options = options || {};
 
     let newmarkers = {};
     //  const chan = Session.get('sel_channel');
-    console.info('Update Map,  Channel = ', chan);
+    if (Meteor.isDevelopment)
+      console.info('Update Map,  Channel = ', chan);
 
-    // Multiple subscriptions
     this.subscribe('botChannels', { channel: chan }, function () {
       let p = BotChannels.findOne({ channel: chan });
-      //console.info('channel', p)
 
-      // Check if channel does exist
+      // Check if channel does exist, otherwise go back home
       if (!p) {
         FlowRouter.go('/');
         return;
       }
 
-      // Check if map feature is enabled
+      // Check if map feature is enabled, otherwise go back home
       if (!p.map) {
         FlowRouter.go('/');
         return;
@@ -250,6 +278,8 @@ function onMouseOver(event) {
 
       //        return ul[chan+'-lastreq'];
       const msgfield = chan + '-msg';
+      let longshift = mymap.getCenter().lng - 180;
+
 
       let ic;
       if (p)
@@ -286,8 +316,8 @@ function onMouseOver(event) {
           else {
 
             if (!isNaN(item.latitude)) {
-              let opt= {};
-        
+              let opt = {};
+
               // broadcaster emotes is different
               if (options.broadcaster !== rid) {
                 let icon = 1;
@@ -308,16 +338,17 @@ function onMouseOver(event) {
               }
 
               // Randomized
-              let r0 = (Math.random() - 0.5) * 0.02;
-              let r1 = (Math.random() - 0.5) * 0.02;
+              const r0 = (Math.random() - 0.5) * 0.02;
+              const r1 = (Math.random() - 0.5) * 0.02;
+              let lng = parseFloat(item.longitude);
+              if (lng < longshift) lng += 360;
+              if (lng > longshift + 360) lng -= 360;
 
-              let m = L.marker([parseFloat(item.latitude) + r0, parseFloat(item.longitude) + r1], opt);
+              const m = L.marker([parseFloat(item.latitude) + r0, lng + r1], opt);
               m.data = item.__originalId;
               m.on('mouseover', onMouseOver);
               m.on('mouseout', onZoomstart);
               m.on('click', onClick);
-              //m.on('dblclick', ondblClick);
-              //m.on('dragend', onDrag);
               m.addTo(mymap);
 
               //cache
@@ -351,22 +382,22 @@ function onMouseOver(event) {
     try {
       //console.info('autorun - update map');
 
-      // check there is a user (for non public maps only)
-      // if (!Meteor.userId()) return;
       let curchan = Session.get('sel_channel');
       if (!curchan) return;
-      //console.error(curchan);
 
-      this.subscribe('botChannels', { channel: curchan });   //function () {
-      //console.error('subscribed');
 
-      let p = BotChannels.findOne( { channel: curchan });
+      this.subscribe('botChannels', { channel: curchan });
+      this.subscribe('userLocation', { name: curchan }, { limit: 1 });
+
+      // TODO: Wait for subscriptions ready? 
+
+      let p = BotChannels.findOne({ channel: curchan });
       //console.error('p=', p);
       if (!p) return;
 
       let searchData = Session.get("searchUsers");
 
-      let prop = {map:true};
+      let prop = { map: true };
 
       // Selector
       if (searchData.msg === true) {
@@ -384,7 +415,7 @@ function onMouseOver(event) {
       if (searchData.lastreq === true) {
         prop.lastreq = curchan;
       }
-    
+
 
       // To generalize
       if (searchData.team === true) {
@@ -408,23 +439,42 @@ function onMouseOver(event) {
       let opt = {};
 
       // Broadcaster  
-      // we could also search in userloc collection, or make a strict search
-      let bcs = UserLocIndex.search(curchan, { limit: 1 , props: {map:true}});
-      if (bcs) {
-        bcs=bcs.mongoCursor;
-        if (bcs.count()) {
-          opt = { broadcaster: bcs.fetch()[0].__originalId }; 
+      try {
+        const bcu = UserLocations.findOne({ name: curchan });
+        if (bcu) {
+          //console.error(bcu);
+          opt.broadcaster = bcu._id;
 
-          // Too much fields :O
-          //console.error('broadcaster=', bcs.fetch()[0]);
+          // Center map on broadcaster's location (but only once)
+          if (!isNaN(bcu.latitude) && (centeredOnBroadcaster===false) ) {
+            mymap.setView([60, bcu.longitude], 2);
+            centeredOnBroadcaster = true;
+          }
         }
-        
-        // Viewers
-        let cursor = UserLocIndex.search(curSearch, { limit: 2000, props: prop }).mongoCursor;
-        // ... Wait for cursor to be complete?
-        updateMap(cursor, curchan, opt);
-        
-      } 
+      }
+      catch (e) { console.error(e); }
+
+      /*
+            let bcs = UserLocIndex.search(curchan, { limit: 1, props: { map: true } });
+            if (bcs) {
+              bcs = bcs.mongoCursor;
+            
+              if (bcs.count()) {
+                const bcu = bcs.fetch()[0];
+                opt = { broadcaster: bcu.__originalId };
+                console.error('bcu=', bcu);
+                // We could set the map center here 
+                //mymap.setLatLng({lat: opt.latitude)
+                // Too much fields :O
+                //console.error('broadcaster=', bcs.fetch()[0]);
+              }
+            }
+      */
+
+      // Viewers
+      let cursor = UserLocIndex.search(curSearch, { limit: 3000, props: prop }).mongoCursor;
+      // ... Wait for cursor to be complete?
+      updateMap(cursor, curchan, opt);
 
     }
     catch (e) {
@@ -454,10 +504,10 @@ Template.WorldMap.helpers({
   chanteam() {
     let curchan = Session.get('sel_channel');
     if (!curchan) return false;
-    let p = BotChannels.findOne( { channel: curchan }, {fields: {team:1}});
+    let p = BotChannels.findOne({ channel: curchan }, { fields: { team: 1 } });
     if (!p) return false;
-    console.error(curchan,p, p.team);
-    
+    //console.error(curchan, p, p.team);
+
     return (!_.isEmpty(p.team));
   }
 });

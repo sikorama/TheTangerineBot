@@ -118,7 +118,7 @@ Meteor.methods({
   },
 
   // For test purpose only, generate random people on the map
-  'genRandomMapPeople': function (nb) {
+  'genRandomMapPeople': function (nb,channel) {
     assertMethodAccess('genRandomMapPeople', this.userId,'admin');
 
       for (let i = 0; i < nb; i++) {
@@ -128,15 +128,40 @@ Meteor.methods({
           name: n,
           dname: n,
           location: 'generated',
-          latitude: Math.random() * 180 - 90,
-          longitude: Math.random() * 180 - 90,
+          latitude: Math.random() * 160 - 80,
+          longitude: Math.random() * 360 - 180,
           timestamp: new Date(),
-          channels: ['TEMP'],
+          channels: ['#'+channel],
+          allow: true, 
           country: randElement(['GE', 'FR', 'BR', 'JP'])
         };
+        doc[channel]= new Date();
         if (Math.random() > 0.5) doc.allow = true;
         if (Math.random() > 0.5) doc.msg = randSentence();
         UserLocations.insert(doc);
       }
   }
 });
+
+/*
+
+{
+  "_id": "rAuBCmaepR9wnz6mc",
+  "name": "gengen_coarsest_finger",
+  "dname": "gengen_coarsest_finger",
+  "location": "generated",
+  "latitude": -59.40895352784635,
+  "longitude": -22.89648765291433,
+  "timestamp": ISODate("2022-05-18T10:57:35.198Z"),
+  "channels": [
+      "#sikorama",
+      "#temp"
+  ],
+  "country": "FR",
+  "allow": true,
+  "msg": "...",
+  "mapname": "gengen_coarsest_finger",
+  "sikorama": 1652988864204,
+  "temp": 1652988899039
+}
+*/
