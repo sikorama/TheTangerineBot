@@ -9,14 +9,19 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.8.3",
-    "chart.js": "^2.9.3",
-    "googletrans": "^1.0.0",
+    "bcrypt": "^5.0.1",
+    "chart.js": "^2.9.4",
+    "googletrans": "^1.0.2",
+    "httpreq": "^0.4.24",
     "jquery": "^3.4.1",
+    "jshint": "^2.13.1",
     "leaflet": "^1.6.0",
     "meteor-node-stubs": "^1.0.0",
+    "node-fetch": "^2.6.1",
     "node-geocoder": "^3.27.0",
     "phraseit": "^1.0.2",
-    "tmi.js": "^1.5.0"
+    "rss": "^1.2.2",
+    "tmi.js": "^1.8.5"
   },
   "meteor": {
     "mainModule": {

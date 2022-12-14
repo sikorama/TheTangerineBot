@@ -42,11 +42,73 @@ function getDate(since) {
 
 }
 
+// Refresh stat, depends on displayed page
+function refresh(sch) {
+
+  const page = Session.get('statPage');
+  console.info('refresh', page, sch);
+
+  // get mods
+  //  if (page === 'report' && page==='') {
+  Meteor.call('getActiveUsers', sch, function (err, res) {
+    //console.error(err, res);
+    Session.set('activeUsers', res);
+  });
+  //}
+
+  // Refresh for  report
+  if (page === 'report') {
+    Session.set('supporters', []);
+
+    const rsearchopt = Session.get('searchSubs');
+    const rd0 = getDate(Session.get('selDuration'));
+    //  console.error(rd0);
+    rsearchopt.chan = '#' + sch;
+
+    if (rd0)
+      rsearchopt.date = { $gt: rd0 };
+
+    //console.error(rsearchopt);
+
+    // get supporters names per category (subs, bits, tips...)
+    Meteor.call('getSupportersReport', rsearchopt, function (err, res) {
+      // Tempplate variable
+      Session.set('supporters', res);
+      //console.error('aggregation:', res);
+    });
+  }
+
+  if (page === 'supporters') {
+
+    Session.set('supporters', []);
+
+    const searchopt = Session.get('searchSubs');
+    const d0 = getDate(Session.get('selDuration'));
+    console.error(d0);
+
+    searchopt.chan = '#' + sch;
+
+    if (sch) {
+
+      if (d0 > 0) {
+        searchopt.date = { $gt: d0 };
+      }
+
+      // Top supporters
+      //console.error('call aggregation', searchopt);
+      Meteor.call('aggregateSubscribers', searchopt, 50, function (err, res) {
+        // Tempplate variable
+        Session.set('supporters', res);
+        //console.error('aggregation:', res);
+      });
+    }
+  }
+}
 
 Template.Stats.events({
   'click button.selStat': function (ev) {
     Session.set('statPage', ev.currentTarget.name);
-    FlowRouter.go('/stats?page='+ev.currentTarget.name);
+    FlowRouter.go('/stats?page=' + ev.currentTarget.name);
   },
   'click button.remove[name="remove_active_user"]': function (ev) {
     let id = ev.currentTarget.id;
@@ -63,10 +125,13 @@ Template.Stats.events({
   'click button[name="refresh"]': function (ev) {
     let sch = Session.get('sel_channel');
     if (!sch) return;
-    Meteor.call('getActiveUsers', sch, function (err, res) {
+
+    refresh(sch);
+
+    /*    Meteor.call('getActiveUsers', sch, function (err, res) {
       //console.error(err, res);
       Session.set('activeUsers', res);
-    });
+    });*/
   },
   'input .search': _.debounce(function (event) {
     manageSearchEvents(event, 'searchSubs', true);
@@ -93,7 +158,7 @@ Template.Stats.events({
     //
     /*const element = document.querySelector('#element')
     const topPos = element.getBoundingClientRect().top + window.pageYOffset
-
+ 
     window.scrollTo({
       top: topPos, // scroll so that the element is at the top of the view
       behavior: 'smooth' // smooth scroll
@@ -130,7 +195,7 @@ Template.Stats.onRendered(function () {
       return;
     }
     console.error('sub bot channels', sch);
-        const chan = Session.get('sel_channel');
+    const chan = Session.get('sel_channel');
 
     this.subscribe('botChannels', { channel: sch });
 
@@ -175,74 +240,18 @@ Template.Stats.onRendered(function () {
         break;
       case 'report':
         //        get_supporters_names
-        Session.set('supporters', []);
+        if (sch) {
+          refresh(sch);
+        }
 
-        const rsearchopt = Session.get('searchSubs');
-        const rd0 = getDate(Session.get('selDuration'));
-        console.error(rd0);
-        rsearchopt.chan = '#' + sch;
+        break;
+      case 'supporters':
+        if (sch) {
+          refresh(sch);
 
-        if (rd0)
-          rsearchopt.date = { $gt: rd0 };
-
-        console.error(rsearchopt);
-
-        // get supporters names per category (subs, bits, tips...)
-        Meteor.call('getSupportersReport', rsearchopt, function (err, res) {
-          // Tempplate variable
-          Session.set('supporters', res);
-          console.error('aggregation:', res);
-        });
-
-        // get mods
-        Meteor.call('getActiveUsers', sch, function (err, res) {
-          Session.set('activeUsers', res);
-        });
-    
-      break;
-
-        case 'supporters':
-        // Supporters
-        Session.set('supporters', []);
-        //this.subscribe('subs', { raider: new RegExp(sch,'i') } );
-        //SubEvents.find()
-        console.error('Page supporters');
-//        const chan = Session.get('sel_channel');
-        const searchopt = Session.get('searchSubs');
-        const d0 = getDate(Session.get('selDuration'));
-        console.error(d0);
-
-        searchopt.chan = '#' + sch;
-
-        // Detailed stats
-        let su = Session.get('selectedUser');
-        if (su)
-          this.subscribe('subevents', { chan: '#' + chan, user: su });
-
-        if (chan) {
-          const bc = BotChannels.findOne({ channel: chan });
-          if (!bc) {
-            console.error('bc undefined', chan);
-            return;
-          }
-          if (bc.subs === true) {
-            // Date min, max
-            // Last 30 days
-            // const d1 = Date.now();
-            // const d0 = d1 - 1000 * 3600 * 24 * 30;
-            if (d0 > 0) {
-              searchopt.date = { $gt: d0 };
-            }
-
-            // Top supporters
-            console.error('call aggregation', searchopt);
-            Meteor.call('aggregateSubscribers', searchopt, 50, function (err, res) {
-              // Tempplate variable
-              Session.set('supporters', res);
-              console.error('aggregation:', res);
-
-            });
-          }
+          let su = Session.get('selectedUser');
+          if (su)
+            this.subscribe('subevents', { chan: '#' + sch, user: su });
         }
         break;
     }
@@ -265,7 +274,7 @@ Template.Stats.helpers({
       case 'sub':
         return 'Subscribded for the first time';
       case 'tip':
-          return 'Tipped $'+ev.tip;
+        return 'Tipped $' + ev.tip;
       default:
         return JSON.stringify(ev);
     }
