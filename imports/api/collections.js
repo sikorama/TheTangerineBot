@@ -39,6 +39,8 @@ export const Lyrics = new Mongo.Collection('lyrics');
 // Collection for storing lyrics quizz game state
 export const LyricsQuizz = new Mongo.Collection('lyricsquizz');
 
+// Collection for storing subs & cheers events
+export const SubEvents = new Mongo.Collection('subevents');
 
 /// Index pour les localisations
 /*const*/ UserLocIndex = new Index({

@@ -149,18 +149,29 @@ Template.ChannelPage.helpers({
 });
 
 
-Template.LiveChannels.onCreated(function () {
+Template.ActiveChan.helpers({
+  // Active channels in chat
+  enchan() {
+    return BotChannels.find({ enabled: true, suspended: {$ne: true} }, { sort: { channel: 1 } });
+  }
+});
+
+Template.ChannelsOverview.onCreated(function() {
+  // fields
   this.subscribe('EnabledChannels');
   this.subscribe('LiveChannels');
 });
 
-Template.ActiveChan.helpers({
-  enchan() {
-    return BotChannels.find({ enabled: true }, { sort: { channel: 1 } });
+Template.ChannelsOverview.helpers({
+  allchans() {
+    return BotChannels.find( {}, { sort: { live_notifdate: -1 } });
   }
 });
 
-
+Template.LiveChannels.onCreated(function () {
+  this.subscribe('EnabledChannels');
+  this.subscribe('LiveChannels');
+});
 
 Template.LiveChannels.helpers({
 //  enchan() {

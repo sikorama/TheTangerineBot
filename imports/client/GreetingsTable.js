@@ -21,7 +21,7 @@ Template.Greetings.onCreated(function () {
   Session.set('bans_search', '');
   Session.set('bans_page', 1);
   Session.set('bans_count', 0);
-  Session.set('greetPage',1);
+  Session.set('greetPage', 1);
 
 });
 
@@ -74,11 +74,13 @@ Template.Greetings.helpers({
     }
   },
   greetChan() {
-
     return BotChannels.find({
       enabled: true,
-      greet: true
-    }).fetch().map((item) => { return item.channel; });
+      greet: true,
+      suspended: { $ne: true },
+      fields: { channel: 1 }
+    }
+    ).fetch().map((item) => { return item.channel; });
   },
   username(id) {
     let u = Meteor.users.findOne(id);

@@ -6,16 +6,17 @@
 
 import { Meteor } from 'meteor/meteor';
 import { AccountsTemplates } from 'meteor/useraccounts:core';
-import { BotChannels, GreetDate, GreetMessages, LiveEvents, QuizzScores, Raiders, Settings, ShoutOuts, Stats, UserLocations } from '../imports/api/collections.js';
+import { BotChannels, GreetDate, GreetMessages, LiveEvents, QuizzScores, Raiders, Settings, ShoutOuts, Stats, SubEvents, UserLocations } from '../imports/api/collections.js';
 import { regext } from '../imports/api/regex.js';
 import { genChord, genProgression, noteArray } from './chords.js';
 import { country_lang } from './const.js';
 import { getGreetMessages, init_greetings } from './greetings.js';
 import { checkLiveChannels, sendDiscord } from './notifications.js';
 import { init_publications } from './publications.js';
+import './publications/_publications';
 import { getCurQuestion, init_quizz, selectQuestion } from './quizz.js';
 //import { init_radio } from './radio.js';
-import { tr_lang_alias,tr_lang_desc } from '../imports/api/languages.js';
+import { tr_lang_alias, tr_lang_desc } from '../imports/api/languages.js';
 import { initRaidManagement } from './raids.js';
 import { init_rss } from './rss.js';
 import { randElement, randSentence } from './tools.js';
@@ -25,7 +26,10 @@ import { connect_chat, connect_raid, init_client, say } from './client.js';
 import { findClosest, init_geocoding, userfindClosest } from './geocoding.js';
 import { processWordLyricsQuizz, startLyricsQuizz, stopLyricsQuizz } from './lyricsquizz';
 import { manageScoreCommands } from './scores.js';
-import { twitch_finds_on,twitch_finds_off } from './twitchfinds.js';
+import { twitch_finds_on, twitch_finds_off } from './twitchfinds.js';
+import { onAnongiftpaidupgrade, onCheer, onGiftpaidupgrade, onResub, onSubgift, onSubmysterygift, onSubscription } from './subscriptions.js';
+import './aggregations/_aggregations';
+
 const gtrans = require('googletrans').default;
 //const gc = require('node-geocoder');
 
@@ -100,7 +104,7 @@ Meteor.startup(() => {
   init_greetings();
   init_publications();
   initRaidManagement();
-//  init_radio();
+  //  init_radio();
   init_rss();
   init_geocoding();
   /**
@@ -138,12 +142,12 @@ Meteor.startup(() => {
     removeActiveUser(chan, name) {
       assertMethodAccess('removeActiveUser', this.userId);
 
-        removeActiveUser(chan, name);
+      removeActiveUser(chan, name);
     },
-    getClosestUsers(chan, lat,lng,opt) {
+    getClosestUsers(chan, lat, lng, opt) {
       assertMethodAccess('getClosestUsers', this.userId);
       // We could check the used logger has access to the channel in parameter
-      return findClosest(chan,lat,lng,opt);
+      return findClosest(chan, lat, lng, opt);
     }
   });
 
@@ -194,18 +198,18 @@ Meteor.startup(() => {
   Meteor.methods({
     removeChannel: function (chanid) {
       assertMethodAccess('removeChannel', this.userId);
-        console.warn('Removing channel', chanid);
-        BotChannels.remove(chanid);
+      console.warn('Removing channel', chanid);
+      BotChannels.remove(chanid);
     },
     toggleChanSettings: function (chanid, field) {
       assertMethodAccess('toggleChanSettings', this.userId);
-        let bc = BotChannels.findOne(chanid);
-        if (bc === undefined)
-          return;
-        let v = bc[field];
-        let objset = {};
-        objset[field] = !v;
-        BotChannels.update(chanid, { $set: objset });
+      let bc = BotChannels.findOne(chanid);
+      if (bc === undefined)
+        return;
+      let v = bc[field];
+      let objset = {};
+      objset[field] = !v;
+      BotChannels.update(chanid, { $set: objset });
     },
     setChanSettings: function (chanid, field, value) {
       assertMethodAccess('setChanSettings', this.userId);
@@ -262,14 +266,14 @@ Meteor.startup(() => {
     export_userloc: function (channame) {
       assertMethodAccess('export_userloc', this.userId);
 
-        console.error('export', channame);
-        let sel = {};
-        sel[channame] = { $exists: 1 };
-        let res = UserLocations.find(sel, { sort: { dname: 1 } }).fetch().map((item) => {
-          return ([item.dname, item.location, item.latitude, item.longitude, item.country, item.msg, item.mail].join(';'));
-        });
-        res.unshift('Name;Location;Latitude;Longitude;Country;Message;Mail');
-        return res.join('\n');
+      console.error('export', channame);
+      let sel = {};
+      sel[channame] = { $exists: 1 };
+      let res = UserLocations.find(sel, { sort: { dname: 1 } }).fetch().map((item) => {
+        return ([item.dname, item.location, item.latitude, item.longitude, item.country, item.msg, item.mail].join(';'));
+      });
+      res.unshift('Name;Location;Latitude;Longitude;Country;Message;Mail');
+      return res.join('\n');
     },
     export_live_events: function (from, to, team) {
       assertMethodAccess('export_live_events', this.userId);
@@ -371,6 +375,15 @@ Meteor.startup(() => {
   bclient.on('unban', Meteor.bindEnvironment(onUnBanHandler));
   bclient.on('notice', Meteor.bindEnvironment(onNotice));
 
+  // subs & gifts
+  bclient.on("anongiftpaidupgrade", Meteor.bindEnvironment(onAnongiftpaidupgrade));
+  bclient.on("cheer", Meteor.bindEnvironment(onCheer));
+  bclient.on("subgift", Meteor.bindEnvironment(onSubgift));
+  bclient.on("subscription", Meteor.bindEnvironment(onSubscription));
+  bclient.on("resub", Meteor.bindEnvironment(onResub));
+  bclient.on("giftpaidupgrade", Meteor.bindEnvironment(onGiftpaidupgrade));
+  bclient.on("submysterygift", Meteor.bindEnvironment(onSubmysterygift));
+
   raid_bclient.on('connected', onConnectedHandler);
   raid_bclient.on('raided', Meteor.bindEnvironment(onRaidedHandler));
 
@@ -383,10 +396,11 @@ Meteor.startup(() => {
   const default_regsonglistreq2 = /@(.*), (.*)added to queue/;
   // FR:
   // @nickname [FR] Il y a ton sourire - Saez a été ajoutée à la file d'attente // [EN] Il y a ton sourire - Saez 
-   //-- SONG REQUEST: fofffie [FR] Nobody Knows me At All  - The Weepies a été ajoutée à la file d'attente // [EN] Nobody Knows me At All  - The Weepies 
+  //-- SONG REQUEST: fofffie [FR] Nobody Knows me At All  - The Weepies a été ajoutée à la file d'attente // [EN] Nobody Knows me At All  - The Weepies 
   // or 
 
   // Called every time a message comes in
+  // target is the name of the channel with "#"
   function onMessageHandler(target, context, msg, self) {
 
     if (self) { return; } // Ignore messages from the bot itself
@@ -411,9 +425,9 @@ Meteor.startup(() => {
       //mailRegex=RegExp()
 
       // Detect one ore more mail addresses
-      const regexmail=/^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
-      let mail = msg.split(' ').filter((s)=> regexmail.test(s));
-      if (mail.length>0) {        
+      const regexmail = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
+      let mail = msg.split(' ').filter((s) => regexmail.test(s));
+      if (mail.length > 0) {
         console.error('Mail address whispered!', mail);
         //    UserLocations.      
         let doc = {
@@ -422,13 +436,20 @@ Meteor.startup(() => {
           timestamp: dnow,
           mail: mail.join(',')
         };
-        UserLocations.upsert({name:username}, {$set: doc});
+        UserLocations.upsert({ name: username }, { $set: doc });
       }
 
       // TODO: remove the mail from the message, we don't need to post it on discord
-      let title = 'Whisper ' + username + ' from ' + chan + ' : ' + msg;
       if (bot_discord_admincall_url) {
+        let title = 'Whisper ' + username + ' from ' + chan + ' : ' + msg;
+
+        if (mail.length > 0) {
+          title += ' MAIL';
+        }
+
         sendDiscord(title, bot_discord_admincall_url);
+
+        // Responds to user's channel?? 
         say(target, '#icon');
       }
       return;
@@ -617,28 +638,28 @@ Meteor.startup(() => {
      }
  */
 
-     // enable/disable features commands
-     if (isModerator) {
-       if ((cmd.indexOf('enable-')==0) ||  (cmd.indexOf('disable-')==0)) {
-          const encmd=cmd.split('-');
-          //console.error(chan, encmd);
-          if (encmd.length==2) {
-            
-            const feature = encmd[1];
+    // enable/disable features commands
+    if (isModerator) {
+      if ((cmd.indexOf('enable-') == 0) || (cmd.indexOf('disable-') == 0)) {
+        const encmd = cmd.split('-');
+        //console.error(chan, encmd);
+        if (encmd.length == 2) {
+
+          const feature = encmd[1];
 
 
 
-          if (['quizz', 'lyricsquizz', 'hug', 'map','greetings','so','tr'].indexOf(feature)<0) {
-            say(target,'Unknown feature '+ feature);
+          if (['quizz', 'lyricsquizz', 'hug', 'map', 'greetings', 'so', 'tr'].indexOf(feature) < 0) {
+            say(target, 'Unknown feature ' + feature);
             return;
           }
-          
-          const en = (encmd[0]==='enable');
+
+          const en = (encmd[0] === 'enable');
           let set = {};
-          set[feature]=en;
-          console.error(chan, ': Setting ',set);
-          BotChannels.update(botchan._id,{$set:set});
-          say(target,en?'Enabling ':'Disabling "'+ feature+'" feature');
+          set[feature] = en;
+          console.error(chan, ': Setting ', set);
+          BotChannels.update(botchan._id, { $set: set });
+          say(target, en ? 'Enabling ' : 'Disabling "' + feature + '" feature');
         }
       }
     }
@@ -867,22 +888,22 @@ Meteor.startup(() => {
         let lc = 'en';
 
         //alias        
-        if (cmd in tr_lang_alias) 
-        lc  = tr_lang_alias[cmd];
-        
-        if (cmd in tr_lang_desc) 
-          lc  = cmd;
+        if (cmd in tr_lang_alias)
+          lc = tr_lang_alias[cmd];
 
-        let ll=tr_lang_desc[lc];
-        
+        if (cmd in tr_lang_desc)
+          lc = cmd;
+
+        let ll = tr_lang_desc[lc];
+
         // Remove some words (emotes for example)
         let txt = commandName.replace(/ LUL/g, '');
-        
+
         // Remove command if not auto translating
         if (!autotr) {
           txt = txt.substring(1 + cmd.length);
         }
-        
+
         //console.error(ll);
 
         // TODO: remove Urls too
@@ -952,10 +973,10 @@ Meteor.startup(() => {
         //console.error(url);
 
         if (url) {
-          if (botchan.lang==='FR') {
+          if (botchan.lang === 'FR') {
             say(target, "EarthDay Retrouvez la carte de la communauté ici: " + url.val + "/c/" + chan);
           }
-          else 
+          else
             say(target, "You can access our EarthDay map here: " + url.val + "/c/" + chan);
         }
         return;
@@ -963,31 +984,31 @@ Meteor.startup(() => {
 
       if (cmd.indexOf('forget') == 0) {
         UserLocations.remove({ name: username });
-        if (botchan.lang==='FR') {
+        if (botchan.lang === 'FR') {
           say(target, "c'est fait " + answername + " !");
 
         }
         else
-        say(target, "it's done " + answername + " !");
+          say(target, "it's done " + answername + " !");
       }
 
       if (cmd.indexOf('where') == 0) {
         let pdoc = UserLocations.findOne({ name: username });
         if (pdoc) {
-          if (botchan.lang==='FR') {
+          if (botchan.lang === 'FR') {
             say(target, answername + " Vous m'avez indiqué cette localisation: " + pdoc.location + '. Si vous voulez retirer toutes les informations vous concernant, utilisez !forget');
           }
-            else
-          say(target, answername + " You've told me you were from " + pdoc.location + '. If you want me to forget your location, use !forget');
+          else
+            say(target, answername + " You've told me you were from " + pdoc.location + '. If you want me to forget your location, use !forget');
 
           return;
         }
         else {
-          if (botchan.lang==='FR') {
+          if (botchan.lang === 'FR') {
             say(target, "Désolé " + answername + " je ne connais pas votre localisation. Veuillez utiliser la commande !from au préalable!");
           }
-          else 
-          say(target, "Sorry " + answername + " I don't know where you're from. Please use !from command to tell me!");
+          else
+            say(target, "Sorry " + answername + " I don't know where you're from. Please use !from command to tell me!");
           return;
         }
       }
@@ -995,20 +1016,20 @@ Meteor.startup(() => {
       if (cmd.indexOf('show') == 0) {
         let pdoc = UserLocations.findOne({ name: username });
         if (pdoc === undefined) {
-          if (botchan.lang==='FR') {
+          if (botchan.lang === 'FR') {
             say(target, "Désolé " + answername + " je ne connais pas votre localisation. Veuillez utiliser la commande !from au préalable!");
           }
           else
-          say(target, "Sorry " + answername + " I don't have you location in my database. Please use '!from city,country' command first.");
+            say(target, "Sorry " + answername + " I don't have you location in my database. Please use '!from city,country' command first.");
           return;
         }
         else {
           UserLocations.update(pdoc._id, { $set: { allow: true } });
-          if (botchan.lang==='FR') {
+          if (botchan.lang === 'FR') {
             say(target, "Ca marche, votre pseudo sera visible sur la carte! " + answername + ' Avec !msg vous pouvez ajouter un message personnalisé');
           }
           else
-          say(target, "Ok, your nickname will be displayed on the map! " + answername + ' Use !msg to add a personalized message on the map');
+            say(target, "Ok, your nickname will be displayed on the map! " + answername + ' Use !msg to add a personalized message on the map');
           return;
         }
       }
@@ -1016,7 +1037,7 @@ Meteor.startup(() => {
       if (cmd.indexOf('mask') == 0) {
         let pdoc = UserLocations.findOne({ name: username });
         if (pdoc === undefined) {
-          if (botchan.lang==='FR') {
+          if (botchan.lang === 'FR') {
             say(target, "Désolé " + answername + " je ne connais pas votre localisation. Veuillez utiliser la commande !from au préalable!");
           }
           else
@@ -1034,7 +1055,7 @@ Meteor.startup(() => {
       if ((cmd.indexOf('msg') == 0) || (cmd.indexOf('message') == 0)) {
         let pdoc = UserLocations.findOne({ name: username });
         if (pdoc === undefined) {
-          if (botchan.lang==='FR') {
+          if (botchan.lang === 'FR') {
             say(target, "Désolé " + answername + " je n'ai pas votre position dans ma base. Veuillez utiliser la commande !from au préalable!");
           }
           else
@@ -1044,11 +1065,11 @@ Meteor.startup(() => {
         else {
           msg = commandName.substring(cmd.length + 1).trim();
           if (msg.length == 0) {
-            if (botchan.lang==='FR') {
+            if (botchan.lang === 'FR') {
               say(target, "Utilisez '!msg +message' pour ajouter un petit mot sur la carte");
             }
             else
-            say(target, "use '!msg +message' for adding a personalized message on the map");
+              say(target, "use '!msg +message' for adding a personalized message on the map");
           }
           else {
             let msgobj = {};
@@ -1065,7 +1086,7 @@ Meteor.startup(() => {
         let me = UserLocations.findOne({ name: username });
 
         if (me === undefined) {
-          if (botchan.lang==='FR') {
+          if (botchan.lang === 'FR') {
             say(target, answername + ", Je ne vous trouve pas sur la carte...Veuillez utiliser !from dans un premier temps");
           }
           else
@@ -1074,21 +1095,21 @@ Meteor.startup(() => {
         }
 
         if (me.latitude === undefined) {
-          if (botchan.lang==='FR') {
+          if (botchan.lang === 'FR') {
             say(target, answername + ",encore un peu de patience, j'ai un plat sur le feu , veuillez réessayer dans quelques minutes...");
           }
           else
-          say(target, answername + ",sorry i still need to process some data... please try again in a few minutes...");
+            say(target, answername + ",sorry i still need to process some data... please try again in a few minutes...");
           return;
         }
 
-        let ares = userfindClosest(me._id, chan, {nbmax: 5, distmax: 20});
+        let ares = userfindClosest(me._id, chan, { nbmax: 5, distmax: 20 });
         if (ares.length === 0) {
-          if (botchan.lang==='FR') {
+          if (botchan.lang === 'FR') {
             say(target, answername + ",Désolé je n'ai trouvé personne de proche...");
           }
           else
-          say(target, answername + ",sorry i couldn't find someone close to your place...");
+            say(target, answername + ",sorry i couldn't find someone close to your place...");
           return;
         }
         else {
@@ -1096,33 +1117,33 @@ Meteor.startup(() => {
           for (let i = 1; i < ares.length; i += 1)
             arestr += ', ' + ares[i];
           if (ares.length > 1) {
-            if (botchan.lang==='FR') {
+            if (botchan.lang === 'FR') {
               say(target, answername + ',vos voisins les plus proches sont ' + arestr);
             }
             else
-            
-            say(target, answername + ',your closest neighbours are ' + arestr);
+
+              say(target, answername + ',your closest neighbours are ' + arestr);
           }
           else {
-            if (botchan.lang==='FR') {
+            if (botchan.lang === 'FR') {
               say(target, answername + ',votre voisin le plus proche est ' + arestr);
             }
             else
-            
-            say(target, answername + ',your closest neighbour is ' + arestr);
+
+              say(target, answername + ',your closest neighbour is ' + arestr);
           }
         }
         return;
       }
 
-      if (cmd === 'from' ) {
+      if (cmd === 'from' || cmd === 'wya') {
         let geoloc = commandName.substring(5).trim();
         if (geoloc.length < 2) {
-          if (botchan.lang==='FR') {
+          if (botchan.lang === 'FR') {
             say(target, answername + " Veuillez m'indiquer la ville et le pays ou vous vous trouvez. Par exemple !from Paris,France ou !from New York.");
           }
           else
-          say(target, answername + " Please tell me the country/state/city where you're from, for example: !from Paris,France or !from Japan.");
+            say(target, answername + " Please tell me the country/state/city where you're from, for example: !from Paris,France or !from Japan.");
           return;
         }
         else {
@@ -1138,11 +1159,11 @@ Meteor.startup(() => {
                 geoloc = geoloc.replace(w, '');
               }
               else {
-                if (botchan.lang==='FR') {
+                if (botchan.lang === 'FR') {
                   say(target, answername + " Veuillez m'indiquer la ville et le pays ou vous vous trouvez. Par exemple !from Paris,France ou !from New York.");
                 }
                 else
-                    say(target, "Please tell me the country/state/city where you're from, for example: !from Paris,France or !from Japan. Although please do not provide too much information");
+                  say(target, "Please tell me the country/state/city where you're from, for example: !from Paris,France or !from Japan. Although please do not provide too much information");
                 return;
                 //                say(target, answername + " Sorry you're not allowed to change the city of another viewer");
                 //                return;
@@ -1178,8 +1199,8 @@ Meteor.startup(() => {
                             'Use !msg to add a personalized message on the map',
                           ]*/
 
-            if (botchan.lang==='FR') {
-              let txt = "Utilisez !show pour m'autoriser à rendre visible votre pseudo sur la carte"; 
+            if (botchan.lang === 'FR') {
+              let txt = "Utilisez !show pour m'autoriser à rendre visible votre pseudo sur la carte";
               say(target, answername + " Ok, merci! " + txt, username);
             }
             else {
@@ -1189,11 +1210,11 @@ Meteor.startup(() => {
             return;
           }
           else {
-            if (botchan.lang==='FR') {
+            if (botchan.lang === 'FR') {
               say(target, answername + " Ok, compris! ", username);
             }
             else
-            say(target, answername + " Ok, got it! ", username);
+              say(target, answername + " Ok, got it! ", username);
           }
           return;
         }
@@ -1211,7 +1232,7 @@ Meteor.startup(() => {
           // Timestamp for getting active on channel's map
           updateObj[chan] = now;
           UserLocations.update(pdoc._id, { $set: updateObj, $unset: { country: 1, latitude: 1, longitude: 1 } });
-          if (botchan.lang==='FR') {
+          if (botchan.lang === 'FR') {
             say(target, answername + " Ok, j'ai mis à jour ma mémoire!");
           }
           else
@@ -1222,7 +1243,7 @@ Meteor.startup(() => {
     }
 
     if (botchan.lyricsquizz === true) {
-      if (manageScoreCommands('lyricsquizz',chan, cmd,username, target, answername)===true) 
+      if (manageScoreCommands('lyricsquizz', chan, cmd, username, target, answername) === true)
         return;
 
       if ((cmd.indexOf('start-quizz') == 0) || (cmd.indexOf('startquizz') == 0)) {
@@ -1237,16 +1258,16 @@ Meteor.startup(() => {
 
       // clues...
 
-      const res =processWordLyricsQuizz(chan, commandName.toLowerCase(), username); 
+      const res = processWordLyricsQuizz(chan, commandName.toLowerCase(), username);
       if (res) {
-        if (res.titleFound===true) {
-            say(target, username+' has found the title!! Congrats!' );
-            
-            return;
+        if (res.titleFound === true) {
+          say(target, username + ' has found the title!! Congrats!');
+
+          return;
         }
         else {
-            say(target, username+' has found "'+commandName+'" word, scoring '+res.points+' points! #icon' );
-            return;
+          say(target, username + ' has found "' + commandName + '" word, scoring ' + res.points + ' points! #icon');
+          return;
         }
       }
     }
@@ -1255,8 +1276,8 @@ Meteor.startup(() => {
 
     if (botchan.quizz === true) {
       let curQuestion = getCurQuestion(chan);
-      
-      if (manageScoreCommands('quizz',chan, cmd,username, target, answername)) return;
+
+      if (manageScoreCommands('quizz', chan, cmd, username, target, answername)) return;
 
 
       if ((cmd.indexOf('clue') == 0) || (cmd.indexOf('help') == 0)) {
@@ -1379,7 +1400,7 @@ Meteor.startup(() => {
           curQuestion = undefined;
           // Incrémente le score
           try {
-            QuizzScores.upsert({ chan:chan, type:'quizz', user: username }, { $inc: { score: 1 } });
+            QuizzScores.upsert({ chan: chan, type: 'quizz', user: username }, { $inc: { score: 1 } });
           }
           catch (e) {
             console.error(e);
@@ -1412,7 +1433,7 @@ Meteor.startup(() => {
           // ON
           // Check if already 'on', then start a new one
           say(target, 'Shoutout monitoring is now enabled, using label ' + label + '. Use "!' + cmd + ' off" to disable it.');
-          twitch_finds_on(chan,label);
+          twitch_finds_on(chan, label);
           // Timeout
           //tfofftimer[chan] = Meteor.setTimeout(twitchfinds_off.bind(), 1000*60*70);
         }
@@ -1520,6 +1541,30 @@ Meteor.startup(() => {
       }
     }
 
+    // Donation (streamelements)
+    //
+    if (username === "streamelements") {
+      try {
+
+        //ex: fishelicious just tipped $15.00 PogChamp 
+        const rx = new RegExp("([0-9a-zA-Z_]+) just tipped \\$([0-9]+.[0-9]*) PogChamp")
+        const match = rx.exec(msg);
+        if (match) {
+          console.info('TIP! ', match, 'user=', match[1], 'amount=', match[2]);
+          SubEvents.insert({
+            chan: '#'+chan,
+            date: Date.now(),
+            user: match[1],
+            type: 'tip',
+            tip: parseFloat(match[2])
+          });
+        }
+      }
+      catch(e) {
+        console.error(e);
+      }
+    }
+
 
     // ------------------- GREET ----------------------
     if (botchan.greet === true) {
@@ -1551,7 +1596,7 @@ Meteor.startup(() => {
           return;
 
         // Special case if username==chan
-        if (username===chan) {
+        if (username === chan) {
           greetingsStack.push({
             target: target,
             txt: 'hey boss #atname! #icon',
@@ -1562,8 +1607,8 @@ Meteor.startup(() => {
 
 
         }
-       let gmtext= getGreetMessages(username, chan);
- 
+        let gmtext = getGreetMessages(username, chan);
+
         let r = -1;
         // Check if user in in greet database or in the map
         // Pick up randomly a message
@@ -1737,7 +1782,7 @@ Meteor.startup(() => {
         ':D :D :D ',
         ':) :) :) ',
         '#icon #icon #icon',
-//        'I try to do my best :D'
+        //        'I try to do my best :D'
         'beep beep boop ',
         'beep boop! beep beep boop'
       ];
@@ -1856,25 +1901,24 @@ Meteor.startup(() => {
 
   function onUnBanHandler(channel, username, userstate) {
     console.log('>>>>', channel, 'Unban', username);
-
   }
 
   function onNotice(channel, msgid, message) {
     try {
 
       console.log('>>>>', 'NOTICE', channel, msgid, message);
-      
+
       // Bot has been banned
-      if (msgid==='msg_banned') {
+      if (msgid === 'msg_banned') {
         // Disable account
-        let chan = channel.toLowerCase().substring(1);  
-        BotChannels.update({channel: chan}, {$set: {suspended:true, suspended_reason: 'Bot has been banned on '+chan+'channel :('}});
+        let chan = channel.toLowerCase().substring(1);
+        BotChannels.update({ channel: chan }, { $set: { suspended: true, suspended_reason: 'Bot has been banned on ' + chan + 'channel :(' } });
       }
-    }catch(e) {console.error(e);}
+    } catch (e) { console.error(e); }
   }
 
   function onBanHandler(channel, username, reason, userstate) {
-    let notif='';
+    let notif = '';
     try {
       // TODO: only available if manageban is enabled?
       let chan = channel.substring(1).toLowerCase();
@@ -1885,40 +1929,40 @@ Meteor.startup(() => {
         if (bc.live) {
 
 
-        notif = '**' + username + '** has been banned from **' + chan + '** channel.';
-        // we don't know the name of the mod who banned, even as a moderator, obviously for security reasons
-        let bo = { chan: chan , date: Date.now()};  // We keep track of dates, so we can remove users after a while (removes accounts...)
-        let update_obj = { lang: false };
+          notif = '**' + username + '** has been banned from **' + chan + '** channel.';
+          // we don't know the name of the mod who banned, even as a moderator, obviously for security reasons
+          let bo = { chan: chan, date: Date.now() };  // We keep track of dates, so we can remove users after a while (removes accounts...)
+          let update_obj = { lang: false };
 
-        // mark in greetings list
-        let gu = GreetMessages.findOne({ username: username });
-        let banlist = [bo];
-        // If user has already banned somewhere, then 
-        if (gu) {
-          if (gu.ban) {
-            banlist = gu.ban;
-            let chans = banlist.map((item) => item.chan);
-            if (chans.indexOf(chan) < 0) {
-              notif += 'They have already been banned from ' + chans.length+ ' channels';
-              banlist.push(bo);
+          // mark in greetings list
+          let gu = GreetMessages.findOne({ username: username });
+          let banlist = [bo];
+          // If user has already banned somewhere, then 
+          if (gu) {
+            if (gu.ban) {
+              banlist = gu.ban;
+              let chans = banlist.map((item) => item.chan);
+              if (chans.indexOf(chan) < 0) {
+                notif += 'They have already been banned from ' + chans.length + ' channels';
+                banlist.push(bo);
 
-              // TODO: add an option for automatic trigger
-              if (bc.autoban === true && banlist.length >= 3) {
-                notif += ' : they will be added to ultimate ban list.';
-                update_obj.autoban = true;
+                // TODO: add an option for automatic trigger
+                if (bc.autoban === true && banlist.length >= 3) {
+                  notif += ' : they will be added to ultimate ban list.';
+                  update_obj.autoban = true;
+                }
               }
             }
           }
-        }
 
-        update_obj.ban = banlist;
-        if (bc.notifban === true && discord_autoban_url)
-          sendDiscord(notif, discord_autoban_url);
+          update_obj.ban = banlist;
+          if (bc.notifban === true && discord_autoban_url)
+            sendDiscord(notif, discord_autoban_url);
 
           GreetMessages.upsert({ username: username }, { $set: update_obj });
         }
 
-        console.log('['+(bc.live?'LIVE':'')+'BAN]', notif, JSON.stringify(userstate), reason);
+        console.log('[' + (bc.live ? 'LIVE' : '') + 'BAN]', notif, JSON.stringify(userstate), reason);
 
       }
 

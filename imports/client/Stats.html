@@ -1,17 +1,31 @@
 <template name="Stats">
 
-  <div class="header" id="myHeader"> 
-    {{>SelectChannel}}    
-    <button class="selStat pure-button {{#if showStat 1}}pure-button-primary{{/if}}" name="1">Countries</button>
-    <button class="selStat pure-button {{#if showStat 2}}pure-button-primary{{/if}}" name="2">Songs</button>
-    {{#if statsEnabled}}
-    <button class="selStat pure-button {{#if showStat 3}}pure-button-primary{{/if}}" name="3">Active Users</button>
+  <div class="header" id="myHeader">
+    {{>SelectChannel}}
+
+    {{#let curchan=getCurChan}}
+
+    <button class="selStat pure-button {{#if showStat " countries"}}pure-button-primary{{/if}}"
+      name="countries">Countries</button>
+    <button class="selStat pure-button {{#if showStat " songs"}}pure-button-primary{{/if}}" name="songs">Songs</button>
+    {{#if curchan.active_users}}
+    <button class="selStat pure-button {{#if showStat " users"}}pure-button-primary{{/if}}" name="users">Active
+      Users</button>
     {{/if}}
-    <button class="selStat pure-button {{#if showStat 4}}pure-button-primary{{/if}}" name="4">Raiders</button>
-    <button class="selStat pure-button {{#if showStat 5}}pure-button-primary{{/if}}" name="5">Raids</button>
+    {{#if curchan.subs}}
+    <button class="selStat pure-button {{#if showStat " supporters"}}pure-button-primary{{/if}}"
+      name="supporters">Supporters</button>
+    <button class="selStat pure-button {{#if showStat " report"}}pure-button-primary{{/if}}"
+      name="report">Report</button>
+    {{/if}}
+    <button class="selStat pure-button {{#if showStat " raiders"}}pure-button-primary{{/if}}"
+      name="raiders">Raiders</button>
+    <button class="selStat pure-button {{#if showStat " raids"}}pure-button-primary{{/if}}" name="raids">Raids</button>
+
+    {{/let}}
   </div>
 
-  {{#if showStat 1}}
+  {{#if showStat "countries"}}
   <h2>Number of people per country</h2>
 
   {{#let countries=getCountryCount}}
@@ -57,7 +71,7 @@
   {{/if}}
 
 
-  {{#if showStat 2}}
+  {{#if showStat "songs"}}
 
   <h2>Currently requested Songs</h2>
   {{#let songs=getSongCount}}
@@ -91,9 +105,134 @@
   {{/let}}
   {{/if}}
 
+  {{#if showStat "report"}}
+  <h2>Stream Supporters Report</h2>
+
+<p>
+  Since : <select id="selDuration" name="selDuration">
+    {{#each d in durations}}
+    <option value="{{d.value}}" {{isSelected d.value}}>{{d.label}}</option>
+    {{/each}}
+  </select>
+</p>
+
+  {{#let supporters=get_supporters}}
+
+  <textarea rows="20" class="reportResult">
+Subs/Resubs: {{#each c in supporters.subs}}@{{c}} {{/each}}
+ 
+SubGifters: {{#each c in supporters.gifts}}@{{c}} {{/each}}
+ 
+Cheerers: {{#each c in supporters.cheers}}@{{c}} {{/each}}
+ 
+Lovely Mods: {{#each c in ausers}} {{#if c.recent}} @{{c.name}} {{/if}} {{/each}} 
+
+Tips:  {{#each c in supporters.tips}}@{{c}} {{/each}}
+ 
+</textarea>
 
 
-  {{#if showStat 3}}
+  {{/let}}
+
+  {{/if}}
+
+
+
+  <!-- Supporters : subgifters.. -->
+  {{#if showStat "supporters"}}
+
+  <!-- Top Users -->
+  <table class="pure-table">
+    <thead>
+      <tr>
+        <th colspan="5">
+          <h2>
+            Top Users
+          </h2>
+        </th>
+      </tr>
+    </thead>
+
+    <tbody>
+      <tr>
+        <td colspan="2">
+          Search Username:
+          <input type="text" name="user" class="search">
+        </td>
+        <td colspan="3">
+          Since : <select id="selDuration" name="selDuration">
+            {{#each d in durations}}
+            <option value="{{d.value}}" {{isSelected d.value}}>{{d.label}}</option>
+            {{/each}}
+          </select>
+        </td>
+
+      </tr>
+    </tbody>
+
+    <!-- Dates -->
+    <thead>
+      <tr>
+        <th>User</th>
+        <th>Total Subs</th>
+        <th>Total Bits</th>
+        <th>Total Tips</th>
+        <th title="Bits+Subsx200+Tipsx100">Score</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{#each sup in get_supporters}}
+      <tr>
+        <td class="selectuser" id="{{sup._id}}">{{sup._id}}</td>
+        <td>{{sup.tsubs}}</td>
+        <td>{{sup.tbits}}</td>
+        <td>{{sup.ttips}}</td>
+        <td>{{sup.score}}</td>
+      </tr>
+      {{/each}}
+      <td colspan="5" id="anchor_userevents">
+        <hr>
+      </td>
+    </tbody>
+
+
+
+    {{#if seluser}}
+    <thead>
+      <tr>
+        <th colspan="5">
+          <h2 id="anchor_userevents">
+            {{seluser}}'s Events
+          </h2>
+        </th>
+      </tr>
+
+      <tr>
+        <th> Date </th>
+        <th colspan="4"> Event </th>
+      </tr>
+
+    </thead>
+
+    <!-- Detail -->
+    <tbody>
+      {{#each ev in get_subEvents }}
+      <tr title="{{stringify ev}}">
+        <td>{{FormatDate ev.date}} </td>
+        <td colspan="4"> {{format_event ev}}</td>
+      </tr>
+      {{/each}}
+    </tbody>
+
+    {{/if}}
+
+  </table>
+
+
+  {{/if}}
+
+
+  {{#if showStat "users"}}
 
   <h2>Last Active Users <button name="refresh">&#8634; </button></h2>
   {{#let ausers=getActiveUsers}}
@@ -104,7 +243,7 @@
    </code>
   </div>
   <br>
-  
+
   <table class="pure-table">
     <thead>
       <tr>
@@ -137,7 +276,7 @@
 
 
 
-  {{#if showStat 4}}
+  {{#if showStat "raiders"}}
 
   <h2>All-Time Channels raiding you</h2>
   {{#let raiders=getraiders}}
@@ -195,7 +334,7 @@
   {{/if}}
 
 
-  {{#if showStat 5}}
+  {{#if showStat "raids"}}
 
   <h2>Channels you've raided</h2>
   <p>Only channels managed with TTC bot are displayed here</p>

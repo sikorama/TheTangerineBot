@@ -14,7 +14,7 @@ export function getParentId(el) {
  * @param {*} event : change event 
  * @param {*} vname : Session variable's name
  */
-export function manageSearchEvents(event, vname) {
+export function manageSearchEvents(event, vname,rx) {
   let n = event.target.name;
   let t = event.target.type;
   let sel = Session.get(vname);
@@ -27,6 +27,18 @@ export function manageSearchEvents(event, vname) {
   else {
     v = event.target.value.trim();
   }
+
+  // regex i texte
+  if (rx===true) {
+    if (t==='text') {
+      if (v.length>0) {
+        v = new RegExp('.*' + v + '.*', 'i');
+      }
+      else
+      v = undefined;
+    }
+  }
+  
   sel[n] = v;
   console.error('search', vname, sel);
   Session.set(vname, sel);

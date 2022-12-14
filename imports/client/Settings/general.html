@@ -154,7 +154,24 @@
       {{>SettingsBoolParam name="Auto SO after raid" param="raid_auto_so" c=c}}
       </tbody>
       {{/if}}
-  
+
+      
+      {{>SettingsSection n="subs" c=c label="Monitor Supporters"}}   
+      {{#if c.subs}}
+      <tbody>
+        <tr>
+        <td>
+          Statistics about sub gifters will be stored.
+        </td>
+        </tr>
+<!--
+  {{>SettingsTextParam name="RAID Channel Hook URL" param="discord_raid_url" c=c}}
+  {{>SettingsBoolParam name="Auto SO after raid" param="raid_auto_so" c=c}}  
+-->
+    </tbody>
+      {{/if}}
+
+
       {{>SettingsSection n="generator" c=c label="Chord generator"}}   
       {{>SettingsSection n="detectso" c=c label="Monitor !SO"}}   
       

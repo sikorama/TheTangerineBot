@@ -311,3 +311,20 @@ div.overlay-textarea{
 	font-size: 30px;
 
 }
+
+
+
+
+
+.roundedcorner {
+	border-radius: 5%;
+	margin-left: 0.5em;
+}
+
+
+
+.reportResult {
+	width:80%;
+	font-size: 1rem;
+	font-family: "Courier New", Monospace;
+}

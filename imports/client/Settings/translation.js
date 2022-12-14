@@ -11,6 +11,7 @@ Template.TranslationSettings.helpers({
         return Stats.find({ chan: '#' + c }, { sort: { month: -1 } });
     },
     getStatChannels() {
+        // Only channel field is required
         return BotChannels.find({});
     },
 });

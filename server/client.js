@@ -40,7 +40,7 @@ export function init_client() {
 
 export function connect_chat() {
 
-    let bot_channels = BotChannels.find({ enabled: true }).fetch().map(i => i.channel);
+    let bot_channels = BotChannels.find({ enabled: true, suspended: {$ne:true} }).fetch().map(i => i.channel);
     console.info('Connecting to channels:', bot_channels);
 
     // Connection to TWITCH CHAT
@@ -62,7 +62,7 @@ export function connect_chat() {
 /*** Raid only */
 export function connect_raid() {
 
-    let raid_bot_channels = BotChannels.find({ enabled: false, raids: true }).fetch().map(i => i.channel);
+    let raid_bot_channels = BotChannels.find({ enabled: false, raids: true, suspended: {$ne:true} }).fetch().map(i => i.channel);
     console.info('Connecting to channels for raid monitoring only:', raid_bot_channels);
 
     const opts_raid = {

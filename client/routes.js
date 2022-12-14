@@ -35,8 +35,8 @@ FlowRouter.route('/about', {
 });
 
 
-FlowRouter.route('/countries', {
-  name: 'countries',
+FlowRouter.route('/stats', {
+  name: 'stats',
   action: function (params, queryParams) {
     BlazeLayout.render('MainPage', {
       main: 'Stats',

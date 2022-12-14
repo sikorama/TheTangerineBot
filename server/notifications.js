@@ -125,7 +125,10 @@ export function checkLiveChannels(client_id, client_private) {
     }
 
     let client_token = token_param.val;
-    let channels = BotChannels.find().fetch().map((item) => item.channel);
+    // Maximum 100 channels per request
+    // Channel must not be suspended, but there's no need to have the bot enabled in chat
+    let channels = BotChannels.find({suspended: {$ne: true}}, {limit: 100, fields: {channel:1}, sorted: {channel:1}}).fetch().map((item) => item.channel);
+
     let headers = {
       'Client-ID': client_id,
       'Authorization': 'Bearer ' + client_token

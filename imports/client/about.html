@@ -45,14 +45,17 @@
   {{/if}}
 
   {{>ActiveChan}}
+  
+  {{#if currentUser}}
+  {{>ChannelsOverview}}
+  {{/if}}
+
 </template>
 
-
+<!-- Public 'about' page'-->
 <template name="ChanAbout">
   {{>LiveChannels}}
-
   {{>About}}
-
 </template>
 
 <template name="LiveChannels">
@@ -67,7 +70,7 @@ Started {{w.live_started}}
 {{w.live_title}}">
       <a href="https://twitch.tv/{{w.channel}}" target="_blank" rel="noopener noreferrer">
         <div height="200px">
-            <img class="pure-img" src="https://static-cdn.jtvnw.net/previews-ttv/live_user_{{w.channel}}-320x200.jpg">
+            <img class="pure-img roundedcorner" src="https://static-cdn.jtvnw.net/previews-ttv/live_user_{{w.channel}}-320x200.jpg">
           </div>
           <div>
               {{w.channel}} ({{w.live_viewers}})
@@ -92,4 +95,25 @@ Started {{w.live_started}}
     {{/each}}
   </div>
 
+</template>
+
+
+<template name="ChannelsOverview">
+  <h3>Last live channels</h3>
+  <table class="pure-table">
+    <tbody>
+      {{#each c in allchans}}
+      <tr>
+        <td>{{c.channel}}</td>
+        <td>{{c.live_started}}</td>
+        <td>{{c.live_notifdate}}</td>
+        <td>
+          {{#if c.enabled}} Enabled{{/if}}
+          {{#if c.suspended}} Suspended{{/if}}
+
+        </td>
+      </tr>
+      {{/each}}
+    </tbody>
+  </table>
 </template>

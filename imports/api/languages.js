@@ -20,7 +20,7 @@ export const tr_lang_desc = {
     //23 	German 	Deutsch 	de
     'de': {name: 'German', says:'sagt'},
     //15 	Dutch 	Nederlands 	nl
-    'du': {name: 'Dutch', says:''},    
+    'nl': {name: 'Dutch', says:''},    
     //16 	English 	English 	en
     'en': {name: 'English', says:'says'},    
     //24 	Greek 	Ελληνικά 	el
@@ -102,6 +102,7 @@ export const tr_lang_alias = {
     'br': 'pt',
     'cn': 'zh',
     'co': 'ko',
+    'du': 'nl',
     'eng': 'en',
     'esp': 'es',
     'ge': 'de',
