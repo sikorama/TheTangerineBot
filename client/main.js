@@ -1,3 +1,4 @@
+import { Accounts } from 'meteor/accounts-base';
 import { Template } from 'meteor/templating';
 import { Session } from 'meteor/session';
 import { BotChannels, Raiders} from '../imports/api/collections.js';
@@ -23,7 +24,6 @@ import '../imports/client/overlays.js';
 import '../imports/client/lyricsquizz_overlay';
 import '../imports/client/lyricsquizz_table';
 
-import { Accounts } from 'meteor/accounts-base';
 
 Accounts.ui.config({
   //  passwordSignupFields: 'USERNAME_ONLY'
@@ -214,11 +214,12 @@ Template.registerHelper('rh_getchaninfo',function(chan) {
 });
 
 
-Template.About.events({
+/*Template.About.events({
   "click .pure-link": function (event) {
     if (event.target.id === 'logout') AccountsTemplates.logout();	// A la place de Meteor.logout()
   }
 });
+*/
 
 
 Template.registerHelper('isAdmin', function () { return checkUserRole(['admin']); });

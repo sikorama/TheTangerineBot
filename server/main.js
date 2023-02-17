@@ -4,8 +4,9 @@
  * 
  */
 
+
 import { Meteor } from 'meteor/meteor';
-import { AccountsTemplates } from 'meteor/useraccounts:core';
+//import { AccountsTemplates } from 'meteor/useraccounts:core';
 import { BotChannels, GreetDate, GreetMessages, LiveEvents, QuizzScores, Raiders, Settings, ShoutOuts, Stats, SubEvents, UserLocations } from '../imports/api/collections.js';
 import { regext } from '../imports/api/regex.js';
 import { genChord, genProgression, noteArray } from './chords.js';
@@ -32,6 +33,7 @@ import './aggregations/_aggregations';
 
 const gtrans = require('googletrans').default;
 //const gc = require('node-geocoder');
+
 
 
 // global Hooks => get from env variable
@@ -87,13 +89,13 @@ let autotranslate = {};
 
 
 
-
+/*
 AccountsTemplates.configure({
   forbidClientAccountCreation: true,
   enablePasswordChange: false,
   showForgotPasswordLink: false,
 });
-
+*/
 
 
 
