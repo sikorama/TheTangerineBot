@@ -961,8 +961,9 @@ Meteor.startup(() => {
               }
 
               // Limit translated message length
-              if (res.text > 200) {
-                res.text = res.text.substring(0,200);
+              if (res.text.length > 200) {
+                //console.info('Plus de 200 caracteres');
+                res.text = res.text.substring(0,200)+'...';
               }
 
               // TODO: also remove links?
@@ -982,8 +983,6 @@ Meteor.startup(() => {
       }
 
     }
-
-
 
 
     // ------------------- MAP -------------------------

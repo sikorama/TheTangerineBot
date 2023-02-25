@@ -1,46 +1,38 @@
 import { Session } from 'meteor/session';
-import { FlowRouter }  from 'meteor/ostrio:flow-router-extra';
+import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 
+FlowRouter.route('/', {
+  name: 'main',
+  action() { FlowRouter.go("/about"); }
+});
 
 FlowRouter.route('*', {
-  action: function () {
-    FlowRouter.go("/");
-  }
+  action() { FlowRouter.go("/about"); }
 });
 
 FlowRouter.route('/settings', {
   name: 'settings',
-  waitOn() {
-    return import ('/imports/client/Settings');
-  },
-  action: function (params, queryParams) {
-    BlazeLayout.render('MainPage', {
-      main: 'Settings',
-    });
+  waitOn() { return import('/imports/client/Settings'); },
+  action(params, queryParams) {
+    BlazeLayout.render('MainPage', { main: 'Settings' });
   }
 });
 
 FlowRouter.route('/commands', {
-  waitOn() {
-    return import ('/imports/client/CommandsTable');
-  },
   name: 'commands',
-  action: function (params, queryParams) {
-    BlazeLayout.render('MainPage', {
-      main: 'CommandsTable',
-    });
+  waitOn() { return import('/imports/client/CommandsTable'); },
+  action(params, queryParams) {
+    BlazeLayout.render('MainPage', { main: 'CommandsTable' });
   }
 });
 
 FlowRouter.route('/about', {
   name: 'about',
-  waitOn() {
-//    return import ('/imports/client/');
-  },
-  action: function (params, queryParams) {
-    BlazeLayout.render('MainPage', {
-      main: 'About',
-    });
+  //  waitOn() {
+  //    return import ('/imports/client/');
+  //  },
+  action(params, queryParams) {
+    BlazeLayout.render('MainPage', { main: 'About' });
   }
 });
 
@@ -48,11 +40,11 @@ FlowRouter.route('/about', {
 FlowRouter.route('/stats', {
   name: 'stats',
   waitOn() {
-    return import ('/imports/client/Stats');
+    return import('/imports/client/Stats');
   },
-  action: function (params, queryParams) {
+  action(params, queryParams) {
     BlazeLayout.render('MainPage', {
-      main: 'Stats',
+      main: 'Stats'
     });
   }
 });
@@ -60,11 +52,11 @@ FlowRouter.route('/stats', {
 FlowRouter.route('/live', {
   name: 'live',
   waitOn() {
-   // return import ('/imports/client/');
+    // return import ('/imports/client/');
   },
-  action: function (params, queryParams) {
+  action(params, queryParams) {
     BlazeLayout.render('MainPage', {
-      main: 'LiveChannels',
+      main: 'LiveChannels'
     });
   }
 });
@@ -72,46 +64,37 @@ FlowRouter.route('/live', {
 FlowRouter.route('/live-embed', {
   name: 'channel',
   waitOn() {
-  //  return import ('/imports/client/');
+    //  return import ('/imports/client/');
   },
-  action: function (params, queryParams) {
-    BlazeLayout.render('LiveChannels', {
-    });
+  action(params, queryParams) {
+    BlazeLayout.render('LiveChannels', {});
   }
 });
 
 FlowRouter.route('/from', {
   name: 'from',
-  waitOn() {
-    return import ('/imports/client/LocationsTable');
-  },
-  action: function (params, queryParams) {
+  waitOn() { return import('/imports/client/LocationsTable'); },
+  action(params, queryParams) {
     Session.set('edit_mode', false);
-    BlazeLayout.render('MainPage', {
-      main: 'LatestLocations',
-    });
+    BlazeLayout.render('MainPage', { main: 'LatestLocations' });
   }
 });
 
 FlowRouter.route('/from/edit', {
   name: 'from',
-  waitOn() {
-    return import ('/imports/client/LocationsTable');
-  },
-  action: function (params, queryParams) {
+  waitOn() { return import('/imports/client/LocationsTable'); },
+  action(params, queryParams) {
     Session.set('edit_mode', true);
-    BlazeLayout.render('MainPage', {
-      main: 'LatestLocations',
-    });
+    BlazeLayout.render('MainPage', {  main: 'LatestLocations' });
   }
 });
 
 FlowRouter.route('/customcommands', {
   name: 'customcommands',
   waitOn() {
-   // return import ('/imports/client/');
+    // return import ('/imports/client/');
   },
-  action: function (params, queryParams) {
+  action(params, queryParams) {
     Session.set('edit_mode', false);
     BlazeLayout.render('MainPage', {
       main: 'CustomCommands',
@@ -122,9 +105,9 @@ FlowRouter.route('/customcommands', {
 FlowRouter.route('/irlevents', {
   name: 'irlevents',
   waitOn() {
-  //  return import ('/imports/client/');
+    //  return import ('/imports/client/');
   },
-  action: function (params, queryParams) {
+  action(params, queryParams) {
     Session.set('edit_mode', false);
     BlazeLayout.render('MainPage', {
       main: 'IRLEvents',
@@ -137,9 +120,9 @@ FlowRouter.route('/irlevents', {
 FlowRouter.route('/greetings', {
   name: 'greetings',
   waitOn() {
-    return import ('/imports/client/GreetingsTable');
+    return import('/imports/client/GreetingsTable');
   },
-  action: function (params, queryParams) {
+  action(params, queryParams) {
     Session.set('edit_mode', false);
     BlazeLayout.render('MainPage', {
       main: 'Greetings',
@@ -150,9 +133,9 @@ FlowRouter.route('/greetings', {
 FlowRouter.route('/greetings/edit', {
   name: 'greetings',
   waitOn() {
-    return import ('/imports/client/GreetingsTable');
+    return import('/imports/client/GreetingsTable');
   },
-  action: function (params, queryParams) {
+  action(params, queryParams) {
     Session.set('edit_mode', true);
     BlazeLayout.render('MainPage', {
       main: 'Greetings',
@@ -163,9 +146,9 @@ FlowRouter.route('/greetings/edit', {
 FlowRouter.route('/shoutouts', {
   name: 'greetings',
   waitOn() {
-    return import ('/imports/client/Shoutout');
+    return import('/imports/client/Shoutout');
   },
-  action: function (params, queryParams) {
+  action(params, queryParams) {
     BlazeLayout.render('MainPage', {
       main: 'Shoutouts',
     });
@@ -173,24 +156,13 @@ FlowRouter.route('/shoutouts', {
 });
 
 
-FlowRouter.route('/', {
-  name: 'map',
-  waitOn() {
-//    return import ('/imports/client/');
-  },
-  action: function (params, queryParams) {
-    BlazeLayout.render('MainPage', {
-      main: 'WorldMap',
-    });
-  }
-});
 
 FlowRouter.route('/map', {
   name: 'map',
   waitOn() {
-    return import ('/imports/client/WorldMap');
+    return import('/imports/client/WorldMap');
   },
-  action: function (params, queryParams) {
+  action(params, queryParams) {
     BlazeLayout.render('MainPage', {
       main: 'WorldMap',
     });
@@ -201,9 +173,9 @@ FlowRouter.route('/map', {
 FlowRouter.route('/mapsearch', {
   name: 'map',
   waitOn() {
-    return import ('/imports/client/WorldMap');
+    return import('/imports/client/WorldMap');
   },
-  action: function (params, queryParams) {
+  action(params, queryParams) {
     BlazeLayout.render('WorldMap', {
       main: '',
       search_mode: true
@@ -215,9 +187,9 @@ FlowRouter.route('/mapsearch', {
 FlowRouter.route('/quizz', {
   name: 'quizz',
   waitOn() {
-    return import ('/imports/client/QuizzTable');
+    return import('/imports/client/QuizzTable');
   },
-  action: function (params, queryParams) {
+  action(params, queryParams) {
     Session.set('edit_mode', false);
     BlazeLayout.render('MainPage', {
       main: 'QuizzTable',
@@ -228,9 +200,9 @@ FlowRouter.route('/quizz', {
 FlowRouter.route('/quizz/scores', {
   name: 'quizz',
   waitOn() {
-    return import ('/imports/client/QuizzTable');
+    return import('/imports/client/QuizzTable');
   },
-  action: function (params, queryParams) {
+  action(params, queryParams) {
     BlazeLayout.render('MainPage', {
       main: 'QuizzScores',
     });
@@ -240,9 +212,9 @@ FlowRouter.route('/quizz/scores', {
 FlowRouter.route('/quizz/settings', {
   name: 'quizz',
   waitOn() {
-    return import ('/imports/client/QuizzTable');
+    return import('/imports/client/QuizzTable');
   },
-  action: function (params, queryParams) {
+  action(params, queryParams) {
     BlazeLayout.render('MainPage', {
       main: 'QuizzSettings',
     });
@@ -253,9 +225,9 @@ FlowRouter.route('/quizz/settings', {
 FlowRouter.route('/quizz/edit', {
   name: 'quizz',
   waitOn() {
-    return import ('/imports/client/QuizzTable');
+    return import('/imports/client/QuizzTable');
   },
-  action: function (params, queryParams) {
+  action(params, queryParams) {
     Session.set('edit_mode', true);
     BlazeLayout.render('MainPage', {
       main: 'LyrucsTable',
@@ -266,9 +238,9 @@ FlowRouter.route('/quizz/edit', {
 FlowRouter.route('/lyricsquizz', {
   name: 'lyricsquizz',
   waitOn() {
-    return import ('/imports/client/lyricsquizz_overlay');
+    return import('/imports/client/lyricsquizz_overlay');
   },
-  action: function (params, queryParams) {
+  action(params, queryParams) {
     Session.set('edit_mode', false);
     BlazeLayout.render('MainPage', {
       main: 'LyricsTable',
@@ -279,9 +251,9 @@ FlowRouter.route('/lyricsquizz', {
 FlowRouter.route('/lyricsquizz/scores', {
   name: 'lyricsquizz',
   waitOn() {
-    return import ('/imports/client/lyricsquizz_table');
+    return import('/imports/client/lyricsquizz_table');
   },
-  action: function (params, queryParams) {
+  action(params, queryParams) {
     BlazeLayout.render('MainPage', {
       main: 'LyricsQuizzScores',
     });
@@ -291,9 +263,9 @@ FlowRouter.route('/lyricsquizz/scores', {
 FlowRouter.route('/lyricsquizz/settings', {
   name: 'lyricsquizz',
   waitOn() {
-    return import ('/imports/client/lyricsquizz_table');
+    return import('/imports/client/lyricsquizz_table');
   },
-  action: function (params, queryParams) {
+  action(params, queryParams) {
     BlazeLayout.render('MainPage', {
       main: 'LyricsQuizzSettings',
     });
@@ -304,9 +276,9 @@ FlowRouter.route('/lyricsquizz/settings', {
 FlowRouter.route('/lyricsquizz/edit', {
   name: 'lyricsquizz',
   waitOn() {
-    return import ('/imports/client/lyricsquizz_table');
+    return import('/imports/client/lyricsquizz_table');
   },
-  action: function (params, queryParams) {
+  action(params, queryParams) {
     Session.set('edit_mode', true);
     BlazeLayout.render('MainPage', {
       main: 'LyricsTable',
@@ -320,9 +292,9 @@ FlowRouter.route('/lyricsquizz/edit', {
 FlowRouter.route('/disconnect', {
   name: 'disconnect',
   waitOn() {
-//    return import ('/imports/client/');
+    //    return import ('/imports/client/');
   },
-  action: function (params, queryParams) {
+  action(params, queryParams) {
     AccountsTemplates.logout();
     FlowRouter.go('/');
   }
@@ -335,9 +307,9 @@ FlowRouter.route('/disconnect', {
 FlowRouter.route('/c/:chan', {
   name: 'channel',
   waitOn() {
-    return import ('/imports/client/');
+    return import('/imports/client/');
   },
-  action: function (params, queryParams) {
+  action(params, queryParams) {
     BlazeLayout.render('ChannelPage', {
       main: 'DirectMap'
     });
@@ -348,9 +320,9 @@ FlowRouter.route('/c/:chan', {
 FlowRouter.route('/c/:chan/map', {
   name: 'channel',
   waitOn() {
-    return import ('/imports/client/WorldMap');
+    return import('/imports/client/WorldMap');
   },
-  action: function (params, queryParams) {
+  action(params, queryParams) {
     BlazeLayout.render('ChannelPage', {
       main: 'DirectMap'
     });
@@ -360,9 +332,9 @@ FlowRouter.route('/c/:chan/map', {
 FlowRouter.route('/c/:chan/overlay', {
   name: 'channel',
   waitOn() {
-    return import ('/imports/client/overlays');
+    return import('/imports/client/overlays');
   },
-  action: function (params, queryParams) {
+  action(params, queryParams) {
     BlazeLayout.render('GreetingsOverlay', {
     });
   }
@@ -372,9 +344,9 @@ FlowRouter.route('/c/:chan/overlay', {
 FlowRouter.route('/c/:chan/lyricsquizz', {
   name: 'channel',
   waitOn() {
-    return import ('/imports/client/lyricsquizz_overlay');
+    return import('/imports/client/lyricsquizz_overlay');
   },
-  action: function (params, queryParams) {
+  action(params, queryParams) {
     BlazeLayout.render('LyricsQuizzOverlay', {
     });
   }
@@ -384,9 +356,9 @@ FlowRouter.route('/c/:chan/lyricsquizz', {
 FlowRouter.route('/c/:chan/commands', {
   name: 'channel',
   waitOn() {
-//    return import ('/imports/client/');
+    //    return import ('/imports/client/');
   },
-  action: function (params, queryParams) {
+  action(params, queryParams) {
     BlazeLayout.render('ChannelPage', {
       main: 'CommandsTable'
     });
@@ -396,9 +368,9 @@ FlowRouter.route('/c/:chan/commands', {
 FlowRouter.route('/c/:chan/live', {
   name: 'channel',
   waitOn() {
-//    return import ('/imports/client/about');
+    //    return import ('/imports/client/about');
   },
-  action: function (params, queryParams) {
+  action(params, queryParams) {
     BlazeLayout.render('ChannelPage', {
       main: 'ChanAbout'
     });
@@ -408,9 +380,9 @@ FlowRouter.route('/c/:chan/live', {
 FlowRouter.route('/c/:chan/about', {
   name: 'channel',
   waitOn() {
-//    return import ('/imports/client/about');
+    //    return import ('/imports/client/about');
   },
-  action: function (params, queryParams) {
+  action(params, queryParams) {
     BlazeLayout.render('ChannelPage', {
       main: 'About'
     });
