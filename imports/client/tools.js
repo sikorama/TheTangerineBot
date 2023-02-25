@@ -1,4 +1,5 @@
 import { Session } from 'meteor/session';
+import { FlowRouter }  from 'meteor/ostrio:flow-router-extra';
 
 
 // Search for html id, recursively

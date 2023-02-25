@@ -10,7 +10,6 @@
   "dependencies": {
     "@babel/runtime": "^7.8.3",
     "bcrypt": "^5.0.1",
-    "chart.js": "^2.9.4",
     "googletrans": "^1.0.2",
     "httpreq": "^0.4.24",
     "jquery": "^3.4.1",

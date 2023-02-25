@@ -55,11 +55,12 @@ let client_id = process.env.CLIENT_ID;
 let client_secret = process.env.CLIENT_SECRET;
 
 if (client_id != undefined) {
-  console.error('Start Live Timer...');
+  console.info('Start Live Timer...');
   Meteor.setInterval(function () { checkLiveChannels(client_id, client_secret); }, 1000 * 60);
 }
 
 let botname = init_client();
+console.info('Connecting',botname,'to chat');
 let bclient = connect_chat();
 let raid_bclient = connect_raid();
 
@@ -268,7 +269,7 @@ Meteor.startup(() => {
     export_userloc: function (channame) {
       assertMethodAccess('export_userloc', this.userId);
 
-      console.error('export', channame);
+      console.info('export', channame);
       let sel = {};
       sel[channame] = { $exists: 1 };
       let res = UserLocations.find(sel, { sort: { dname: 1 } }).fetch().map((item) => {
@@ -405,13 +406,20 @@ Meteor.startup(() => {
   // target is the name of the channel with "#"
   function onMessageHandler(target, context, msg, self) {
 
-    if (self) { return; } // Ignore messages from the bot itself
+    // Ignore messages from the bot itself
+    if (self) return;  
+    let username = context.username.toLowerCase();
+    // Additional security for ignoring messages from the bot itself
+    // in case we have multiple instances on the same channel
+    if (username===botname) return;
+
     /** Incoming message */
     let commandName = msg.trim();
     /** chan is the channel's name (without #) */
     let chan = target.substring(1).toLowerCase();
     /** username uses lower cases only */
-    let username = context.username.toLowerCase();
+    
+    
     /** Displayed name */
     let dispname = context['display-name'].trim();
     /** is message a whisper? */
@@ -430,7 +438,7 @@ Meteor.startup(() => {
       const regexmail = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
       let mail = msg.split(' ').filter((s) => regexmail.test(s));
       if (mail.length > 0) {
-        console.error('Mail address whispered!', mail);
+        console.info('Mail address whispered!', mail);
         //    UserLocations.      
         let doc = {
           name: username,
@@ -606,7 +614,7 @@ Meteor.startup(() => {
           }
           catch (e) { console.error(e); }
 
-          console.error(active_since);
+          console.info(active_since);
 
           if (last_active_users[chan]) {
 
@@ -659,7 +667,7 @@ Meteor.startup(() => {
           const en = (encmd[0] === 'enable');
           let set = {};
           set[feature] = en;
-          console.error(chan, ': Setting ', set);
+          console.info(chan, ': Setting ', set);
           BotChannels.update(botchan._id, { $set: set });
           say(target, en ? 'Enabling ' : 'Disabling "' + feature + '" feature');
         }
@@ -833,7 +841,7 @@ Meteor.startup(() => {
           let u = cmdarray[1].toLowerCase();
           /// Remove @
           if (u[0] === '@') u = u.substring(1);
-          console.error(u);
+          console.info(u);
 
           // 5 minutes by default
           let atdt = 5;
@@ -915,7 +923,7 @@ Meteor.startup(() => {
         if (txt.length > 2) {
 
           // Too long text?
-          if (txt.length > 300) {
+          if (txt.length > 250) {
             lazy = true;
             txt = "I'm too lazy to translate long sentences ^^";
           }
@@ -929,6 +937,7 @@ Meteor.startup(() => {
           // Translate text
           gtrans(txt, { to: lc }).then(res => {
             if (lazy === true) {
+
               // Lazy message in english & target language
               say(target, context['display-name'] + ', ' + txt + '/' + res.text);
             }
@@ -942,12 +951,22 @@ Meteor.startup(() => {
               // 3/26/2021 11:43:05 !en me está picando la cara
               // 3/26/2021 11:43:05 says: I'm fucking my face              
 
+
+
               //res.text = res.text.replace(/fuck/g,'****');
               if (res.text.indexOf('fuck') >= 0) {
                 res.text = "I think that would be offensive if i said that";
                 say(target, context['display-name'] + ' ' + res.text);
                 return;
               }
+
+              // Limit translated message length
+              if (res.text > 200) {
+                res.text = res.text.substring(0,200);
+              }
+
+              // TODO: also remove links?
+
 
               say(target, context['display-name'] + ' ' + ll.says + ': ' + res.text);
             }

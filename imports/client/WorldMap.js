@@ -1,7 +1,6 @@
-import { options } from 'httpreq';
+import { FlowRouter } from 'meteor/ostrio:flow-router-extra';
 import { Session } from 'meteor/session';
 import { BotChannels, Images, UserLocations } from '../api/collections.js';
-import { checkUserRole } from '../api/roles.js';
 import { manageSearchEvents } from './tools.js';
 import './WorldMap.html';
 

@@ -3,6 +3,9 @@ import { Template } from 'meteor/templating';
 import { BotChannels, Raiders, SubEvents } from '../api/collections.js';
 import './Stats.html';
 import { manageSearchEvents } from './tools.js';
+import { FlowRouter }  from 'meteor/ostrio:flow-router-extra';
+
+//const Chart = require('chart.js');
 
 
 /**

@@ -2,6 +2,7 @@ import './overlays.html';
 import { BotMessage } from '../api/collections';
 import { ReactiveVar } from 'meteor/reactive-var';
 import { decodecolor } from './tools';
+import { FlowRouter }  from 'meteor/ostrio:flow-router-extra';
 
 // http://nicolasgallagher.com/pure-css-speech-bubbles/demo/
 

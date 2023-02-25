@@ -8,6 +8,8 @@
 import { LyricsQuizz } from '../api/collections';
 import './lyricsquizz_overlay.html';
 import { decodecolor } from './tools';
+import { FlowRouter }  from 'meteor/ostrio:flow-router-extra';
+
 
 Template.LyricsQuizzOverlay.onCreated(function () {
     

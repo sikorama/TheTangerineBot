@@ -5,24 +5,25 @@ import { BotChannels, Raiders} from '../imports/api/collections.js';
 import { getCountryName } from '../imports/api/countrycodes.js';
 import { checkUserRole } from '../imports/api/roles.js';
 import './routes.js';
-import '../imports/client/Settings.js';
-import '../imports/client/QuizzTable.js';
+//import '../imports/client/QuizzTable.js';
 import '../imports/client/common/showMore';
 import '../imports/client/common/skipResult';
 import '../imports/client/common/checkMark';
+import '../imports/client/common/selectChannel.html';
 import './main.html';
-import '../imports/client/CommandsTable.js';
-import '../imports/client/Stats';
-import '../imports/client/GreetingsTable.js';
-import '../imports/client/Shoutout.js';
-import '../imports/client/LocationsTable.js';
+//import '../imports/client/CommandsTable.js';
+//import '../imports/client/Stats';
+//import '../imports/client/GreetingsTable.js';
+//import '../imports/client/Shoutout.js';
+//import '../imports/client/LocationsTable.js';
 import '../imports/client/about.html';
-import '../imports/client/WorldMap.js';
-import '../imports/client/WorldMap.html';
-import '../imports/client/RadioControl.js';
-import '../imports/client/overlays.js';
-import '../imports/client/lyricsquizz_overlay';
-import '../imports/client/lyricsquizz_table';
+//import '../imports/client/WorldMap.js';
+//import '../imports/client/WorldMap.html';
+//import '../imports/client/RadioControl.js';
+//import '../imports/client/overlays.js';
+//import '../imports/client/lyricsquizz_overlay';
+//import '../imports/client/lyricsquizz_table';
+import { FlowRouter }  from 'meteor/ostrio:flow-router-extra';
 
 
 Accounts.ui.config({
@@ -31,7 +32,6 @@ Accounts.ui.config({
 });
 
 
-const Chart = require('chart.js');
 
 Session.setDefault('searchUsers', {});
 Session.setDefault('searchQuizz', {});
