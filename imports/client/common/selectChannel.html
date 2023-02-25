@@ -1,0 +1,13 @@
+
+<template name="SelectChannel">
+    {{#let g=groups}}
+    {{#if g}}
+      Channel : <select id="selChannel" name="selChannel" placeholder="{{getSessionVar "sel_channel"}}">
+        {{#each v in g}}
+          <option value="{{v.l}}" selected="{{v.s}}">{{v.l}}</option>
+        {{/each}}
+      </select>
+      {{/if}}
+    {{/let}}
+  </template>
+  
