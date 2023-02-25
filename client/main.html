@@ -23,12 +23,15 @@
 
   <nav class="pure-menu pure-menu-horizontal main-menu">
     <ul class="pure-menu-list main-menu-list">
-      {{#if rh_featureEnabled "map"}}
 
+      <li class="pure-menu-item {{active "about"}}">
+        <a href="/about" class="pure-menu-link ">About</a>
+      </li>
+
+      {{#if rh_featureEnabled "map"}}
       <li class="pure-menu-item {{active "map"}}">
         <a href="/map" class="pure-menu-link ">Map</a>
       </li>
-
       {{/if}}
         <li class="pure-menu-item {{active "stats"}}">
           <a href="/stats" class="pure-menu-link ">Stats</a>
@@ -91,9 +94,7 @@
       </li>
       {{/if}}
 
-      <li class="pure-menu-item {{active "about"}}">
-        <a href="/about" class="pure-menu-link ">About</a>
-      </li>
+    
 
     </ul>
   </nav>

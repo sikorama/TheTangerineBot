@@ -1,23 +1,27 @@
 <template name="About">
 
+  <div style="max-width:1024px;">
+
+  <img src="/bot.png" align="right">
+
   <h1>About</h1>
-  The Tangerine Bot is a friendly little bot i (sikorama) have developped for The Tangerine Club, a fantastic band you
+  The Tangerine Bot is a friendly little bot developped for The Tangerine Club, a fantastic band you
   can find on twitch, bandcamp, instagram, and many other social networks. It is now used by a few music channels on
   twitch.
-
+  
   This is an open source project. Code is available on <a href="https://github.com/sikorama/TheTangerineBot"> github
   </a>!
   You'll also find there a minimalistic bot, easy to deply, that performs translation only.
-
+  
   <h4> Collected data</h4>
   All data are collected for the solely purpose of improving your interaction with the bot/the streamer.
   In particular, location associated with nicknames are used for greeting people when they enter in the chat, in
   a personalized way (taking account of the local language and local time ).
   Geolocation is not accurate, and is even a bit randomized (for example the icon on the map will move every time you
   refresh the map).
-
+  
   You can remove all informations associated with your nickname by using !forget command in chat.
-
+  
   <h4>Credits</h4>
   <ul>
     <li>
@@ -33,12 +37,12 @@
       Geolocation conversion made with open street map API
     </li>
   </ul>
-
+  
   <br>
   Also note i'm not affiliated with 'tangerine-bot', a bot aimed to help moderate your discord server. Check it here :
   <a href="tangerinebot.com"> tangerinebot.com</a>
   (source code available <a href="https://github.com/tangerine-bot/tangerine">here</a>).
-
+  
   {{#if currentUser}}
   <h4>Session</h4>
   Logged as {{currentUser.username}} <a href="/" id="logout" class="pure-link">(Disconnect)</a>
@@ -46,9 +50,11 @@
 
   {{>ActiveChan}}
   
-  {{#if currentUser}}
-  {{>ChannelsOverview}}
+  {{#if isUserRole "admin"}}
+      {{>ChannelsOverview}}
   {{/if}}
+
+</div>
 
 </template>
 
@@ -86,7 +92,7 @@ Started {{w.live_started}}
 
 
 <template name="ActiveChan">
-  <h3>Chats where the bot is active</h3>
+  <h3>Channels where the bot is active</h3>
   <div>
     This instance is currently active in the chat of these channels:
 
@@ -106,7 +112,7 @@ Started {{w.live_started}}
       <tr>
         <td>{{c.channel}}</td>
         <td>{{c.live_started}}</td>
-        <td>{{c.live_notifdate}}</td>
+        <td>{{FormatDate c.live_notifdate}}</td>
         <td>
           {{#if c.enabled}} Enabled{{/if}}
           {{#if c.suspended}} Suspended{{/if}}
