@@ -41,9 +41,11 @@
         <a href="/commands" class="pure-menu-link ">Commands</a>
       </li>
 
-      <li class="pure-menu-item {{active "live"}}">
-        <a href="/live" class="pure-menu-link ">Live</a>
-      </li>
+      <!--
+        <li class="pure-menu-item {{active "live"}}">
+          <a href="/live" class="pure-menu-link ">Live</a>
+        </li>
+      -->
 
 
       {{#if isUserRole "admin"}}
@@ -88,14 +90,14 @@
       </li>
       {{/if}}
 
-      {{#if isUserRole "stream_control"}}
-      <li class="pure-menu-item {{active "radio"}}">
-        <a href="/radio" class="pure-menu-link ">Radio</a>
-      </li>
-      {{/if}}
-
-    
-
+<!--
+  {{#if isUserRole "stream_control"}}
+  <li class="pure-menu-item {{active "radio"}}">
+    <a href="/radio" class="pure-menu-link ">Radio</a>
+  </li>
+  {{/if}}
+--> 
+  
     </ul>
   </nav>
 

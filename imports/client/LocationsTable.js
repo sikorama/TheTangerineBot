@@ -5,6 +5,7 @@ import { UserLocations } from '../api/collections.js';
 import { country_names } from '../api/countrycodes.js';
 import { checkUserRole } from '../api/roles.js';
 import { manageSortEvent,getParentId, manageSearchEvents } from './tools.js';
+import './common/selectActive.html';
 
 // ------------ User localization
 Template.LatestLocations.onCreated(function () {

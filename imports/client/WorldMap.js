@@ -3,6 +3,7 @@ import { Session } from 'meteor/session';
 import { BotChannels, Images, UserLocations } from '../api/collections.js';
 import { manageSearchEvents } from './tools.js';
 import './WorldMap.html';
+import './common/selectActive.html';
 
 const L = require('leaflet');
 let circle;
