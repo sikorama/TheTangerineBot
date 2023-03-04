@@ -307,7 +307,7 @@ FlowRouter.route('/disconnect', {
 FlowRouter.route('/c/:chan', {
   name: 'channel',
   waitOn() {
-    return import('/imports/client/');
+    return import('/imports/client/WorldMap');
   },
   action(params, queryParams) {
     BlazeLayout.render('ChannelPage', {
