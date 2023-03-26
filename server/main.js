@@ -31,10 +31,13 @@ import { twitch_finds_on, twitch_finds_off } from './twitchfinds.js';
 import { onAnongiftpaidupgrade, onCheer, onGiftpaidupgrade, onResub, onSubgift, onSubmysterygift, onSubscription } from './subscriptions.js';
 import './aggregations/_aggregations';
 
-const gtrans = require('googletrans').default;
+let gtrans;
+try {
+  gtrans = require('googletrans').default;
+} catch(e) {
+  console.error('Error importing googletrans module', e);
+}
 //const gc = require('node-geocoder');
-
-
 
 // global Hooks => get from env variable
 ['BOT_DISCORD_RAID_HOOK',
