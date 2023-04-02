@@ -37,6 +37,7 @@ try {
 } catch(e) {
   console.error('Error importing googletrans module', e);
 }
+
 //const gc = require('node-geocoder');
 
 // global Hooks => get from env variable
@@ -1570,7 +1571,7 @@ Meteor.startup(() => {
       try {
 
         //ex: fishelicious just tipped $15.00 PogChamp 
-        const rx = new RegExp("([0-9a-zA-Z_]+) just tipped \\$([0-9]+.[0-9]*) PogChamp")
+        const rx = new RegExp("([0-9a-zA-Z_]+) just tipped \\$([0-9]+.[0-9]*) PogChamp");
         const match = rx.exec(msg);
         if (match) {
           console.info('TIP! ', match, 'user=', match[1], 'amount=', match[2]);
