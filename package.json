@@ -15,7 +15,7 @@
     "httpreq": "^0.4.24",
     "jquery": "^3.6.4",
     "jshint": "^2.13.6",
-    "leaflet": "^1.9.3",
+    "leaflet": "^1.9.4",
     "meteor-node-stubs": "^1.2.5",
     "node-fetch": "^2.6.9",
     "node-geocoder": "^3.29.0",

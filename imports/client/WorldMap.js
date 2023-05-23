@@ -43,10 +43,15 @@ Template.WorldMap.onRendered(function () {
   let mymap = L.map('map', {
     //worldCopyJump: 1,  // No need, as we handle manually keeping markers on the map
     minZoom: 1,
+//    center: [60, 0],
+//    zoom: 4
   });
 
-  // TODO: start centered on broadcaster's location
-  mymap.setView([60, -0.09], 2);
+  mymap.setView({lon: 2, lat: 40},4);
+
+//  mymap.setView([60, -0.09], 4);
+
+  //setTimeout(function () {mymap.invalidateSize(true);}, 1000);
 
 
   let markers = {};
@@ -81,17 +86,16 @@ Template.WorldMap.onRendered(function () {
   });
 
   let layer;
-
-
   
   if (layer === undefined) {
     // Put these settings as parameter
     layer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 18,
+      maxZoom: 14,
       attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-      zoomOffset: -1
     }).addTo(mymap);
   }
+
+  L.control.scale({imperial: true, metric: true}).addTo(mymap);
 
   function onZoomstart(event) { mymap.closePopup(); }
   mymap.on('zoomstart', onZoomstart);
@@ -446,7 +450,8 @@ Template.WorldMap.onRendered(function () {
 
           // Center map on broadcaster's location (but only once)
           if (!isNaN(bcu.latitude) && (centeredOnBroadcaster===false) ) {
-            mymap.setView([60, bcu.longitude], 2);
+            console.info('Center view lat=', bcu.latitude,  'lon=',bcu.longitude );
+            mymap.setView({lon: bcu.longitude, lat: bcu.latitude},4);
             centeredOnBroadcaster = true;
           }
         }
