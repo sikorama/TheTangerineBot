@@ -18,22 +18,31 @@ export function init_geocoding() {
 }
 
 
-function checkLocations() {
+
+function checkLocations(sel) {
+
+  let reschedule = false;
+
+  if (!sel) {
+    sel = { longitude: { $exists: 0 } };
+    reschedule = true;
+  }
 
   try {
 
     let i = 60;
 
-    let item = UserLocations.findOne({ longitude: { $exists: 0 } });
-    //console.error('Check geocoding', item?._id);
- 
+    let item = UserLocations.findOne(sel);
+
     // Is there a location not converted to geo positions?
     if (item != undefined) {
+
+      console.info('Check geocoding', item._id);
 
       // Check if there is already someone with the same location
       let sameLoc = UserLocations.findOne({ location: item.location, latitude: { $exists: 1 } });
       if (sameLoc) {
-       // console.debug('Found someone with same location: ', item.location, sameLoc);
+        // console.debug('Found someone with same location: ', item.location, sameLoc);
         // If it's the same, then do nothing :)
         if (sameLoc._id != item._id) {
           UserLocations.update(item._id, {
@@ -45,13 +54,13 @@ function checkLocations() {
           });
         }
         // We can check again very quickly
-        setTimeout(Meteor.bindEnvironment(checkLocations), 1000);
+        if (reschedule) setTimeout(Meteor.bindEnvironment(checkLocations), 1000);
       }
       else {
         // Use geoCoder API for convrerting
         console.info('Location not found in cache, Geo Coding', item.location);
 
-        getGeoCoder().geocode(item.location).then(Meteor.bindEnvironment(function (res) { 
+        getGeoCoder().geocode(item.location).then(Meteor.bindEnvironment(function (res) {
           let fres = { longitude: "NA" }; // We set longitude to NA, to exclude this location next time if no coordinates were found
           if (res.length > 0)
             fres = res[0];
@@ -72,20 +81,22 @@ function checkLocations() {
           if (i > 60) i = 60;
           if (i < 5) i = 5;
           //        console.info('Next check in', i, 'seconds');
-          setTimeout(Meteor.bindEnvironment(checkLocations), i * 1000);
+          if (reschedule) setTimeout(Meteor.bindEnvironment(checkLocations), i * 1000);
 
         })).catch(Meteor.bindEnvironment(function (err) {
           console.log(err);
           i = 3600 * 5;
           console.error('Error occured, next Verification in', Math.floor(i / 60), 'minutes');
-          setTimeout(Meteor.bindEnvironment(checkLocations), i * 1000);
+          UserLocations.update(item._id, { $set: { longitude: "Err" } });
+          if (reschedule) setTimeout(Meteor.bindEnvironment(checkLocations), i * 1000);
         }));
       }
 
     } else {
-      // Nothing to do, next Verification in 60 seconds;
-      //console.error('Next Verification in 1 minute');
-      setTimeout(Meteor.bindEnvironment(checkLocations), 60 * 1000);
+      // Nothing to do, next check in 60 seconds;
+
+      if (reschedule)
+        setTimeout(Meteor.bindEnvironment(checkLocations), 60 * 1000);
     }
 
 
@@ -97,6 +108,9 @@ function checkLocations() {
 
 //  Settings.remove({});
 
+Meteor.methods({
+  checkLocations: checkLocations
+});
 
 
 /**
