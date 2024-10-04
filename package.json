@@ -18,7 +18,7 @@
     "leaflet": "^1.9.4",
     "meteor-node-stubs": "^1.2.5",
     "node-fetch": "^2.6.9",
-    "node-geocoder": "^3.29.0",
+    "node-geocoder": "^4.3.0",
     "phraseit": "^1.0.2",
     "rss": "^1.2.2",
     "tmi.js": "^1.8.5"

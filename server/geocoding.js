@@ -37,7 +37,7 @@ function checkLocations(sel) {
     // Is there a location not converted to geo positions?
     if (item != undefined) {
 
-      console.info('Check geocoding', item._id);
+      //console.info('Check geocoding', item._id, 'loc=', item.location);
 
       // Check if there is already someone with the same location
       let sameLoc = UserLocations.findOne({ location: item.location, latitude: { $exists: 1 } });
