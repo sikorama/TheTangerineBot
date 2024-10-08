@@ -38,6 +38,8 @@ function replaceUSA(str0) {
 async function geocode(location) {
   if (!location) return;
 
+  location = replaceUSA(location);
+
   try {
     const info = {
       user: process.env.PGUSER,
@@ -49,14 +51,12 @@ async function geocode(location) {
     };
 
     const client = new Client(info);
-
     await client.connect();
 
     let res = await client.query('SELECT $1::text as connected', ['Connection to postgres successful!']);
     console.info('connected = ', res.rows[0].connected);
-    // if not connected, trigger an exception
-    location = replaceUSA(location);
 
+    // if not connected, trigger an exception
     let query2 = "SELECT *,similarity(CONCAT(city,', ',country),'" + location + "') FROM cities ORDER BY similarity(CONCAT(city,', ',country), '" + location + "') DESC limit 1;";
     console.info(query2);
     //let query2 = 'SELECT * FROM cities';
@@ -66,27 +66,11 @@ async function geocode(location) {
 
     console.info('res=', res);
     if (res.rows?.length == 0) {
-
-      return ([{
-        //latitude: res.rows[0].lat,
-        //longitude: res.rows[0].lng,
-        countryCode: 'NONE'
-      }]);
-
+      console.info('geocode returns null');
+      return null;
     }
+
     console.info(res.rows[0]);
-
-    /*
-    {
-      city: 'Paris',
-      lat: 48.8567,
-      lng: 2.3522,
-      country: 'France',
-      iso2: 'FR',
-      similarity: 0.6666667
-    }
-    */
-
 
     return ([{
       latitude: res.rows[0].lat,
@@ -97,12 +81,7 @@ async function geocode(location) {
   }
   catch (e) {
     console.error(e);
-    return ([{
-      latitude: "Err",
-      longitude: "Err",
-      countryCode: "None"
-    }]);
-
+    return null;
   }
 }
 
