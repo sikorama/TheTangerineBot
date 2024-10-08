@@ -31,13 +31,14 @@ const mygeocoder = {
       await client.connect();
 
       let res = await client.query('SELECT $1::text as connected', ['Connection to postgres successful!']);
-      console.log(res.rows[0].connected);
+      console.info(res.rows[0].connected);
 
-      let query2 = "SELECT *,similarity(CONCAT(city,', ',country),location) FROM cities ORDER BY similarity(CONCAT(city,', ',country), 'location') DESC limit 1;";
+      let query2 = "SELECT *,similarity(CONCAT(city,', ',country),"+location+") FROM cities ORDER BY similarity(CONCAT(city,', ',country), "+location+") DESC limit 1;";
+      console.info(query2);
       //let query2 = 'SELECT * FROM cities';
       res = await client.query(query2);
       //    console.info(res);
-      console.log(res.rows[0]);
+      console.info(res.rows[0]);
 
       /*
       {
@@ -52,7 +53,7 @@ const mygeocoder = {
 
       await client.end();
 
-      console.info('Exit');
+//      console.info('Exit');
       return ([{
         latitude: res.rows[0].lat,
         longitude: res.rows[0].lng,
@@ -132,7 +133,7 @@ function checkLocations(sel) {
     // Is there a location not converted to geo positions?
     if (item != undefined) {
 
-      //console.info('Check geocoding', item._id, 'loc=', item.location);
+      console.info('Check geocoding', item.name, item._id, 'loc=', item.location);
 
       // Check if there is already someone with the same location
       let sameLoc = UserLocations.findOne({ location: item.location, latitude: { $exists: 1 } });
@@ -156,15 +157,21 @@ function checkLocations(sel) {
         console.info('Location not found in cache, Geo Coding', item.location);
 
         getGeoCoder().geocode(item.location).then(Meteor.bindEnvironment(function (res) {
-          let fres = { longitude: "NA" }; // We set longitude to NA, to exclude this location next time if no coordinates were found
-          if (res.length > 0)
+          let fres = { countryCode: "NA" }; // We set longitude to NA, to exclude this location next time if no coordinates were found
+
+          if (res?.length > 0)
             fres = res[0];
 
           let upobj = {
-            latitude: parseFloat(fres.latitude),
-            longitude: parseFloat(fres.longitude),
             country: fres.countryCode
           };
+
+          if (fres.latitude)
+          upobj.latitude= parseFloat(fres.latitude);
+          if (fres.longitude)
+            upobj.longitude= parseFloat(fres.longitude);
+
+
           console.info('Found', upobj, 'for', item.location);
 
           UserLocations.update(item._id, { $set: upobj });
@@ -179,7 +186,7 @@ function checkLocations(sel) {
           if (reschedule) setTimeout(Meteor.bindEnvironment(checkLocations), i * 1000);
 
         })).catch(Meteor.bindEnvironment(function (err) {
-          console.log(err);
+          console.info(err);
           i = 3600 * 5;
           console.error('Error occured, next Verification in', Math.floor(i / 60), 'minutes');
           UserLocations.update(item._id, { $set: { longitude: "Err" } });
