@@ -10,7 +10,33 @@ import pg from 'pg';
 const { Client } = pg;
 
 
+/**
+ * Check if the word USA is present in the string,
+ * and replace it by 'United States'
+ * @param {string} str0 The input string to check for the word "USA".
+ */
+function replaceUSA(str0) {
+  let str = str0.replace(/[^a-zA-Z]/g, ' ');
+  let words = str.split(' ');
+  let found = false;
+  for (var i = 0; i < words.length; i++) {
+    if (words[i].toLowerCase() === 'usa') {
+      found = true;
+      if (i > 0)
+        words[i] = ", United States";
+      else
+        words[i] = "United States";
+    }
+  }
+
+  if (found) return words.join(" ");
+
+  return str0;
+}
+
+
 async function geocode(location) {
+  if (!location) return;
 
   try {
     const info = {
@@ -27,7 +53,9 @@ async function geocode(location) {
     await client.connect();
 
     let res = await client.query('SELECT $1::text as connected', ['Connection to postgres successful!']);
-    console.info(res.rows[0].connected);
+    console.info('connected = ', res.rows[0].connected);
+    // if not connected, trigger an exception
+    location = replaceUSA(location);
 
     let query2 = "SELECT *,similarity(CONCAT(city,', ',country),'" + location + "') FROM cities ORDER BY similarity(CONCAT(city,', ',country), '" + location + "') DESC limit 1;";
     console.info(query2);
@@ -103,10 +131,9 @@ function checkLocations(sel) {
       console.info('Check geocoding', item.name, item._id, 'loc=', item.location);
 
       // Check if there is already someone with the same location
-      let sameLoc = UserLocations.findOne({ location: item.location, latitude: { $exists: 1 } });
+      let sameLoc = UserLocations.findOne({ _id: { $ne: item._id }, location: item.location, latitude: { $exists: 1 } });
       if (sameLoc) {
-        // console.debug('Found someone with same location: ', item.location, sameLoc);
-        // If it's the same, then do nothing :)
+        console.info('Found someone with same location: ', item.location, sameLoc);
         if (sameLoc._id != item._id) {
           UserLocations.update(item._id, {
             $set: {
@@ -124,20 +151,23 @@ function checkLocations(sel) {
         console.info('Location not found in cache, Geo Coding', item.location);
 
         geocode(item.location).then(Meteor.bindEnvironment(function (res) {
-          let fres = { countryCode: "NA" }; // We set longitude to NA, to exclude this location next time if no coordinates were found
+
+          // We set by default longitude to Err, to exclude this location next time if no coordinates were found
+          let fres = { longitude: "Err" };
 
           if (res?.length > 0)
             fres = res[0];
 
-          let upobj = {
-            country: fres.countryCode
-          };
+          let upobj = { longitude: "Err" };
 
-          if (fres.latitude)
-            upobj.latitude = parseFloat(fres.latitude);
-          if (fres.longitude)
+          if (fres.countrycode)
+            upobj.country = fres.countryCode
+          if (fres.longitude && !Number.isNaN(parseFloat(fres.longitude))) {
             upobj.longitude = parseFloat(fres.longitude);
-
+          }
+          if (fres.latitude && !Number.isNaN(parseFloat(fres.latitude))) {
+            upobj.latitude = parseFloat(fres.latitude);
+          }
 
           console.info('Found', upobj, 'for', item.location);
 
@@ -146,10 +176,9 @@ function checkLocations(sel) {
           let p = Settings.findOne({ param: 'location_interval' });
           if (p !== undefined) i = p.val;
           if (i === undefined) i = 60;
-          // On limite le min/max
-          if (i > 60) i = 60;
+
+          // Minimal duration
           if (i < 5) i = 5;
-          //        console.info('Next check in', i, 'seconds');
           if (reschedule) setTimeout(Meteor.bindEnvironment(checkLocations), i * 1000);
 
         })).catch(Meteor.bindEnvironment(function (err) {
@@ -183,18 +212,18 @@ Meteor.methods({
 
 
 /**
- * Find closest person on map, from lat,lng coordinates, 
+ * Find closest person on map, from lat,lng coordinates,
  * for a given channel
  * Uses hamming distance, not euclidian
  * (abs(dx)+abs(dy))
- * 
- * @param {*} chan 
- * @param {*} lat 
- * @param {*} lng 
+ *
+ * @param {*} chan
+ * @param {*} lat
+ * @param {*} lng
  * @param {*} opt:options:
  *  - nbmax : nb max of people (0 to disable)
- *  - distmax: max dist (expressed in lat/lng)  
- * @returns 
+ *  - distmax: max dist (expressed in lat/lng)
+ * @returns
  */
 export function findClosest(chan, lat, lng, opt) {
   opt = opt || {};
