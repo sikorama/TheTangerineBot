@@ -5,6 +5,7 @@ export const country_names = {
     'AM': 'Armenia',
     'AR': 'Argentina',
     'AO': 'Angola',
+    'AQ': 'Antarctica',
     'AT': 'Austria',
     'AU': 'Australia',
     'AZ': 'Azerbaijan',
@@ -86,7 +87,8 @@ export const country_names = {
     'US': 'United States',
     'UY': 'Uruguay',
     'VE': 'Venezuela',
-    'ZA': 'South Africa'
+    'ZA': 'South Africa',
+//    'NONE'
   };
   
  export function getCountryName(cn) {

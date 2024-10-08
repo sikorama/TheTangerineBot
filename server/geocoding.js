@@ -10,110 +10,77 @@ import pg from 'pg';
 const { Client } = pg;
 
 
+async function geocode(location) {
 
-const mygeocoder = {
-  geocode: async function (location) {
-
-    try {
-
-
-      const info = {
-        user: process.env.PGUSER,
-        host: process.env.PGHOST,
-        port: process.env.PGPORT,
-        database: process.env.PGDATABASE,
-        password: process.env.PGPASSWORD,
-        ssl: false
-      };
-
-      const client = new Client(info);
-
-      await client.connect();
-
-      let res = await client.query('SELECT $1::text as connected', ['Connection to postgres successful!']);
-      console.info(res.rows[0].connected);
-
-      let query2 = "SELECT *,similarity(CONCAT(city,', ',country),'"+location+"') FROM cities ORDER BY similarity(CONCAT(city,', ',country), '"+location+"') DESC limit 1;";
-      console.info(query2);
-      //let query2 = 'SELECT * FROM cities';
-      res = await client.query(query2);
-      //    console.info(res);
-      console.info(res.rows[0]);
-
-      /*
-      {
-        city: 'Paris',
-        lat: 48.8567,
-        lng: 2.3522,
-        country: 'France',
-        iso2: 'FR',
-        similarity: 0.6666667
-      }
-      */
-
-      await client.end();
-
-//      console.info('Exit');
-      return ([{
-        latitude: res.rows[0].lat,
-        longitude: res.rows[0].lng,
-        countryCode: res.rows[0].iso2
-      }]);
-
-    }
-    catch (e) {
-      console.error(e);
-      return ([{
-        latitude: "Err",
-        longitude: "Err",
-        countryCode: "None"
-      }]);
-
-    }
-  }
-
-};
-
-
-//getGeoCoder().geocode(item.location);
-
-
-function getGeoCoder() { return mygeocoder; }
-
-
-/*
-
-const gc = require('node-geocoder');
-let geoCoder;
-
-export function getGeoCoder() { return geoCoder; }
-*/
-
-
-export function init_geocoding() {
-
-  // FIXME: Add referer, user-agent...
-  /*
-    let gcoptions = {
-      provider: 'openstreetmap',
-      fetch: function fetch(url, options) {
-        return nodeFetch(url, {
-          ...options,
-          headers: {
-            'user-agent': 'My application <email@domain.com>',
-            'X-Specific-Header': 'Specific value'
-          }
-        });
-      }
+  try {
+    const info = {
+      user: process.env.PGUSER,
+      host: process.env.PGHOST,
+      port: process.env.PGPORT,
+      database: process.env.PGDATABASE,
+      password: process.env.PGPASSWORD,
+      ssl: false
     };
-  
-    geoCoder = gc(gcoptions);
+
+    const client = new Client(info);
+
+    await client.connect();
+
+    let res = await client.query('SELECT $1::text as connected', ['Connection to postgres successful!']);
+    console.info(res.rows[0].connected);
+
+    let query2 = "SELECT *,similarity(CONCAT(city,', ',country),'" + location + "') FROM cities ORDER BY similarity(CONCAT(city,', ',country), '" + location + "') DESC limit 1;";
+    console.info(query2);
+    //let query2 = 'SELECT * FROM cities';
+    res = await client.query(query2);
+
+    await client.end();
+
+    console.info('res=', res);
+    if (res.rows?.length == 0) {
+
+      return ([{
+        //latitude: res.rows[0].lat,
+        //longitude: res.rows[0].lng,
+        countryCode: 'NONE'
+      }]);
+
+    }
+    console.info(res.rows[0]);
+
+    /*
+    {
+      city: 'Paris',
+      lat: 48.8567,
+      lng: 2.3522,
+      country: 'France',
+      iso2: 'FR',
+      similarity: 0.6666667
+    }
     */
 
-  setTimeout(Meteor.bindEnvironment(checkLocations), 5 * 1000);
+
+    return ([{
+      latitude: res.rows[0].lat,
+      longitude: res.rows[0].lng,
+      countryCode: res.rows[0].iso2
+    }]);
+
+  }
+  catch (e) {
+    console.error(e);
+    return ([{
+      latitude: "Err",
+      longitude: "Err",
+      countryCode: "None"
+    }]);
+
+  }
 }
 
-
+export function init_geocoding() {
+  setTimeout(Meteor.bindEnvironment(checkLocations), 5 * 1000);
+}
 
 function checkLocations(sel) {
 
@@ -156,7 +123,7 @@ function checkLocations(sel) {
         // Use geoCoder API for convrerting
         console.info('Location not found in cache, Geo Coding', item.location);
 
-        getGeoCoder().geocode(item.location).then(Meteor.bindEnvironment(function (res) {
+        geocode(item.location).then(Meteor.bindEnvironment(function (res) {
           let fres = { countryCode: "NA" }; // We set longitude to NA, to exclude this location next time if no coordinates were found
 
           if (res?.length > 0)
@@ -167,9 +134,9 @@ function checkLocations(sel) {
           };
 
           if (fres.latitude)
-          upobj.latitude= parseFloat(fres.latitude);
+            upobj.latitude = parseFloat(fres.latitude);
           if (fres.longitude)
-            upobj.longitude= parseFloat(fres.longitude);
+            upobj.longitude = parseFloat(fres.longitude);
 
 
           console.info('Found', upobj, 'for', item.location);
