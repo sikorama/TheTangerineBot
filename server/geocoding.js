@@ -33,7 +33,7 @@ const mygeocoder = {
       let res = await client.query('SELECT $1::text as connected', ['Connection to postgres successful!']);
       console.log(res.rows[0].connected);
 
-      let query2 = "SELECT *,similarity(CONCAT(city,', ',country),'paris,frace') FROM cities ORDER BY similarity(CONCAT(city,', ',country), 'paris, frace') DESC limit 1;";
+      let query2 = "SELECT *,similarity(CONCAT(city,', ',country),location) FROM cities ORDER BY similarity(CONCAT(city,', ',country), 'location') DESC limit 1;";
       //let query2 = 'SELECT * FROM cities';
       res = await client.query(query2);
       //    console.info(res);
