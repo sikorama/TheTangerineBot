@@ -1,20 +1,115 @@
 import { Settings, UserLocations } from "../imports/api/collections";
+
+
+/** Geocoding using a provider, deprecated, using a dedicated postgres database instead */
+
+
+
+import pg from 'pg';
+
+const { Client } = pg;
+
+
+
+const mygeocoder = {
+  geocode: async function (location) {
+
+    try {
+
+
+      const info = {
+        user: process.env.PGUSER,
+        host: process.env.PGHOST,
+        port: process.env.PGPORT,
+        database: process.env.PGDATABASE,
+        password: process.env.PGPASSWORD,
+        ssl: false
+      };
+
+      const client = new Client(info);
+
+      await client.connect();
+
+      let res = await client.query('SELECT $1::text as connected', ['Connection to postgres successful!']);
+      console.log(res.rows[0].connected);
+
+      let query2 = "SELECT *,similarity(CONCAT(city,', ',country),'paris,frace') FROM cities ORDER BY similarity(CONCAT(city,', ',country), 'paris, frace') DESC limit 1;";
+      //let query2 = 'SELECT * FROM cities';
+      res = await client.query(query2);
+      //    console.info(res);
+      console.log(res.rows[0]);
+
+      /*
+      {
+        city: 'Paris',
+        lat: 48.8567,
+        lng: 2.3522,
+        country: 'France',
+        iso2: 'FR',
+        similarity: 0.6666667
+      }
+      */
+
+      await client.end();
+
+      console.info('Exit');
+      return ([{
+        latitude: res.rows[0].lat,
+        longitude: res.rows[0].lng,
+        countryCode: res.rows[0].iso2
+      }]);
+
+    }
+    catch (e) {
+      console.error(e);
+      return ([{
+        latitude: "Err",
+        longitude: "Err",
+        countryCode: "None"
+      }]);
+
+    }
+  }
+
+};
+
+
+//getGeoCoder().geocode(item.location);
+
+
+function getGeoCoder() { return mygeocoder; }
+
+
+/*
+
 const gc = require('node-geocoder');
-
-
-
 let geoCoder;
 
 export function getGeoCoder() { return geoCoder; }
+*/
+
 
 export function init_geocoding() {
-  // FIXME: Add referer, user-agent...
-  let gcoptions = {
-    provider: 'openstreetmap',
-  };
 
-  geoCoder = gc(gcoptions);
-  setTimeout(Meteor.bindEnvironment(checkLocations), 60 * 1000);
+  // FIXME: Add referer, user-agent...
+  /*
+    let gcoptions = {
+      provider: 'openstreetmap',
+      fetch: function fetch(url, options) {
+        return nodeFetch(url, {
+          ...options,
+          headers: {
+            'user-agent': 'My application <email@domain.com>',
+            'X-Specific-Header': 'Specific value'
+          }
+        });
+      }
+    };
+  
+    geoCoder = gc(gcoptions);
+    */
+
+  setTimeout(Meteor.bindEnvironment(checkLocations), 5 * 1000);
 }
 
 
@@ -24,7 +119,7 @@ function checkLocations(sel) {
   let reschedule = false;
 
   if (!sel) {
-    sel = { longitude: { $exists: 0 } };
+    sel = { country: { $exists: 0 } };
     reschedule = true;
   }
 
@@ -70,7 +165,7 @@ function checkLocations(sel) {
             longitude: parseFloat(fres.longitude),
             country: fres.countryCode
           };
-          //console.info('Found', upobj, 'for', item.location);
+          console.info('Found', upobj, 'for', item.location);
 
           UserLocations.update(item._id, { $set: upobj });
 
