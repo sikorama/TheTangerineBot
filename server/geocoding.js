@@ -53,13 +53,12 @@ async function geocode(location) {
     const client = new Client(info);
     await client.connect();
 
-    let res = await client.query('SELECT $1::text as connected', ['Connection to postgres successful!']);
+    let res = await client.query('SELECT $1::text as connected', ['Connection successful!']);
     console.info('connected = ', res.rows[0].connected);
 
     // if not connected, trigger an exception
     let query2 = "SELECT *,similarity(CONCAT(city,', ',country),'" + location + "') FROM cities ORDER BY similarity(CONCAT(city,', ',country), '" + location + "') DESC limit 1;";
-    console.info(query2);
-    //let query2 = 'SELECT * FROM cities';
+    //console.info(query2);
     res = await client.query(query2);
 
     await client.end();
@@ -94,7 +93,7 @@ function checkLocations(sel) {
   let reschedule = false;
 
   if (!sel) {
-    sel = { country: { $exists: 0 } };
+    sel = { latitude: { $exists: 0 } };
     reschedule = true;
   }
 
@@ -139,8 +138,9 @@ function checkLocations(sel) {
 
           let upobj = { longitude: "Err" };
 
-          if (fres.countrycode)
-            upobj.country = fres.countryCode
+          if (fres.countryCode)
+            upobj.country = fres.countryCode;
+
           if (fres.longitude && !Number.isNaN(parseFloat(fres.longitude))) {
             upobj.longitude = parseFloat(fres.longitude);
           }
