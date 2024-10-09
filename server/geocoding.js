@@ -33,10 +33,17 @@ function replaceUSA(str0) {
   return str0;
 }
 
-
+/**
+ * Converts a locaion into 
+ * @param {*} location 
+ * @returns 
+ */
 async function geocode(location) {
   if (!location) return;
 
+  // Remove any character that is not a letter or a space or a comma
+  location = location.replace(/[^a-zA-Z ,]/g, '');
+  // Replace short names by omplete name, to improve database match (usa=>United States)
   location = replaceUSA(location);
 
   try {
@@ -76,6 +83,7 @@ async function geocode(location) {
 }
 
 export function init_geocoding() {
+
   setTimeout(Meteor.bindEnvironment(checkLocations), 5 * 1000);
 }
 
@@ -109,6 +117,10 @@ async function fix_geocoding() {
 // single shot
 fix_geocoding();
 
+/**
+ * Converts a single user location. 
+ * @param {*} sel : Selector
+ */
 function checkLocations(sel) {
 
   let reschedule = false;
@@ -203,7 +215,7 @@ function checkLocations(sel) {
       // Nothing to do, next check in 60 seconds;
       // We could trigger resolution when there is a change in database.
       if (reschedule) {
-        console.info('Nothing to resolve, reschedule in 1 minute');
+        console.info('Geocoding: Nothing to resolve, reschedule in 1 minute');
         setTimeout(Meteor.bindEnvironment(checkLocations), 60 * 1000);
       }
     }
