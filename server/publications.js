@@ -61,7 +61,7 @@ export function init_publications() {
   //
 
   UserLocations.before.insert(function (userid, doc) {
-    console.error('before insert', doc);
+    //console.error('before insert', doc);
     if (doc.allow === true)
       doc.mapname = doc.dname;
   });

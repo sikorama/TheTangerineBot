@@ -1,10 +1,9 @@
+/**
+ * Geocoding: Converts from a location to a city, country, and coordiates
+ *
+ */
+
 import { Settings, UserLocations } from "../imports/api/collections";
-
-
-/** Geocoding using a provider, deprecated, using a dedicated postgres database instead */
-
-
-
 import pg from 'pg';
 
 const { Client } = pg;
@@ -53,30 +52,22 @@ async function geocode(location) {
     const client = new Client(info);
     await client.connect();
 
-    let res = await client.query('SELECT $1::text as connected', ['Connection successful!']);
-    console.info('connected = ', res.rows[0].connected);
+//    let res = await client.query('SELECT $1::text as connected', ['Connection successful!']);
+//    console.info('connected = ', res.rows[0].connected);
 
-    // if not connected, trigger an exception
     let query2 = "SELECT *,similarity(CONCAT(city,', ',country),'" + location + "') FROM cities ORDER BY similarity(CONCAT(city,', ',country), '" + location + "') DESC limit 1;";
     //console.info(query2);
-    res = await client.query(query2);
+    let res = await client.query(query2);
 
     await client.end();
 
-    console.info('res=', res);
     if (res.rows?.length == 0) {
-      console.info('geocode returns null');
+      console.info('No result, geocode returns null');
       return null;
     }
 
     console.info(res.rows[0]);
-
-    return ([{
-      latitude: res.rows[0].lat,
-      longitude: res.rows[0].lng,
-      countryCode: res.rows[0].iso2
-    }]);
-
+    return res.rows[0];
   }
   catch (e) {
     console.error(e);
@@ -87,6 +78,36 @@ async function geocode(location) {
 export function init_geocoding() {
   setTimeout(Meteor.bindEnvironment(checkLocations), 5 * 1000);
 }
+
+
+async function fix_geocoding() {
+
+  UserLocations.find({ city: { $exists: 0 } }).forEachAsync(async (item) => {
+
+    let res = await geocode(item.location);
+    //console.info(res);
+    if (res) {
+      UserLocations.update(item._id,
+        {
+          $set: {
+            //longitude : parseFloat(res.lng),
+            //latitude : parseFloat(res.lat),
+            country: res.iso2,
+            city: res.city,
+            match: parseFloat(res.similarity)
+          }
+        }
+      );
+      // Check if lat & lng are correct?
+      // At least log the names
+      if (Math.abs(item.longitude-res.lng)>0 || Math.abs(item.latitude-res.lat)>0 )
+        console.info(item.name, item.longitude-res.lng, item.latitude-res.lat);
+    }
+  });
+}
+
+// single shot
+fix_geocoding();
 
 function checkLocations(sel) {
 
@@ -118,6 +139,8 @@ function checkLocations(sel) {
               latitude: sameLoc.latitude,
               longitude: sameLoc.longitude,
               country: sameLoc.country,
+              city: sameLoc.city,
+              match: sameLoc.match,
             }
           });
         }
@@ -126,43 +149,50 @@ function checkLocations(sel) {
       }
       else {
         // Use geoCoder API for convrerting
-        console.info('Location not found in cache, Geo Coding', item.location);
+        console.info('Location not found in cache, Usin Geo Coding DB', item.location);
 
         geocode(item.location).then(Meteor.bindEnvironment(function (res) {
+          let upobj = {};
 
-          // We set by default longitude to Err, to exclude this location next time if no coordinates were found
-          let fres = { longitude: "Err" };
-
-          if (res?.length > 0)
-            fres = res[0];
-
-          let upobj = { longitude: "Err" };
-
-          if (fres.countryCode)
-            upobj.country = fres.countryCode;
-
-          if (fres.longitude && !Number.isNaN(parseFloat(fres.longitude))) {
-            upobj.longitude = parseFloat(fres.longitude);
+          if (!res) {
+            upobj.$set = {
+              city: 'NA',
+              latitude: 'NA',
+              longitude: 'NA',
+            };
+            // unset?
+            upobj.$unset = {
+              match: 1,
+              country: 1
+            };
           }
-          if (fres.latitude && !Number.isNaN(parseFloat(fres.latitude))) {
-            upobj.latitude = parseFloat(fres.latitude);
+          else {
+            upobj.$set = {
+              longitude: parseFloat(res.lng),
+              latitude: parseFloat(res.lat),
+              country: res.iso2,
+              city: res.city,
+              match: parseFloat(res.similarity)
+            };
           }
 
-          console.info('Found', upobj, 'for', item.location);
+          console.info('Modifier', upobj, 'for:', item.location);
 
-          UserLocations.update(item._id, { $set: upobj });
+          UserLocations.update(item._id, upobj);
 
-          let p = Settings.findOne({ param: 'location_interval' });
-          if (p !== undefined) i = p.val;
-          if (i === undefined) i = 60;
-
-          // Minimal duration
-          if (i < 5) i = 5;
-          if (reschedule) setTimeout(Meteor.bindEnvironment(checkLocations), i * 1000);
+          // Reschedule
+          if (reschedule) {
+            let p = Settings.findOne({ param: 'location_interval' });
+            if (p !== undefined) i = p.val;
+            if (i === undefined) i = 60;
+            // Minimal duration
+            if (i < 5) i = 1;
+            setTimeout(Meteor.bindEnvironment(checkLocations), i * 1000);
+          }
 
         })).catch(Meteor.bindEnvironment(function (err) {
           console.info(err);
-          i = 3600 * 5;
+          i = 1800;
           console.error('Error occured, next Verification in', Math.floor(i / 60), 'minutes');
           UserLocations.update(item._id, { $set: { longitude: "Err" } });
           if (reschedule) setTimeout(Meteor.bindEnvironment(checkLocations), i * 1000);
@@ -171,9 +201,11 @@ function checkLocations(sel) {
 
     } else {
       // Nothing to do, next check in 60 seconds;
-
-      if (reschedule)
+      // We could trigger resolution when there is a change in database.
+      if (reschedule) {
+        console.info('Nothing to resolve, reschedule in 1 minute');
         setTimeout(Meteor.bindEnvironment(checkLocations), 60 * 1000);
+      }
     }
 
 

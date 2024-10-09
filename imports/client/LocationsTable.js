@@ -4,7 +4,7 @@ import { Session } from 'meteor/session';
 import { UserLocations } from '../api/collections.js';
 import { country_names } from '../api/countrycodes.js';
 import { checkUserRole } from '../api/roles.js';
-import { manageSortEvent,getParentId, manageSearchEvents } from './tools.js';
+import { manageSortEvent, getParentId, manageSearchEvents } from './tools.js';
 import './common/selectActive.html';
 
 // ------------ User localization
@@ -16,6 +16,7 @@ Template.LatestLocations.onCreated(function () {
   Session.setDefault('locations_count', 0);
 
   Session.set('searchUsers', {});
+
   Meteor.call("getNumPeople", function (err, res) {
     Session.set("numPeopleLoc", res);
   });
@@ -26,12 +27,13 @@ Template.LatestLocations.helpers({
     let chan = Session.get('sel_channel');
     if (chan) {
       return ul[chan + '-lastreq'];
-    }},
-    getmsg(ul) {
-      let chan = Session.get('sel_channel');
-      if (chan) {
-        return ul[chan + '-msg'];
-      }  
+    }
+  },
+  getmsg(ul) {
+    let chan = Session.get('sel_channel');
+    if (chan) {
+      return ul[chan + '-msg'];
+    }
   },
   getUserLocs() {
     let searchData = Session.get("searchUsers");
@@ -53,10 +55,10 @@ Template.LatestLocations.helpers({
     }
 
     let curchan = Session.get('sel_channel');
-    if (curchan!=="All Channels") {
+    if (curchan !== "All Channels") {
       prop.channel = curchan;
     }
-            //console.error(prop);
+    //console.error(prop);
 
     // sort:
     let sn = Session.get('locations_sort_field', 'username');
@@ -77,8 +79,9 @@ Template.LatestLocations.helpers({
       props: prop,
     });
 
-    //    console.error(res.count());
+    // Should be computed server side
     Session.set('locations_count', res.count());
+    console.info('location count=', res.count());
     return res.mongoCursor;
   },
 });
@@ -86,66 +89,65 @@ Template.LatestLocations.helpers({
 
 
 Template.LatestLocations.events({
-    'click .delete': function (event) {
-      //let n = event.target.name;
-      //let v = event.target.value;
-      let id = getParentId(event.currentTarget);
-      let res = confirm('Are you sure?');
-      if (res) {
-        UserLocations.remove(id);
+  'click .delete': function (event) {
+    //let n = event.target.name;
+    //let v = event.target.value;
+    let id = getParentId(event.currentTarget);
+    let res = confirm('Are you sure?');
+    if (res) {
+      UserLocations.remove(id);
+    }
+  },
+  'click th.sort': function (event) {
+    manageSortEvent(event, 'locations');
+  },
+  'input .search': _.debounce(function (event) { manageSearchEvents(event, 'searchUsers'); }, 300),
+  'change .edit': function (event) {
+    let n = event.target.name;
+    let v = event.target.value;
+    let id = getParentId(event.currentTarget);
+    let setObj = {};
+
+    if (n === "lastreq") {
+      let chan = Session.get('sel_channel');
+      if (!chan)
+        return;
+      n = chan + '-lastreq';
+      //console.error(n);
+    }
+
+    // Clear
+    if (event.target.name == 'country') {
+      // Verification du code
+      v = event.target.value.toUpperCase();
+      if (!(v in country_names)) {
+        v = '';
+        console.error('Unknown Country Code');
       }
-    },
-    'click th.sort': function (event) {
-      manageSortEvent(event, 'locations');
-    },
-    'input .search': _.debounce(function (event) { manageSearchEvents(event, 'searchUsers'); }, 300),
-    'change .edit': function (event) {
-      let n = event.target.name;
-      let v = event.target.value;
-      let id = getParentId(event.currentTarget);
-      let setObj = {};
-  
-      if (n === "lastreq") {
-        let chan = Session.get('sel_channel');
-        if (!chan)
-          return;
-        n = chan + '-lastreq';
-        //console.error(n);
-      }
-  
-      // Clear
-      if (event.target.name == 'country') {
-        // Verification du code
-        v = event.target.value.toUpperCase();
-        if (!(v in country_names)) {
-          v = '';
-          console.error('Unknown Country Code');
-        }
-//        console.error(n,'<-',v);
-      }
-  
-  
-      if (event.target.name == 'location') {
-        UserLocations.update(id, { $unset: { latitude: "", longitude: "", country: "" } });
-      }
-      if (event.target.name == 'latitude' || event.target.name == 'longitude') {
-        v = parseFloat(v);
-      }
-  
-      if (event.target.name == 'allow') {
-        v = event.target.checked;
-      }
-  
-      if (event.target.name == 'streamer') {
-        v = event.target.checked;
-      }
-  
-      //    console.error(event.target.id, n, v, typeof v);
-      // Set value
-      setObj[n] = v;
-  //    console.error(id,setObj);
-      UserLocations.update(id, { $set: setObj });
-    },
-  });
-  
-  
+      //        console.error(n,'<-',v);
+    }
+
+
+    if (event.target.name == 'location') {
+      UserLocations.update(id, { $unset: { latitude: "", longitude: "", country: "" } });
+    }
+    if (event.target.name == 'latitude' || event.target.name == 'longitude') {
+      v = parseFloat(v);
+    }
+
+    if (event.target.name == 'allow') {
+      v = event.target.checked;
+    }
+
+    if (event.target.name == 'streamer') {
+      v = event.target.checked;
+    }
+
+    //    console.error(event.target.id, n, v, typeof v);
+    // Set value
+    setObj[n] = v;
+    //    console.error(id,setObj);
+    UserLocations.update(id, { $set: setObj });
+  },
+});
+
