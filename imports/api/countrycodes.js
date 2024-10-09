@@ -92,6 +92,7 @@ export const country_names = {
   };
   
  export function getCountryName(cn) {
+  if (!cn) return cn;
     if (cn in country_names)
       return country_names[cn];
     return cn;

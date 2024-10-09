@@ -30,11 +30,12 @@ import { manageScoreCommands } from './scores.js';
 import { twitch_finds_on, twitch_finds_off } from './twitchfinds.js';
 import { onAnongiftpaidupgrade, onCheer, onGiftpaidupgrade, onResub, onSubgift, onSubmysterygift, onSubscription } from './subscriptions.js';
 import './aggregations/_aggregations';
+import { getCountryName } from '../imports/api/countrycodes.js';
 
 let gtrans;
 try {
   gtrans = require('googletrans').default;
-} catch(e) {
+} catch (e) {
   console.error('Error importing googletrans module', e);
 }
 
@@ -64,7 +65,7 @@ if (client_id != undefined) {
 }
 
 let botname = init_client();
-console.info('Connecting',botname,'to chat');
+console.info('Connecting', botname, 'to chat');
 let bclient = connect_chat();
 let raid_bclient = connect_raid();
 
@@ -406,24 +407,49 @@ Meteor.startup(() => {
   //-- SONG REQUEST: fofffie [FR] Nobody Knows me At All  - The Weepies a été ajoutée à la file d'attente // [EN] Nobody Knows me At All  - The Weepies 
   // or 
 
+
+  /**
+   * Formats a set of coordinates (latitude and longitude) in degrees,
+   * N/S,E/W format, rounded to two decimal places for intermediate accuracy.
+   *
+   * @param {number} lat Latitude coordinate, represented as a value between -90 and 90 inclusive.
+   * @param {number} long Longitude coordinate, represented as a value between -180 and 180 inclusive.
+   * @returns {string} The formatted coordinates in N/S/E/W format, prefixed with "°" followed by the sign of the longitude.
+   */
+  function formatCoordinates(lat, long) {
+    if (isNaN(long) || isNaN(lat)) return null;
+
+    let l0 = Math.round(lat * 100) / 100; // toFixed(2) ?
+    let l1 = Math.round(long * 100) / 100;
+
+    let h0 = "N";
+    if (l0 < 0) { l0 = -l0; h0 = 'S'; }
+    let h1 = "E";
+    if (l1 < 0) { l1 = -l1; h1 = 'W'; }
+
+    return `${l0}°${h0} ${l1}°${h1}`;
+    //return '' + l0 + '°' + h0 + ' ' + l1 + '°' + h1;
+  }
+
+
   // Called every time a message comes in
   // target is the name of the channel with "#"
   function onMessageHandler(target, context, msg, self) {
 
     // Ignore messages from the bot itself
-    if (self) return;  
+    if (self) return;
     let username = context.username.toLowerCase();
     // Additional security for ignoring messages from the bot itself
     // in case we have multiple instances on the same channel
-    if (username===botname) return;
+    if (username === botname) return;
 
     /** Incoming message */
     let commandName = msg.trim();
     /** chan is the channel's name (without #) */
     let chan = target.substring(1).toLowerCase();
     /** username uses lower cases only */
-    
-    
+
+
     /** Displayed name */
     let dispname = context['display-name'].trim();
     /** is message a whisper? */
@@ -967,7 +993,7 @@ Meteor.startup(() => {
               // Limit translated message length
               if (res.text.length > 200) {
                 //console.info('Plus de 200 caracteres');
-                res.text = res.text.substring(0,200)+'...';
+                res.text = res.text.substring(0, 200) + '...';
               }
 
               // TODO: also remove links?
@@ -1019,11 +1045,31 @@ Meteor.startup(() => {
       if (cmd.indexOf('where') == 0) {
         let pdoc = UserLocations.findOne({ name: username });
         if (pdoc) {
-          if (botchan.lang === 'FR') {
-            say(target, answername + " Vous m'avez indiqué cette localisation: " + pdoc.location + '. Si vous voulez retirer toutes les informations vous concernant, utilisez !forget');
-          }
+
+          let coords = formatCoordinates(pdoc.latitude, pdoc.longitude);
+          if (coords === null)
+            coords = '';
           else
-            say(target, answername + " You've told me you were from " + pdoc.location + '. If you want me to forget your location, use !forget');
+            coords = ' (' + coords + ') ';
+          let loc = [];
+          if (pdoc.city && pdoc.city!='NA') {
+            loc.push(pdoc.city);
+          }
+          if (pdoc.country) {
+            loc.push(getCountryName(pdoc.country));
+          }
+
+          // if loc is empty, use data privided by user
+          if (loc.length===0) {
+            loc=[pdoc.location];
+          }
+
+          if (botchan.lang === 'FR') {
+            say(target, answername + " Vous m'avez indiqué cette localisation: " + loc.join(',') + '. Si vous voulez retirer toutes les informations vous concernant, utilisez !forget');
+          }
+          else {
+            say(target, answername + " You've told me you were from " + loc.join(',') + coords + '. If you want me to forget your location, use !forget. If you want to change your location, use !from <city>,<country>');
+          }
 
           return;
         }
@@ -1576,7 +1622,7 @@ Meteor.startup(() => {
         if (match) {
           console.info('TIP! ', match, 'user=', match[1], 'amount=', match[2]);
           SubEvents.insert({
-            chan: '#'+chan,
+            chan: '#' + chan,
             date: Date.now(),
             user: match[1],
             type: 'tip',
@@ -1584,7 +1630,7 @@ Meteor.startup(() => {
           });
         }
       }
-      catch(e) {
+      catch (e) {
         console.error(e);
       }
     }
