@@ -69,7 +69,7 @@ async function geocode(location) {
     await client.end();
 
     if (res.rows?.length == 0) {
-      console.info('No result, geocode returns null');
+//      console.info('No result, geocode returns null');
       return null;
     }
 
@@ -114,8 +114,6 @@ async function fix_geocoding() {
   });
 }
 
-// single shot
-fix_geocoding();
 
 /**
  * Converts a single user location. 
