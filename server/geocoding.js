@@ -213,7 +213,7 @@ function checkLocations(sel) {
       // Nothing to do, next check in 60 seconds;
       // We could trigger resolution when there is a change in database.
       if (reschedule) {
-        console.info('Geocoding: Nothing to resolve, reschedule in 1 minute');
+        //console.info('Geocoding: Nothing to resolve, reschedule in 1 minute');
         setTimeout(Meteor.bindEnvironment(checkLocations), 60 * 1000);
       }
     }
