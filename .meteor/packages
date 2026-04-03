@@ -33,3 +33,4 @@ logging@1.3.4
 communitypackages:picker
 service-configuration@1.3.4
 ostrio:flow-router-extra
+check

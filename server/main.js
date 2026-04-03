@@ -6,7 +6,6 @@
 
 
 import { Meteor } from 'meteor/meteor';
-//import { AccountsTemplates } from 'meteor/useraccounts:core';
 import { BotChannels, GreetDate, GreetMessages, LiveEvents, QuizzScores, Raiders, Settings, ShoutOuts, Stats, SubEvents, UserLocations } from '../imports/api/collections.js';
 import { regext } from '../imports/api/regex.js';
 import { genChord, genProgression, noteArray } from './chords.js';
@@ -16,7 +15,6 @@ import { checkLiveChannels, sendDiscord } from './notifications.js';
 import { init_publications } from './publications.js';
 import './publications/_publications';
 import { getCurQuestion, init_quizz, selectQuestion } from './quizz.js';
-//import { init_radio } from './radio.js';
 import { tr_lang_alias, tr_lang_desc } from '../imports/api/languages.js';
 import { initRaidManagement } from './raids.js';
 import { init_rss } from './rss.js';
@@ -195,7 +193,7 @@ Meteor.startup(() => {
     // Counts number of people registered on the map, for a given channel
     'getNumPeople': function (ch) {
       assertMethodAccess('getNumPeople', this.userId);
-      check(ch,String);
+      check(ch,Match.Maybe(String));
       let sobj = {};
       sobj[ch] = { $exists: true };
       return UserLocations.find(sobj).count();

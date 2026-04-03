@@ -11,11 +11,6 @@ let circledrag;
 let centeredOnBroadcaster = false;
 // ---------------------------
 
-/*
-Template.WorldMap.onCreated(function () {
-
-});
-*/
 
 Template.WorldMap.onRendered(function () {
 
@@ -41,21 +36,17 @@ Template.WorldMap.onRendered(function () {
 
   // Create Map
   let mymap = L.map('map', {
-    //worldCopyJump: 1,  // No need, as we handle manually keeping markers on the map
+    // No need, as we handle manually keeping markers on the map
+    //worldCopyJump: 1,  
     minZoom: 1,
-//    center: [60, 0],
-//    zoom: 4
+	//    center: [60, 0],
+	//    zoom: 4
   });
 
+  
   mymap.setView({lon: 2, lat: 40},4);
 
-//  mymap.setView([60, -0.09], 4);
-
-  //setTimeout(function () {mymap.invalidateSize(true);}, 1000);
-
-
   let markers = {};
-  //  mymap.on('click', onMapClick);
   mymap.on('mousedown', onMapMouseDown);
   mymap.on('mouseup', onMapMouseUp);
   mymap.on('mousemove', onMapMouseMove);
@@ -100,7 +91,6 @@ Template.WorldMap.onRendered(function () {
   function onZoomstart(event) { mymap.closePopup(); }
   mymap.on('zoomstart', onZoomstart);
 
-  //const isAdmin = checkUserRole(['admin', 'streamer']);
 
   const now = Date.now();
 
@@ -139,11 +129,6 @@ Template.WorldMap.onRendered(function () {
     if (!chan) return;
 
     if (!circle) return;
-    //console.error(circle);
-
-    // get users in area
-    //let center = circle._latlng
-    //let radius= circle._latlng.distanceTo(event.latlng);
 
     const clat = circle._latlng.lat;
     const clng = circle._latlng.lng;
@@ -155,11 +140,10 @@ Template.WorldMap.onRendered(function () {
       radius = 0.8;  // Approx 80km
     }
     else {
-      // Euclidian distance
-      //radius = Math.sqrt(dlat *dlat + dlng * dlng);
+      // Manhattan Distance
       radius = Math.abs(dlat) + Math.abs(dlng);
     }
-    console.error(radius);
+    //console.error(radius);
 
     Meteor.call('getClosestUsers', chan, clat, clng, { nbmax: 0, distmax: radius }, function (err, res) {
       console.error(res);
@@ -190,6 +174,84 @@ Template.WorldMap.onRendered(function () {
     }
   }
 
+let autoPlayTimer = null;
+let isUserInteracting = false;
+let currentIndex = 0;
+
+
+function showTooltipForMarker(marker) {
+  if (!marker) return;
+
+  const rid = marker.data;
+  const chan = Session.get('sel_channel');
+  if (!chan) return;
+
+  const songreqfield = `${chan}-lastreq`;
+  const msgfield = `${chan}-msg`;
+
+  // On s'assure d'avoir les données (Meteor subscribe)
+  template.subscribe('userLocation', { _id: rid }, { limit: 1 }, () => {
+    const ul = UserLocations.findOne({ _id: rid });
+    if (!ul || isNaN(ul.latitude)) return;
+
+    let uname = ul.dname || ul.mapname;
+    if (!uname) return;
+
+    let badge = ul.streamer ? " &#9732;" : "";
+    let txt = `<strong>${badge}${uname}</strong>`;
+
+    if (ul[msgfield]) txt += `<br>${ul[msgfield]}`;
+    if (ul[songreqfield]) txt += `<br>&#9835; "${ul[songreqfield]}" &#9835;`;
+
+    // Calcul de la position (décalée vers le haut comme ton code original)
+    let latlng = marker.getLatLng();
+    let lp = mymap.latLngToLayerPoint(latlng);
+    lp.y -= 16;
+    let targetLatLng = mymap.layerPointToLatLng(lp);
+
+    L.popup()
+      .setLatLng(targetLatLng)
+      .setContent(txt)
+      .openOn(mymap);
+  });
+}
+
+// --- GESTION DE L'ANIMATION AUTOMATIQUE ---
+function startAutoPlay() {
+	console.info("Autoplay...");
+  if (autoPlayTimer) clearInterval(autoPlayTimer);
+  
+  autoPlayTimer = setInterval(() => {
+	  console.info("Autoplay interval",isUserInteracting,Object.keys(markers).length);
+    if (isUserInteracting) { 
+		isUserInteracting = false;
+		return 
+	}
+    
+    if (Object.keys(markers).length > 0) {
+      showTooltipForMarker(markers[Object.keys(markers)[currentIndex]]);
+      currentIndex = (currentIndex + 1) % Object.keys(markers).length;
+    }
+  }, 5000); // Change toutes les 5 secondes
+}
+
+// --- ÉVÉNEMENTS ---
+function onMouseOver(event) {
+  isUserInteracting = true; // Suspend l'auto-play
+  showTooltipForMarker(event.target);
+}
+
+/*
+  function onMouseOut() {
+	console.info("out");
+  // Optionnel : reprendre l'animation après un délai
+  setTimeout(() => {
+    isUserInteracting = false;
+  }, 3000); 
+}
+*/
+
+/*
   function onMouseOver(event) {
     let marker = event.target;
     //let position = marker.getLatLng();
@@ -247,14 +309,12 @@ Template.WorldMap.onRendered(function () {
             .openOn(mymap);
 
         }
-
         // TODO OPTIM:unsubscribe?
-
       }
     });
 
-    // console.error(event,this);
   }
+*/
 
   const updateMap = ((cursor, chan, options) => {
     options = options || {};
@@ -395,7 +455,6 @@ Template.WorldMap.onRendered(function () {
       // TODO: Wait for subscriptions ready? 
 
       let p = BotChannels.findOne({ channel: curchan });
-      //console.error('p=', p);
       if (!p) return;
 
       let searchData = Session.get("searchUsers");
@@ -412,19 +471,15 @@ Template.WorldMap.onRendered(function () {
       if (searchData.streamer === true) {
         prop.streamer = true;
       }
-
       prop.channel = curchan;
 
       if (searchData.lastreq === true) {
         prop.lastreq = curchan;
       }
 
-
-      // To generalize
       if (searchData.team === true) {
         prop.team = p.team; // 
       }
-
 
       if (searchData.activeSince === true) {
         let ad = 8;
@@ -458,23 +513,6 @@ Template.WorldMap.onRendered(function () {
       }
       catch (e) { console.error(e); }
 
-      /*
-            let bcs = UserLocIndex.search(curchan, { limit: 1, props: { map: true } });
-            if (bcs) {
-              bcs = bcs.mongoCursor;
-            
-              if (bcs.count()) {
-                const bcu = bcs.fetch()[0];
-                opt = { broadcaster: bcu.__originalId };
-                console.error('bcu=', bcu);
-                // We could set the map center here 
-                //mymap.setLatLng({lat: opt.latitude)
-                // Too much fields :O
-                //console.error('broadcaster=', bcs.fetch()[0]);
-              }
-            }
-      */
-
       // Viewers
       let cursor = UserLocIndex.search(curSearch, { limit: 3000, props: prop }).mongoCursor;
       // ... Wait for cursor to be complete?
@@ -497,8 +535,10 @@ Template.WorldMap.onRendered(function () {
 
   resize();
 
-});
 
+  startAutoPlay();
+
+});
 
 Template.WorldMap.helpers({
   chan_name() {
