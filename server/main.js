@@ -1216,6 +1216,8 @@ Meteor.startup(() => {
         return;
       }
 
+      
+
       if (cmd === 'from' || cmd === 'wya') {
         let geoloc = commandName.substring(5).trim();
         if (geoloc.length < 2) {
@@ -1273,19 +1275,13 @@ Meteor.startup(() => {
           UserLocations.insert(doc);
 
           if (delta > 60 * 1000) {
-            /*              addmess = [
-                            'Use !forget if you want me to forget your location!',
-                            'Use !show to allow me to display your nickname on the map',
-                            'Use !msg to add a personalized message on the map',
-                          ]*/
+
 
             if (botchan.lang === 'FR') {
-              //let txt = "Utilisez !hide pour m'autoriser à rendre visible votre pseudo sur la carte";
               say(target, answername + " Ok, merci! " + txt, username);
             }
             else {
-              //let txt = 'Use !hide to hide your nickname on the map'; //,randElement(addmess); //.[Math.floor(Math.random() * (addmess.length - 1))];
-              say(target, answername + " Ok, thanks! " + txt, username);
+              say(target, answername + " Ok, thanks! ", username);
             }
             return;
           }
