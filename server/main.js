@@ -32,6 +32,9 @@ import { onAnongiftpaidupgrade, onCheer, onGiftpaidupgrade, onResub, onSubgift, 
 import './aggregations/_aggregations';
 import { getCountryName } from '../imports/api/countrycodes.js';
 
+import {check} from 'meteor/check';
+
+
 let gtrans;
 try {
   gtrans = require('googletrans').default;
@@ -103,6 +106,35 @@ AccountsTemplates.configure({
 });
 */
 
+ Meteor.methods({
+    getActiveUsers: function (chan) {
+      assertMethodAccess('getActiveUsers', this.userId);
+      check(chan,String);
+
+      if (!chan)
+        return [];
+      if (!last_active_users[chan]) return [];
+      if (this.userId)
+        return last_active_users[chan];
+
+      return [];
+    },
+    removeActiveUser(chan, name) {
+      assertMethodAccess('removeActiveUser', this.userId);
+      check(chan,String);
+      check(name,String);
+
+      removeActiveUser(chan, name);
+    },
+    getClosestUsers(chan, lat, lng, opt) {
+       check(chan,String);
+       //check(lat,String);
+
+      assertMethodAccess('getClosestUsers', this.userId);
+      // We could check the used logger has access to the channel in parameter
+      return findClosest(chan, lat, lng, opt);
+    }
+  });
 
 
 Meteor.startup(() => {
@@ -115,6 +147,7 @@ Meteor.startup(() => {
   //  init_radio();
   init_rss();
   init_geocoding();
+
   /**
    * 
    * @param {*} chan : name of channel (low cases, without heading '#')
@@ -135,30 +168,7 @@ Meteor.startup(() => {
     return last_active_users[chan];
   }
 
-  Meteor.methods({
-    getActiveUsers: function (chan) {
-      assertMethodAccess('getActiveUsers', this.userId);
-
-      if (!chan)
-        return [];
-      if (!last_active_users[chan]) return [];
-      if (this.userId)
-        return last_active_users[chan];
-
-      return [];
-    },
-    removeActiveUser(chan, name) {
-      assertMethodAccess('removeActiveUser', this.userId);
-
-      removeActiveUser(chan, name);
-    },
-    getClosestUsers(chan, lat, lng, opt) {
-      assertMethodAccess('getClosestUsers', this.userId);
-      // We could check the used logger has access to the channel in parameter
-      return findClosest(chan, lat, lng, opt);
-    }
-  });
-
+ 
 
 
 
@@ -185,7 +195,7 @@ Meteor.startup(() => {
     // Counts number of people registered on the map, for a given channel
     'getNumPeople': function (ch) {
       assertMethodAccess('getNumPeople', this.userId);
-
+      check(ch,String);
       let sobj = {};
       sobj[ch] = { $exists: true };
       return UserLocations.find(sobj).count();
@@ -738,7 +748,7 @@ Meteor.startup(() => {
 
             let target_user = cmdarray[1];
 
-            // TODO: only available if ultimate-ban command is enabled (add an option)
+            // TODO: only available if ultimate-ban command is enabled 
             if (cmd === 'ultimate-ban') {
               // Add/mark the user specified to the greetings 
               GreetMessages.upsert({ username: target_user }, { $set: { autoban: true, lang: false } });
@@ -1233,7 +1243,7 @@ Meteor.startup(() => {
                   say(target, answername + " Veuillez m'indiquer la ville et le pays ou vous vous trouvez. Par exemple !from Paris,France ou !from New York.");
                 }
                 else
-                  say(target, "Please tell me the country/state/city where you're from, for example: !from Paris,France or !from Japan. Although please do not provide too much information");
+                  say(target, "Please tell me the country/state/city where you're from, for example: !from Paris,France or !from Japan.");
                 return;
                 //                say(target, answername + " Sorry you're not allowed to change the city of another viewer");
                 //                return;
@@ -1242,16 +1252,16 @@ Meteor.startup(() => {
           });
         }
         //console.log('*FROM* user ' + context.username + ' ' + context['display-name'] + ' is from: ', geoloc);
-        let now = Date.now();
-        let delta = 2 * 60 * 1000;
+        const now = Date.now();
+        const delta = 2 * 60 * 1000;
 
-        let doc = {
+        const doc = {
           name: username,
           dname: dispname,
           location: geoloc.toLowerCase(),
           timestamp: now,
           channels: [target],
-          allow: false,
+          allow: true,
         };
         // Interaction stamp
         doc[chan] = now;
@@ -1270,11 +1280,11 @@ Meteor.startup(() => {
                           ]*/
 
             if (botchan.lang === 'FR') {
-              let txt = "Utilisez !show pour m'autoriser à rendre visible votre pseudo sur la carte";
+              //let txt = "Utilisez !hide pour m'autoriser à rendre visible votre pseudo sur la carte";
               say(target, answername + " Ok, merci! " + txt, username);
             }
             else {
-              let txt = 'Use !show to allow me to display your nickname on the map'; //,randElement(addmess); //.[Math.floor(Math.random() * (addmess.length - 1))];
+              //let txt = 'Use !hide to hide your nickname on the map'; //,randElement(addmess); //.[Math.floor(Math.random() * (addmess.length - 1))];
               say(target, answername + " Ok, thanks! " + txt, username);
             }
             return;

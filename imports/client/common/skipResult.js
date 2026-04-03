@@ -19,6 +19,7 @@ Template.SkipResult.helpers({
         return;
 
       }
+      
       let nbp = Math.ceil(parseInt(t) / npp);
       Session.set(d.var + '_numpages', nbp);
 

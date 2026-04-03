@@ -71,7 +71,8 @@ As audience on twitch, is world wide, and as a lot of people spontenaously tell 
 Following commands are added when Map feature is enabled:
 
 - `!from`: it's the main command. People can tell where they are coming from, for example !from city, country : !from Tokyo, Japan
-- `!show`: Allows the nickname of the viewer to be displayed on the public map. By default, nick names are not visible on the public map , only access through a streamer account allows to see all nicknames. !hide command is for hiding the nick name
+- `!show`: Allows the nickname of the viewer to be displayed on the public map. By default, nick names are visible on the public map. Use !hide command for hiding the nick name
+- `!hide`: Hide the nickname of the viewer on the public map. By default, nick names are visible on the public map . When hidden, only streamer can  see all nicknames. 
 - `!msg`: it is possible to add a message that will be displayed on the map withi this command. "!msg hello there!" 
 - `!map`: to get access to the public map (using the guest account)
 - `!forget`: for erasing all data associated with a viewer. Privacy is something important, and it is mandatory to allow people to be able to remove all data about themselves.
