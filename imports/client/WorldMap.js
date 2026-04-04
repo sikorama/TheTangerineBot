@@ -175,7 +175,7 @@ Template.WorldMap.onRendered(function () {
   }
 
   let autoPlayTimer = null;
-  let isUserInteracting = false;
+  let isUserInteracting = 6;
   let currentIndex = 0;
 
 
@@ -203,7 +203,6 @@ Template.WorldMap.onRendered(function () {
       if (ul[msgfield]) txt += `<br>${ul[msgfield]}`;
       if (ul[songreqfield]) txt += `<br>&#9835; "${ul[songreqfield]}" &#9835;`;
 
-      // Calcul de la position (décalée vers le haut comme ton code original)
       let latlng = marker.getLatLng();
       let lp = mymap.latLngToLayerPoint(latlng);
       lp.y -= 16;
@@ -221,8 +220,8 @@ Template.WorldMap.onRendered(function () {
     if (autoPlayTimer) clearInterval(autoPlayTimer);
 
     autoPlayTimer = setInterval(() => {
-      if (isUserInteracting) {
-        isUserInteracting = false;
+      if (isUserInteracting>0) {
+        isUserInteracting -= 1;
         return
       }
 
@@ -236,7 +235,7 @@ Template.WorldMap.onRendered(function () {
 
   // --- ÉVÉNEMENTS ---
   function onMouseOver(event) {
-    isUserInteracting = true; // Suspend l'auto-play
+    isUserInteracting = 10; // Suspend auto-play  during 5*10 seconds
     showTooltipForMarker(event.target);
   }
 
