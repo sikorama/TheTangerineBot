@@ -39,12 +39,12 @@ Template.WorldMap.onRendered(function () {
     // No need, as we handle manually keeping markers on the map
     //worldCopyJump: 1,  
     minZoom: 1,
-	//    center: [60, 0],
-	//    zoom: 4
+    //    center: [60, 0],
+    //    zoom: 4
   });
 
-  
-  mymap.setView({lon: 2, lat: 40},4);
+
+  mymap.setView({ lon: 2, lat: 40 }, 4);
 
   let markers = {};
   mymap.on('mousedown', onMapMouseDown);
@@ -77,7 +77,7 @@ Template.WorldMap.onRendered(function () {
   });
 
   let layer;
-  
+
   if (layer === undefined) {
     // Put these settings as parameter
     layer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -86,7 +86,7 @@ Template.WorldMap.onRendered(function () {
     }).addTo(mymap);
   }
 
-  L.control.scale({imperial: true, metric: true}).addTo(mymap);
+  L.control.scale({ imperial: true, metric: true }).addTo(mymap);
 
   function onZoomstart(event) { mymap.closePopup(); }
   mymap.on('zoomstart', onZoomstart);
@@ -174,147 +174,71 @@ Template.WorldMap.onRendered(function () {
     }
   }
 
-let autoPlayTimer = null;
-let isUserInteracting = false;
-let currentIndex = 0;
+  let autoPlayTimer = null;
+  let isUserInteracting = false;
+  let currentIndex = 0;
 
 
-function showTooltipForMarker(marker) {
-  if (!marker) return;
-
-  const rid = marker.data;
-  const chan = Session.get('sel_channel');
-  if (!chan) return;
-
-  const songreqfield = `${chan}-lastreq`;
-  const msgfield = `${chan}-msg`;
-
-  // On s'assure d'avoir les données (Meteor subscribe)
-  template.subscribe('userLocation', { _id: rid }, { limit: 1 }, () => {
-    const ul = UserLocations.findOne({ _id: rid });
-    if (!ul || isNaN(ul.latitude)) return;
-
-    let uname = ul.dname || ul.mapname;
-    if (!uname) return;
-
-    let badge = ul.streamer ? " &#9732;" : "";
-    let txt = `<strong>${badge}${uname}</strong>`;
-
-    if (ul[msgfield]) txt += `<br>${ul[msgfield]}`;
-    if (ul[songreqfield]) txt += `<br>&#9835; "${ul[songreqfield]}" &#9835;`;
-
-    // Calcul de la position (décalée vers le haut comme ton code original)
-    let latlng = marker.getLatLng();
-    let lp = mymap.latLngToLayerPoint(latlng);
-    lp.y -= 16;
-    let targetLatLng = mymap.layerPointToLatLng(lp);
-
-    L.popup()
-      .setLatLng(targetLatLng)
-      .setContent(txt)
-      .openOn(mymap);
-  });
-}
-
-// --- GESTION DE L'ANIMATION AUTOMATIQUE ---
-function startAutoPlay() {
-	console.info("Autoplay...");
-  if (autoPlayTimer) clearInterval(autoPlayTimer);
-  
-  autoPlayTimer = setInterval(() => {
-	  console.info("Autoplay interval",isUserInteracting,Object.keys(markers).length);
-    if (isUserInteracting) { 
-		isUserInteracting = false;
-		return 
-	}
-    
-    if (Object.keys(markers).length > 0) {
-      showTooltipForMarker(markers[Object.keys(markers)[currentIndex]]);
-      currentIndex = (currentIndex + 1) % Object.keys(markers).length;
-    }
-  }, 5000); // Change toutes les 5 secondes
-}
-
-// --- ÉVÉNEMENTS ---
-function onMouseOver(event) {
-  isUserInteracting = true; // Suspend l'auto-play
-  showTooltipForMarker(event.target);
-}
-
-/*
-  function onMouseOut() {
-	console.info("out");
-  // Optionnel : reprendre l'animation après un délai
-  setTimeout(() => {
-    isUserInteracting = false;
-  }, 3000); 
-}
-*/
-
-/*
-  function onMouseOver(event) {
-    let marker = event.target;
-    //let position = marker.getLatLng();
-    let lp = event.layerPoint;
-    lp.y -= 16;
-    let nlp = mymap.layerPointToLatLng(lp);
+  function showTooltipForMarker(marker) {
+    if (!marker) return;
 
     const rid = marker.data;
-    //console.error("rid=",rid);
-
-    let chan = Session.get('sel_channel');
+    const chan = Session.get('sel_channel');
     if (!chan) return;
 
-    const songreqfield = chan + '-lastreq';
-    const msgfield = chan + '-msg';
+    const songreqfield = `${chan}-lastreq`;
+    const msgfield = `${chan}-msg`;
 
-    // add fields
+    // On s'assure d'avoir les données (Meteor subscribe)
     template.subscribe('userLocation', { _id: rid }, { limit: 1 }, () => {
-
       const ul = UserLocations.findOne({ _id: rid });
-      //console.error(ul);
-      if (!isNaN(ul.latitude)) {
-        let txt = '';
+      if (!ul || isNaN(ul.latitude)) return;
 
-        // either dname or mapname are available.
-        // dname if admin, mapname otherwise, if allow===true            
-        let uname = ul.dname;
-        if (!uname) uname = ul.mapname;
+      let uname = ul.dname || ul.mapname;
+      if (!uname) return;
 
-        let badge = '';
-        if (ul.streamer) badge = " &#9732;";
+      let badge = ul.streamer ? " &#9732;" : "";
+      let txt = `<strong>${badge}${uname}</strong>`;
 
-        if (uname !== undefined) {
-          txt = '<strong>' + badge + uname + '</strong>';
+      if (ul[msgfield]) txt += `<br>${ul[msgfield]}`;
+      if (ul[songreqfield]) txt += `<br>&#9835; "${ul[songreqfield]}" &#9835;`;
 
-          // Message?
-          if ((ul[msgfield] != undefined) && (ul[msgfield].length > 0)) {
-            if (txt.length > 0)
-              txt += '<br>';
-            txt += ul[msgfield];
-          }
+      // Calcul de la position (décalée vers le haut comme ton code original)
+      let latlng = marker.getLatLng();
+      let lp = mymap.latLngToLayerPoint(latlng);
+      lp.y -= 16;
+      let targetLatLng = mymap.layerPointToLatLng(lp);
 
-          // Song request
-          if (ul[songreqfield]) {
-            if (txt.length > 0)
-              txt += '<br>&#9835; "' + ul[songreqfield] + " &#9835;";
-          }
-
-          // ... add more info
-
-          //let popup = 
-          L.popup()
-            .setLatLng(nlp, { draggable: 'false' })
-            .setContent(txt)
-            .openOn(mymap);
-
-        }
-        // TODO OPTIM:unsubscribe?
-      }
+      L.popup()
+        .setLatLng(targetLatLng)
+        .setContent(txt)
+        .openOn(mymap);
     });
-
   }
-*/
+
+  // --- GESTION DE L'ANIMATION AUTOMATIQUE ---
+  function startAutoPlay() {
+    if (autoPlayTimer) clearInterval(autoPlayTimer);
+
+    autoPlayTimer = setInterval(() => {
+      if (isUserInteracting) {
+        isUserInteracting = false;
+        return
+      }
+
+      const n = Object.keys(markers).length;
+      if (n > 0) {
+        currentIndex = ~~(Math.random() * n);
+        showTooltipForMarker(markers[Object.keys(markers)[currentIndex]]);
+      }
+    }, 5000); // Change toutes les 5 secondes
+  }
+
+  // --- ÉVÉNEMENTS ---
+  function onMouseOver(event) {
+    isUserInteracting = true; // Suspend l'auto-play
+    showTooltipForMarker(event.target);
+  }
 
   const updateMap = ((cursor, chan, options) => {
     options = options || {};
@@ -504,9 +428,9 @@ function onMouseOver(event) {
           opt.broadcaster = bcu._id;
 
           // Center map on broadcaster's location (but only once)
-          if (!isNaN(bcu.latitude) && (centeredOnBroadcaster===false) ) {
-            console.info('Center view lat=', bcu.latitude,  'lon=',bcu.longitude );
-            mymap.setView({lon: bcu.longitude, lat: bcu.latitude},4);
+          if (!isNaN(bcu.latitude) && (centeredOnBroadcaster === false)) {
+            console.info('Center view lat=', bcu.latitude, 'lon=', bcu.longitude);
+            mymap.setView({ lon: bcu.longitude, lat: bcu.latitude }, 4);
             centeredOnBroadcaster = true;
           }
         }

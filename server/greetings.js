@@ -1,7 +1,7 @@
 import { GreetDate, GreetMessages } from '../imports/api/collections.js';
 import { regexan, regexf, regexi, regexn, regexnn } from '../imports/api/regex.js';
 import { emoticones, followtxts } from './const.js';
-import { randElement } from './tools.js';
+import { randElement } from "/imports/api/randfunc";
 import { assertMethodAccess } from './user_management.js';
 
 

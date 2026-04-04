@@ -18,7 +18,9 @@ import { getCurQuestion, init_quizz, selectQuestion } from './quizz.js';
 import { tr_lang_alias, tr_lang_desc } from '../imports/api/languages.js';
 import { initRaidManagement } from './raids.js';
 import { init_rss } from './rss.js';
-import { randElement, randSentence } from './tools.js';
+import { randSentence } from './tools.js';
+import { randElement } from "/imports/api/randfunc";
+
 import { assertMethodAccess, init_users } from './user_management.js';
 
 import { connect_chat, connect_raid, init_client, say } from './client.js';

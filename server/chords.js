@@ -1,5 +1,5 @@
 
-import {randElement} from './tools.js';
+import { randElement } from "/imports/api/randfunc";
 
 export const noteArray=['A','B','C','D','E','F','G','A#','C#','D#','F#','G#'];
 export const chordArray=['', '-', 'sus', 'sus4', '7', '-7', '-9', '6', '13', '11', '5+', '-5b', 'maj7', 'maj9', '-maj7', '69'];

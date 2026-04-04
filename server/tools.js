@@ -1,22 +1,8 @@
 import { BotChannels, GreetMessages, Raiders, UserLocations } from "../imports/api/collections";
+import { randElement } from "/imports/api/randfunc";
 import { patterns } from "./const";
 import { assertMethodAccess } from "./user_management";
 const PhraseIt = require('phraseit');
-
-/**
- *   Randomly Returns an item from an array
- * @param {array} a
- */
-export function randElement(a) {
-  try {
-    let n = a.length;
-    //    return a[Math.floor(Math.random() * (n))];
-    return a[~~(Math.random() * (n))];
-  }
-  catch (e) { console.error(a, e.stack); }
-  return '...';
-}
-
 
 export function randSentence() {
   try {
