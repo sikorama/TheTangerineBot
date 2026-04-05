@@ -328,3 +328,22 @@ div.overlay-textarea{
 	font-size: 1rem;
 	font-family: "Courier New", Monospace;
 }
+
+@keyframes pulse-marker {
+  0% {
+    filter: brightness(1) drop-shadow(0 0 0px rgba(255, 215, 0, 0)); 
+  }
+  50% { 
+    /* On utilise le filtre pour l'éclat au lieu du scale */
+    filter: brightness(1.2) drop-shadow(0 0 15px gold); 
+  }
+  100% { 
+    filter: brightness(1) drop-shadow(0 0 0px rgba(255, 215, 0, 0)); 
+  }
+}
+
+.active-marker {
+  /* On s'assure de ne PAS toucher à 'position' ou 'transform' */
+  animation: pulse-marker 1.5s ease-in-out infinite;
+  z-index: 1000 !important;
+}

@@ -175,11 +175,11 @@ Template.WorldMap.onRendered(function () {
   }
 
   let autoPlayTimer = null;
-  let isUserInteracting = 6;
+  let isUserInteracting = 5;
   let currentIndex = 0;
 
 
-  function showTooltipForMarker(marker) {
+  function showTooltipForMarker(marker, isAuto = false) {
     if (!marker) return;
 
     const rid = marker.data;
@@ -208,19 +208,66 @@ Template.WorldMap.onRendered(function () {
       lp.y -= 16;
       let targetLatLng = mymap.layerPointToLatLng(lp);
 
-      L.popup()
-        .setLatLng(targetLatLng)
-        .setContent(txt)
-        .openOn(mymap);
+
+      if (isAuto) {
+        // .pad(-0.2) réduit la zone de vision de 20% sur chaque côté
+        // C'est ta "Safe Zone"
+        const safeBounds = mymap.getBounds().pad(-0.2);
+
+        if (!safeBounds.contains(targetLatLng)) {
+          // Si le marqueur n'est pas dans les 80% centraux de l'écran, on recadre
+          mymap.panTo(targetLatLng, { animate: true, duration: 0.5 });
+        }
+      }
+
+     // L.DomUtil.addClass(marker._icon, 'active-marker');
+
+
+      /*      if (isAuto) {
+              // On définit une zone de sécurité (ex: 150px de marge sur chaque bord)
+              const edgeMargin = 150;
+              const mapBounds = mymap.getBounds();
+      
+              const pixelBounds = mymap.getPixelBounds();
+              const sw = mymap.unproject(pixelBounds.getBottomLeft().add([edgeMargin, -edgeMargin]));
+              const ne = mymap.unproject(pixelBounds.getTopRight().add([-edgeMargin, edgeMargin]));
+              const safeBounds = L.latLngBounds(sw, ne);
+      
+              // Si le marqueur est hors de la zone de sécurité, on recadre doucement
+              if (!safeBounds.contains(targetLatLng)) {
+                mymap.panTo(targetLatLng, { animate: true, duration: 0.5 });
+              }
+            }
+      */
+
+      // On attend un tout petit peu que le mouvement commence pour ouvrir la popup
+      setTimeout(() => {
+
+        if (isAuto && isUserInteracting) return;
+
+        L.popup({
+          autoPan: true, // Leaflet ajustera de lui-même si la popup dépasse
+          autoPanPadding: L.point(50, 50), // Garde 50px de marge avec les bords
+          closeButton: false,
+          //offset: L.point(0, -8)
+        })
+          .setLatLng(targetLatLng)
+          .setContent(txt)
+          .openOn(mymap);
+      }, isAuto ? 300 : 0);
+
+
     });
   }
+
+  let previousMarker = null;
 
   // --- GESTION DE L'ANIMATION AUTOMATIQUE ---
   function startAutoPlay() {
     if (autoPlayTimer) clearInterval(autoPlayTimer);
 
     autoPlayTimer = setInterval(() => {
-      if (isUserInteracting>0) {
+      if (isUserInteracting > 0) {
         isUserInteracting -= 1;
         return
       }
@@ -228,14 +275,29 @@ Template.WorldMap.onRendered(function () {
       const n = Object.keys(markers).length;
       if (n > 0) {
         currentIndex = ~~(Math.random() * n);
-        showTooltipForMarker(markers[Object.keys(markers)[currentIndex]]);
+        const currentMarker = markers[Object.keys(markers)[currentIndex]];
+        // Retirer l'effet du précédent
+        if (previousMarker && previousMarker._icon) {
+          L.DomUtil.addClass(previousMarker._icon, 'active-marker');
+
+        }
+
+        // Ajouter l'effet au nouveau
+        if (currentMarker._icon) {
+          L.DomUtil.addClass(currentMarker._icon, 'active-marker');
+        }
+
+        showTooltipForMarker(currentMarker, true);
+
+        previousMarker = currentMarker;
+
       }
     }, 5000); // Change toutes les 5 secondes
   }
 
   // --- ÉVÉNEMENTS ---
   function onMouseOver(event) {
-    isUserInteracting = 10; // Suspend auto-play  during 5*10 seconds
+    isUserInteracting = 10; // Suspend auto-play  during 6*10 seconds
     showTooltipForMarker(event.target);
   }
 
