@@ -278,7 +278,7 @@ Template.WorldMap.onRendered(function () {
         const currentMarker = markers[Object.keys(markers)[currentIndex]];
         // Retirer l'effet du précédent
         if (previousMarker && previousMarker._icon) {
-          L.DomUtil.addClass(previousMarker._icon, 'active-marker');
+          L.DomUtil.removeClass(previousMarker._icon, 'active-marker');
 
         }
 
